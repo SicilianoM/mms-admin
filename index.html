@@ -122,6 +122,24 @@
     /* Loading */
     .loading { text-align: center; padding: 60px; color: #a0907a; font-size: 15px; }
 
+    /* Planning */
+    .planning-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+    .recital-selector { display: flex; gap: 8px; flex-wrap: wrap; }
+    .recital-pill { padding: 6px 16px; border-radius: 20px; border: 1px solid #e8e0d4; background: #fff; font-size: 13px; cursor: pointer; font-family: 'Lora', serif; color: #8b7355; transition: all 0.15s; }
+    .recital-pill.active { background: #7c5c3e; color: #fff; border-color: #7c5c3e; font-weight: 600; }
+    .checklist-category { margin-bottom: 20px; }
+    .category-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .category-title { font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #8b7355; font-weight: 600; }
+    .category-progress { font-size: 11px; color: #c4a882; }
+    .checklist-item { display: flex; align-items: flex-start; gap: 12px; padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; background: #faf6f0; border: 1px solid #f0e8dc; transition: all 0.15s; }
+    .checklist-item.done { background: #f0f9f4; border-color: #bbf7d0; }
+    .checklist-item input[type=checkbox] { width: 16px; height: 16px; cursor: pointer; accent-color: #7c5c3e; flex-shrink: 0; margin-top: 2px; }
+    .checklist-item .task-text { flex: 1; font-size: 14px; color: #3d2b1f; }
+    .checklist-item.done .task-text { text-decoration: line-through; color: #a09080; }
+    .progress-bar-wrap { background: #e8e0d4; border-radius: 10px; height: 8px; margin-bottom: 6px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #7c5c3e, #c4a882); border-radius: 10px; transition: width 0.4s ease; }
+    .progress-label { font-size: 12px; color: #8b7355; margin-bottom: 6px; display: flex; justify-content: space-between; }
+
     @keyframes shake {
       0%,100%{transform:translateX(0)}
       20%{transform:translateX(-8px)}
@@ -172,6 +190,7 @@
     <button class="tab-btn active" onclick="switchTab('recital', this)">Recital</button>
     <button class="tab-btn" onclick="switchTab('tickets', this)">Tickets</button>
     <button class="tab-btn" onclick="switchTab('chapters', this)">Chapters</button>
+    <button class="tab-btn" onclick="switchTab('planning', this)">Planning</button>
   </div>
 
   <div class="content">
@@ -182,7 +201,7 @@
       <div class="card">
         <div class="section-label">Availability Overview</div>
         <div style="overflow-x:auto"><table class="avail-table" id="avail-table"></table></div>
-        <div class="best-dates"><strong>Best dates (confirmed performers):</strong> June 13 &amp; June 20 — all confirmed performers available</div>
+        <div class="best-dates" id="best-dates-box"></div>
       </div>
       <div class="card">
         <div class="section-label">Performers</div>
@@ -264,12 +283,26 @@
         <div id="chapter-list"></div>
       </div>
     </div>
+    <!-- PLANNING TAB -->
+    <div id="tab-planning" class="hidden">
+      <div class="card">
+        <div class="planning-top">
+          <div>
+            <div class="section-label" style="margin-bottom:4px">Concert Checklists</div>
+            <div style="font-size:13px;color:#8b7355">Each recital has its own checklist. Select one below.</div>
+          </div>
+          <button class="btn-primary" onclick="addRecitalChecklist()">+ New Recital</button>
+        </div>
+        <div class="recital-selector" id="recital-selector"></div>
+      </div>
+      <div id="checklist-container"></div>
+    </div>
   </div>
 </div>
 
 <script>
 // ── Config ──────────────────────────────────────────────────────────────────
-const ADMIN_PASSWORD = "MobileMusic2026";
+const ADMIN_PASSWORD = "MobileMusic2025";
 const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
 
@@ -358,12 +391,13 @@ if (sessionStorage.getItem("mms_auth") === "1") {
 
 // ── Tabs ────────────────────────────────────────────────────────────────────
 function switchTab(name, btn) {
-  ["recital","tickets","chapters"].forEach(t => {
+  ["recital","tickets","chapters","planning"].forEach(t => {
     document.getElementById("tab-"+t).classList.add("hidden");
   });
   document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
   document.getElementById("tab-"+name).classList.remove("hidden");
   btn.classList.add("active");
+  if (name === "planning") renderPlanning();
 }
 
 // ── Render All ───────────────────────────────────────────────────────────────
@@ -414,6 +448,31 @@ function renderAvailability() {
   });
   html += `</tr></tbody>`;
   document.getElementById("avail-table").innerHTML = html;
+
+  // Dynamically compute best dates
+  const bestDatesBox = document.getElementById("best-dates-box");
+  if (confirmed.length === 0) {
+    bestDatesBox.innerHTML = `<strong>Best dates:</strong> No confirmed performers yet.`;
+    return;
+  }
+  // Find dates where all confirmed performers are available
+  const allAvailDates = DATES.filter(d => confirmed.every(p => p.availability.includes(d)));
+  // Also find dates with the most overlap as fallback
+  const maxOverlap = Math.max(...DATES.map(d => confirmed.filter(p => p.availability.includes(d)).length));
+  const mostOverlapDates = DATES.filter(d => confirmed.filter(p => p.availability.includes(d)).length === maxOverlap);
+  const pendingCount = state.performers.filter(p => p.status === "pending").length;
+
+  if (allAvailDates.length > 0) {
+    bestDatesBox.innerHTML = `<strong>✅ Best dates (all ${confirmed.length} confirmed performers available):</strong> ${allAvailDates.join(", ")}${pendingCount > 0 ? `<br><span style="font-size:12px;opacity:0.8">⏳ ${pendingCount} performer${pendingCount > 1 ? 's' : ''} still pending — best dates may change once they respond.</span>` : ""}`;
+    bestDatesBox.style.background = "#f0f9f4";
+    bestDatesBox.style.borderColor = "#bbf7d0";
+    bestDatesBox.style.color = "#166534";
+  } else {
+    bestDatesBox.innerHTML = `<strong>⚠️ No single date works for everyone.</strong> Best overlap (${maxOverlap}/${confirmed.length} confirmed performers): ${mostOverlapDates.join(", ")}${pendingCount > 0 ? `<br><span style="font-size:12px;opacity:0.8">⏳ ${pendingCount} performer${pendingCount > 1 ? 's' : ''} still pending — this may improve once they respond.</span>` : ""}`;
+    bestDatesBox.style.background = "#fef3c7";
+    bestDatesBox.style.borderColor = "#fde68a";
+    bestDatesBox.style.color = "#92400e";
+  }
 }
 
 // ── Performers ───────────────────────────────────────────────────────────────
@@ -580,6 +639,130 @@ function addChapter() {
   document.getElementById("add-chapter-form").classList.add("hidden");
   saveData();
   renderChapters();
+}
+
+// ── Planning ──────────────────────────────────────────────────────────────────
+const DEFAULT_TASKS = [
+  { category: "Venue & Logistics", tasks: [
+    "Confirm venue booking and date", "Get venue address and parking info",
+    "Check AV / piano availability at venue", "Arrange chairs and stage layout",
+    "Confirm venue capacity", "Plan arrival and setup time day-of",
+  ]},
+  { category: "Performers & Scheduling", tasks: [
+    "Collect all performer availability via Google Form", "Confirm final performer list",
+    "Confirm each performer's piece", "Confirm accompaniment arrangements",
+    "Send performers the final date and time", "Establish running order of performers",
+    "Schedule a rehearsal or run-through if needed",
+  ]},
+  { category: "Tickets & Fundraising", tasks: [
+    "Set ticket price", "Set fundraising goal for the hospital",
+    "Create ticket sales tracking sheet", "Start selling tickets",
+    "Send donation total to Yale New Haven Children's Hospital after event",
+    "Get donation receipt for records",
+  ]},
+  { category: "Marketing & Social Media", tasks: [
+    "Create event post for Instagram", "Post event announcement on Facebook",
+    "Update mobilmusicsalon.org with event details", "Send email to mailing list",
+    "Share event in local community groups", "Post reminder 1 week before",
+    "Post reminder day before",
+  ]},
+  { category: "Day-Of Tasks", tasks: [
+    "Arrive early to set up venue", "Check sound and confirm piano is tuned",
+    "Set up ticket and cash collection at door", "Brief performers on running order",
+    "Welcome guests and introduce the event", "Collect all cash ticket payments",
+    "Take photos for social media",
+  ]},
+  { category: "Post-Event Tasks", tasks: [
+    "Count total ticket revenue", "Send donation to Yale New Haven Children's Hospital",
+    "Post thank-you on social media with photos", "Email performers to say thank you",
+    "Log final totals in admin dashboard", "Debrief: what went well and what to improve",
+    "Start planning next recital",
+  ]},
+];
+
+let activeRecitalId = null;
+
+function initPlanningDefaults() {
+  if (!state.recitals) {
+    state.recitals = [{
+      id: 1,
+      name: "Recital #1 — Glastonbury",
+      checks: buildDefaultChecks(),
+    }];
+    activeRecitalId = 1;
+  } else if (state.recitals.length > 0 && !activeRecitalId) {
+    activeRecitalId = state.recitals[0].id;
+  }
+}
+
+function buildDefaultChecks() {
+  const checks = {};
+  DEFAULT_TASKS.forEach(cat => {
+    cat.tasks.forEach((t, i) => { checks[cat.category + "_" + i] = false; });
+  });
+  return checks;
+}
+
+function addRecitalChecklist() {
+  const name = prompt("Name this recital (e.g. Recital #2 — Boston):");
+  if (!name) return;
+  const newRecital = { id: Date.now(), name, checks: buildDefaultChecks() };
+  state.recitals.push(newRecital);
+  activeRecitalId = newRecital.id;
+  saveData();
+  renderPlanning();
+}
+
+function selectRecital(id) {
+  activeRecitalId = id;
+  renderPlanning();
+}
+
+function toggleCheck(recitalId, key) {
+  const r = state.recitals.find(r => r.id === recitalId);
+  if (r) { r.checks[key] = !r.checks[key]; saveData(); renderPlanning(); }
+}
+
+function renderPlanning() {
+  initPlanningDefaults();
+  const selector = document.getElementById("recital-selector");
+  selector.innerHTML = state.recitals.map(r =>
+    `<button class="recital-pill ${r.id === activeRecitalId ? 'active' : ''}" onclick="selectRecital(${r.id})">${r.name}</button>`
+  ).join("");
+
+  const container = document.getElementById("checklist-container");
+  const recital = state.recitals.find(r => r.id === activeRecitalId);
+  if (!recital) { container.innerHTML = ""; return; }
+
+  const totalTasks = DEFAULT_TASKS.reduce((s, c) => s + c.tasks.length, 0);
+  const doneTasks = Object.values(recital.checks).filter(Boolean).length;
+  const pct = Math.round((doneTasks / totalTasks) * 100);
+
+  let html = `<div class="card">
+    <div class="progress-label"><span>${recital.name}</span><span>${doneTasks}/${totalTasks} tasks complete</span></div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+    <div style="font-size:12px;color:#8b7355;margin-top:6px">${pct}% complete</div>
+  </div>`;
+
+  DEFAULT_TASKS.forEach(cat => {
+    const catDone = cat.tasks.filter((_, i) => recital.checks[cat.category + "_" + i]).length;
+    html += `<div class="card checklist-category">
+      <div class="category-header">
+        <span class="category-title">${cat.category}</span>
+        <span class="category-progress">${catDone}/${cat.tasks.length}</span>
+      </div>`;
+    cat.tasks.forEach((task, i) => {
+      const key = cat.category + "_" + i;
+      const done = recital.checks[key];
+      html += `<div class="checklist-item ${done ? 'done' : ''}">
+        <input type="checkbox" ${done ? 'checked' : ''} onchange="toggleCheck(${recital.id}, '${key}')" />
+        <span class="task-text">${task}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+
+  container.innerHTML = html;
 }
 </script>
 </body>
