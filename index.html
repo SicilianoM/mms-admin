@@ -172,7 +172,7 @@
       <div>
         <div class="eyebrow">Nonprofit · Yale New Haven Children's Hospital</div>
         <h1>Mobile Music Salon</h1>
-        <div class="subline">Mobilemusicsalon.org · Admin <span id="saving-indicator" class="hidden" style="margin-left:6px;opacity:0.7">saving…</span></div>
+        <div class="subline">mobilemusicsalon.org · Admin <span id="saving-indicator" class="hidden" style="margin-left:6px;opacity:0.7">saving…</span></div>
       </div>
       <button class="btn-secondary" style="color:#c4a882;border-color:rgba(196,168,130,0.4);font-size:12px" onclick="logout()">Sign Out</button>
     </div>
@@ -199,6 +199,16 @@
 
     <!-- RECITAL -->
     <div id="tab-recital" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <div class="section-label">Candidate Dates</div>
+        </div>
+        <div id="dates-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="new-date-input" placeholder="Add a date (e.g. Jul 11)" onkeydown="if(event.key==='Enter')addDate()" style="padding:7px 12px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;font-family:'Lora',serif;outline:none;background:#fffdf9;color:#3d2b1f;width:200px" />
+          <button class="btn-primary btn-sm" onclick="addDate()">+ Add Date</button>
+        </div>
+      </div>
       <div class="card">
         <div class="section-label">Availability Overview</div>
         <div style="overflow-x:auto"><table class="avail-table" id="avail-table"></table></div>
@@ -339,7 +349,7 @@
 const ADMIN_PASSWORD = "MobileMusic2025";
 const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
-const DATES = ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"];
+const DATES_DEFAULT = ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"];
 const ALL_TABS = ["recital","tickets","program","planning","contacts","notes","emails","chapters"];
 
 const DEFAULT_DATA = {
@@ -350,6 +360,7 @@ const DEFAULT_DATA = {
     {id:4,name:"Arya",piece:"—",accompaniment:"—",availability:[],preference:"",status:"pending",notes:"Awaiting Google Form response"},
     {id:5,name:"Jacob",piece:"—",accompaniment:"—",availability:[],preference:"",status:"pending",notes:"Awaiting Google Form response"},
   ],
+  dates: ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"],
   runningOrder:[1,2,3],
   tickets:[],
   chapters:[{id:1,city:"Glastonbury, CT",status:"Active",lead:"Matt",notes:"First recital in planning"}],
@@ -416,12 +427,13 @@ function switchTab(name,btn){
 
 // ── Utils ──
 function toggleForm(id){document.getElementById(id).classList.toggle("hidden");}
+function getDates(){ return state.dates && state.dates.length ? state.dates : DATES_DEFAULT; }
 
 // ── Render All ──
 function renderAll(){
   document.getElementById("loading-msg").classList.add("hidden");
   document.getElementById("tab-recital").classList.remove("hidden");
-  renderStats(); renderAvailability(); renderPerformers(); renderTickets(); renderChapters();
+  renderStats(); renderDates(); renderAvailability(); renderPerformers(); renderTickets(); renderChapters();
 }
 
 function renderStats(){
@@ -443,13 +455,40 @@ function renderStats(){
   document.getElementById("goal-pct").textContent=goal>0?pct+"%":"";
 }
 
+// ── Dates ──
+function renderDates(){
+  const dates = getDates();
+  document.getElementById("dates-list").innerHTML = dates.map((d,i)=>`
+    <span style="display:inline-flex;align-items:center;gap:4px;background:#faf6f0;border:1px solid #e8e0d4;border-radius:16px;padding:4px 10px;font-size:13px;color:#3d2b1f">
+      ${d}
+      <button onclick="deleteDate(${i})" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:15px;line-height:1;padding:0 0 0 2px" title="Remove date">×</button>
+    </span>`).join("");
+}
+function addDate(){
+  const input=document.getElementById("new-date-input");
+  const val=input.value.trim(); if(!val)return;
+  if(!state.dates)state.dates=[...DATES_DEFAULT];
+  if(state.dates.includes(val)){alert("That date is already in the list.");return;}
+  state.dates.push(val); input.value="";
+  saveData(); renderDates(); renderAvailability(); renderPerformers();
+}
+function deleteDate(idx){
+  if(!state.dates)state.dates=[...DATES_DEFAULT];
+  const d=state.dates[idx];
+  if(!confirm(`Remove "${d}" from the date list? This will also remove it from all performer availability.`))return;
+  state.dates.splice(idx,1);
+  state.performers=state.performers.map(p=>({...p,availability:p.availability.filter(x=>x!==d)}));
+  saveData(); renderDates(); renderAvailability(); renderPerformers();
+}
+
 // ── Availability ──
 function renderAvailability(){
+  const dates=getDates();
   const conf=state.performers.filter(p=>p.status==="confirmed");
-  let html=`<thead><tr><th>Performer</th>${DATES.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>`;
+  let html=`<thead><tr><th>Performer</th>${dates.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>`;
   state.performers.forEach(p=>{
     html+=`<tr><td style="color:${p.status==='pending'?'#aaa':'#3d2b1f'}">${p.name}${p.status==='pending'?'<span class="badge badge-pending" style="font-size:9px">pending</span>':''}</td>`;
-    DATES.forEach(d=>{
+    dates.forEach(d=>{
       if(p.status==="pending") html+=`<td style="color:#ddd">—</td>`;
       else if(p.availability.includes(d)) html+=`<td style="color:#22c55e;font-size:18px">✓</td>`;
       else html+=`<td style="color:#e8e0d4;font-size:16px">✕</td>`;
@@ -457,7 +496,7 @@ function renderAvailability(){
     html+=`</tr>`;
   });
   html+=`<tr class="overlap-row"><td style="font-size:12px;font-weight:700;text-transform:uppercase">Overlap</td>`;
-  DATES.forEach(d=>{
+  dates.forEach(d=>{
     const n=conf.filter(p=>p.availability.includes(d)).length;
     const all=conf.length>0&&conf.every(p=>p.availability.includes(d));
     html+=`<td><span class="overlap-dot" style="background:${all?"#22c55e":n>=2?"#f59e0b":"#e8e0d4"};color:${n>=2?"#fff":"#aaa"}">${n}</span></td>`;
@@ -467,10 +506,10 @@ function renderAvailability(){
 
   const box=document.getElementById("best-dates-box");
   const pending=state.performers.filter(p=>p.status==="pending").length;
-  if(conf.length===0){box.innerHTML="<strong>Best dates:</strong> No confirmed performers yet.";box.style.cssText="background:#faf6f0;border:1px solid #e8e0d4;color:#8b7355";return;}
-  const allDates=DATES.filter(d=>conf.every(p=>p.availability.includes(d)));
-  const maxN=Math.max(...DATES.map(d=>conf.filter(p=>p.availability.includes(d)).length));
-  const mostDates=DATES.filter(d=>conf.filter(p=>p.availability.includes(d)).length===maxN);
+  if(conf.length===0){box.innerHTML="<strong>Best dates:</strong> No confirmed performers yet.";box.style.cssText="background:#faf6f0;border:1px solid #e8e0d4;color:#8b7355;padding:12px 16px;border-radius:8px;font-size:14px";return;}
+  const allDates=dates.filter(d=>conf.every(p=>p.availability.includes(d)));
+  const maxN=Math.max(...dates.map(d=>conf.filter(p=>p.availability.includes(d)).length));
+  const mostDates=dates.filter(d=>conf.filter(p=>p.availability.includes(d)).length===maxN);
   const pendingNote=pending>0?`<br><span style="font-size:12px;opacity:0.8;display:block;margin-top:4px">⏳ ${pending} performer${pending>1?'s':''} still pending — dates may change once they respond.</span>`:"";
   if(allDates.length>0){
     box.innerHTML=`<strong>✅ Best dates — all ${conf.length} confirmed performers available:</strong> ${allDates.join(", ")}${pendingNote}`;
@@ -493,7 +532,7 @@ function renderPerformers(){
         <input value="${p.notes}" onchange="upP(${p.id},'notes',this.value)" placeholder="Notes" />
         <input value="${p.preference}" onchange="upP(${p.id},'preference',this.value)" placeholder="Preference" />
         <div><div style="font-size:11px;color:#8b7355;margin-bottom:6px">Availability:</div>
-        <div class="avail-checks">${DATES.map(d=>`<label><input type="checkbox" ${p.availability.includes(d)?'checked':''} onchange="togAvail(${p.id},'${d}',this.checked)" />${d}</label>`).join("")}</div></div>
+        <div class="avail-checks">${getDates().map(d=>`<label><input type="checkbox" ${p.availability.includes(d)?'checked':''} onchange="togAvail(${p.id},'${d}',this.checked)" />${d}</label>`).join("")}</div></div>
         <div class="form-actions"><button class="btn-primary" onclick="confirmP(${p.id})">Save & Confirm</button><button class="btn-secondary" onclick="cancelEdit()">Cancel</button></div>
       </div></div>`;
     return `<div class="performer-card ${p.status==='pending'?'pending':''}">
@@ -577,7 +616,7 @@ function renderProgramPreview(){
       <div class="prog-performer">${p.name}</div>
       ${p.accompaniment&&p.accompaniment!=="None"&&p.accompaniment!=="—"?`<div class="prog-accompanist">Piano accompaniment: Tamana</div>`:""}
     </div>`).join("")}
-    <div style="margin-top:28px;text-align:center;font-family:'Lora',serif;font-size:12px;color:#a09080;border-top:1px solid #e8e0d4;padding-top:16px">Thank you for your support · Mobilemusicsalon.org</div>`;
+    <div style="margin-top:28px;text-align:center;font-family:'Lora',serif;font-size:12px;color:#a09080;border-top:1px solid #e8e0d4;padding-top:16px">Thank you for your support · mobilemusicsalon.org</div>`;
 }
 function moveOrder(id,dir){
   const idx=state.runningOrder.indexOf(id); if(idx<0)return;
@@ -591,7 +630,7 @@ const PLAN_TASKS=[
   {cat:"Venue & Logistics",tasks:["Confirm venue booking and date","Get venue address and parking info","Check piano availability at venue","Arrange chairs and stage layout","Confirm venue capacity","Plan arrival and setup time"]},
   {cat:"Performers & Scheduling",tasks:["Collect availability via Google Form","Confirm final performer list","Confirm each performer's piece","Confirm accompaniment arrangements","Send performers the final date and time","Set running order","Schedule rehearsal or run-through if needed"]},
   {cat:"Tickets & Fundraising",tasks:["Set ticket price","Set fundraising goal","Start selling tickets","Track all cash sales in dashboard","Send donation to Yale New Haven Children's Hospital after event","Get donation receipt for records"]},
-  {cat:"Marketing & Social Media",tasks:["Create event post for Instagram","Post on Facebook","Update Mobilemusicsalon.org","Send email to mailing list","Share in local community groups","Post reminder 1 week before","Post reminder day before"]},
+  {cat:"Marketing & Social Media",tasks:["Create event post for Instagram","Post on Facebook","Update mobilemusicsalon.org","Send email to mailing list","Share in local community groups","Post reminder 1 week before","Post reminder day before"]},
   {cat:"Day-Of Tasks",tasks:["Arrive early to set up","Confirm piano is tuned","Set up ticket collection at door","Brief performers on running order","Welcome guests and open the event","Collect all cash payments","Take photos for social media"]},
   {cat:"Post-Event Tasks",tasks:["Count total revenue","Send donation to hospital","Post thank-you on social media","Email performers thank you","Log totals in dashboard","Debrief: what went well, what to improve","Start planning next recital"]},
 ];
@@ -729,7 +768,7 @@ More details coming soon. Reply to reserve your tickets!
 
 See you there,
 Matt
-Mobilemusicsalon.org`},
+mobilemusicsalon.org`},
   {title:"Selling Tickets to Guests",subject:"Tickets now available — Mobile Music Salon",body:`Hi [Name],
 
 Tickets are now available for our upcoming recital!
@@ -744,7 +783,7 @@ To get your tickets, reply to this email or reach me at [phone/email].
 Thank you for your support!
 
 Matt
-Mobilemusicsalon.org`},
+mobilemusicsalon.org`},
   {title:"Thank You to Performers (Post-Event)",subject:"Thank you — you were wonderful!",body:`Hi [Name],
 
 I just wanted to say thank you for performing at Mobile Music Salon. Your performance of [Piece] was truly special and the audience loved every moment.
@@ -762,7 +801,7 @@ Thank you so much for joining us at Mobile Music Salon. Your presence and genero
 
 Together we raised $[Amount] for Yale New Haven Children's Hospital. Every dollar makes a difference for the children and families they serve.
 
-Stay tuned for our next recital at Mobilemusicsalon.org.
+Stay tuned for our next recital at mobilemusicsalon.org.
 
 With warm appreciation,
 Matt & the Mobile Music Salon team`},
@@ -778,7 +817,7 @@ Would you be open to a quick call to learn more?
 
 Best,
 Matt
-Mobilemusicsalon.org`},
+mobilemusicsalon.org`},
 ];
 function renderEmails(){
   document.getElementById("email-list").innerHTML=EMAILS.map((e,i)=>`
