@@ -7,153 +7,217 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Lora', serif; background: #f5f0ea; color: #3d2b1f; min-height: 100vh; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Lora',serif;background:#f5f0ea;color:#3d2b1f;min-height:100vh}
 
-    #login-screen { min-height:100vh; background:linear-gradient(135deg,#3d2b1f 0%,#6b4226 100%); display:flex; align-items:center; justify-content:center; }
-    .login-box { background:#fff; border-radius:16px; padding:48px 40px; width:360px; box-shadow:0 24px 60px rgba(0,0,0,0.3); text-align:center; }
-    .login-box .emoji { font-size:36px; margin-bottom:8px; }
-    .login-box h1 { font-family:'Playfair Display',serif; font-size:22px; color:#3d2b1f; margin-bottom:4px; }
-    .login-box .subtitle { font-size:12px; color:#c4a882; letter-spacing:2px; text-transform:uppercase; margin-bottom:32px; }
-    .login-box input { width:100%; padding:12px; text-align:center; font-size:15px; border:1.5px solid #e8e0d4; border-radius:6px; font-family:'Lora',serif; outline:none; margin-bottom:8px; }
-    .login-box .err-msg { color:#e57373; font-size:12px; margin-bottom:8px; }
-    .login-box .tagline { margin-top:20px; font-size:11px; color:#c4a882; }
+    /* Login */
+    #login-screen{min-height:100vh;background:linear-gradient(135deg,#3d2b1f,#6b4226);display:flex;align-items:center;justify-content:center}
+    .login-box{background:#fff;border-radius:16px;padding:48px 40px;width:360px;box-shadow:0 24px 60px rgba(0,0,0,.3);text-align:center}
+    .login-box .emoji{font-size:36px;margin-bottom:8px}
+    .login-box h1{font-family:'Playfair Display',serif;font-size:22px;color:#3d2b1f;margin-bottom:4px}
+    .login-box .subtitle{font-size:12px;color:#c4a882;letter-spacing:2px;text-transform:uppercase;margin-bottom:32px}
+    .login-box input{width:100%;padding:12px;text-align:center;font-size:15px;border:1.5px solid #e8e0d4;border-radius:6px;font-family:'Lora',serif;outline:none;margin-bottom:8px}
+    .login-box .err-msg{color:#e57373;font-size:12px;margin-bottom:8px}
+    .login-box .tagline{margin-top:20px;font-size:11px;color:#c4a882}
 
-    .btn-primary { background:#7c5c3e; color:#fff; border:none; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Lora',serif; }
-    .btn-secondary { background:transparent; color:#7c5c3e; border:1px solid #c4a882; border-radius:6px; padding:8px 18px; font-size:13px; font-weight:600; cursor:pointer; font-family:'Lora',serif; }
-    .btn-sm { padding:4px 10px; font-size:12px; }
-    .btn-xs { padding:2px 8px; font-size:11px; }
+    /* Buttons */
+    .btn-primary{background:#7c5c3e;color:#fff;border:none;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Lora',serif}
+    .btn-secondary{background:transparent;color:#7c5c3e;border:1px solid #c4a882;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Lora',serif}
+    .btn-danger{background:transparent;color:#e57373;border:1px solid #f5c6c6;border-radius:6px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Lora',serif}
+    .btn-sm{padding:5px 12px;font-size:12px}
+    .btn-xs{padding:2px 8px;font-size:11px}
 
-    .header { background:linear-gradient(135deg,#3d2b1f 0%,#6b4226 100%); padding:28px 32px 20px; }
-    .header-top { display:flex; justify-content:space-between; align-items:flex-start; }
-    .header .eyebrow { font-size:11px; letter-spacing:3px; color:#c4a882; text-transform:uppercase; margin-bottom:4px; }
-    .header h1 { font-family:'Playfair Display',serif; font-size:26px; color:#fff; font-weight:700; margin-bottom:2px; }
-    .header .subline { font-size:12px; color:#c4a882; }
-    .stats { display:flex; gap:14px; margin-top:20px; flex-wrap:wrap; }
-    .stat-card { background:rgba(255,255,255,0.08); border-radius:10px; padding:12px 20px; min-width:110px; }
-    .stat-card .val { font-size:22px; font-weight:700; color:#fff; font-family:'Playfair Display',serif; }
-    .stat-card .lbl { font-size:11px; color:#c4a882; margin-top:2px; }
+    /* Header */
+    .header{background:linear-gradient(135deg,#3d2b1f,#6b4226);padding:28px 32px 20px}
+    .header-top{display:flex;justify-content:space-between;align-items:flex-start}
+    .eyebrow{font-size:11px;letter-spacing:3px;color:#c4a882;text-transform:uppercase;margin-bottom:4px}
+    .header h1{font-family:'Playfair Display',serif;font-size:26px;color:#fff;font-weight:700;margin-bottom:2px}
+    .subline{font-size:12px;color:#c4a882}
+    .stats{display:flex;gap:14px;margin-top:20px;flex-wrap:wrap}
+    .stat-card{background:rgba(255,255,255,.08);border-radius:10px;padding:12px 20px;min-width:110px}
+    .stat-card .val{font-size:22px;font-weight:700;color:#fff;font-family:'Playfair Display',serif}
+    .stat-card .lbl{font-size:11px;color:#c4a882;margin-top:2px}
 
-    .tabs { display:flex; background:#ede6dc; border-bottom:1px solid #e8e0d4; overflow-x:auto; }
-    .tab-btn { padding:13px 18px; border:none; background:transparent; color:#8b7355; font-size:13px; cursor:pointer; border-bottom:2px solid transparent; font-family:'Lora',serif; white-space:nowrap; transition:all 0.15s; }
-    .tab-btn.active { background:#f5f0ea; color:#3d2b1f; font-weight:700; border-bottom:2px solid #7c5c3e; }
+    /* Tabs */
+    .tabs{display:flex;background:#ede6dc;border-bottom:1px solid #e8e0d4;overflow-x:auto}
+    .tab-btn{padding:13px 16px;border:none;background:transparent;color:#8b7355;font-size:12px;cursor:pointer;border-bottom:2px solid transparent;font-family:'Lora',serif;white-space:nowrap;transition:all .15s}
+    .tab-btn.active{background:#f5f0ea;color:#3d2b1f;font-weight:700;border-bottom:2px solid #7c5c3e}
 
-    .content { padding:28px 32px; max-width:960px; margin:0 auto; }
-    .card { background:#fff; border-radius:12px; padding:24px; margin-bottom:24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .section-label { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#8b7355; margin-bottom:16px; }
-    .card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-    .card-header .section-label { margin-bottom:0; }
+    /* Layout */
+    .content{padding:24px 28px;max-width:980px;margin:0 auto}
+    .card{background:#fff;border-radius:12px;padding:22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .section-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:0}
+    .section-desc{font-size:13px;color:#8b7355;margin-top:4px}
 
-    .avail-table { width:100%; border-collapse:collapse; font-size:13px; }
-    .avail-table th { padding:8px 6px; color:#8b7355; font-weight:600; font-size:11px; text-transform:uppercase; text-align:center; }
-    .avail-table th:first-child { text-align:left; padding-left:12px; }
-    .avail-table td { padding:10px 6px; text-align:center; border-top:1px solid #e8e0d4; }
-    .avail-table td:first-child { text-align:left; padding-left:12px; font-family:'Playfair Display',serif; font-size:14px; font-weight:600; }
-    .avail-table .overlap-row { border-top:2px solid #c4a882; background:#faf6f0; }
-    .overlap-dot { display:inline-block; min-width:24px; height:24px; border-radius:50%; font-size:12px; font-weight:700; line-height:24px; text-align:center; }
+    /* Forms */
+    .add-form{background:#faf6f0;border:1px solid #e8e0d4;border-radius:10px;padding:16px;margin-bottom:16px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+    .form-field{display:flex;flex-direction:column;gap:4px}
+    .form-label{font-size:11px;color:#8b7355;text-transform:uppercase;letter-spacing:1px}
+    .fi{width:100%;padding:8px 10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;background:#fffdf9;color:#3d2b1f;outline:none;font-family:'Lora',serif}
+    .fi:focus{border-color:#c4a882}
+    textarea.fi{resize:vertical;min-height:80px;line-height:1.6}
+    .form-actions{display:flex;gap:8px;margin-top:12px}
 
-    .badge { font-size:10px; padding:2px 8px; border-radius:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-left:6px; }
-    .badge-confirmed { background:#d4f4e2; color:#1a6b3a; }
-    .badge-pending { background:#fef3c7; color:#92400e; }
-    .badge-active { background:#d4f4e2; color:#1a6b3a; }
-    .badge-planning { background:#fef3c7; color:#92400e; }
-    .badge-on-hold { background:#f3f4f6; color:#6b7280; }
+    /* Tables */
+    table.dt{width:100%;border-collapse:collapse;font-size:13px}
+    table.dt th{text-align:left;padding:8px 10px;font-size:11px;color:#8b7355;text-transform:uppercase;letter-spacing:.8px;font-weight:600;border-bottom:2px solid #e8e0d4}
+    table.dt td{padding:10px;border-bottom:1px solid #f0ebe3;vertical-align:top}
+    .empty{text-align:center;color:#c4b8a8;padding:32px;font-size:14px}
 
-    .performer-list { display:flex; flex-direction:column; gap:12px; }
-    .performer-card { border:1px solid #e8e0d4; border-radius:10px; padding:16px 20px; }
-    .performer-card.pending { background:#fdfcfa; }
-    .performer-name { font-family:'Playfair Display',serif; font-size:17px; font-weight:700; }
-    .performer-piece { font-size:13px; color:#5a3e28; font-style:italic; margin-bottom:4px; }
-    .performer-meta { font-size:12px; color:#8b7355; }
-    .performer-note { font-size:12px; color:#a09080; margin-top:4px; }
-    .edit-form { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
-    .edit-form input { width:100%; padding:8px 10px; border:1px solid #e8e0d4; border-radius:6px; font-size:13px; background:#fffdf9; color:#3d2b1f; outline:none; font-family:'Lora',serif; }
-    .avail-checks { display:flex; flex-wrap:wrap; gap:6px; }
-    .avail-checks label { display:flex; align-items:center; gap:4px; font-size:12px; cursor:pointer; }
-    .form-actions { display:flex; gap:8px; margin-top:4px; }
+    /* Badges */
+    .badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+    .badge-confirmed,.badge-active{background:#d4f4e2;color:#1a6b3a}
+    .badge-pending,.badge-planning{background:#fef3c7;color:#92400e}
+    .badge-on-hold{background:#f3f4f6;color:#6b7280}
+    .badge-excellent{background:#dbeafe;color:#1e40af}
 
-    .ticket-stats { display:flex; gap:16px; margin-bottom:24px; flex-wrap:wrap; }
-    .ticket-stat { flex:1; min-width:130px; background:#fff; border-radius:12px; padding:20px 24px; box-shadow:0 1px 4px rgba(0,0,0,0.06); }
-    .ticket-stat .icon { font-size:22px; }
-    .ticket-stat .val { font-size:24px; font-weight:700; font-family:'Playfair Display',serif; color:#3d2b1f; margin-top:4px; }
-    .ticket-stat .lbl { font-size:12px; color:#8b7355; margin-top:2px; }
-    .inline-edit-row { display:flex; align-items:center; gap:8px; margin-top:4px; }
-    .inline-edit-row input { width:80px; font-size:18px; font-weight:700; padding:2px 6px; border:1px solid #e8e0d4; border-radius:6px; font-family:'Lora',serif; outline:none; }
-    .goal-bar-wrap { background:#e8e0d4; border-radius:10px; height:6px; margin-top:8px; overflow:hidden; }
-    .goal-bar-fill { height:100%; background:linear-gradient(90deg,#22c55e,#16a34a); border-radius:10px; transition:width 0.4s; }
+    /* Availability */
+    .avail-table{width:100%;border-collapse:collapse;font-size:13px}
+    .avail-table th{padding:8px 6px;color:#8b7355;font-weight:600;font-size:11px;text-transform:uppercase;text-align:center}
+    .avail-table th:first-child{text-align:left;padding-left:12px}
+    .avail-table td{padding:10px 6px;text-align:center;border-top:1px solid #e8e0d4}
+    .avail-table td:first-child{text-align:left;padding-left:12px;font-family:'Playfair Display',serif;font-size:14px;font-weight:600}
+    .avail-table .overlap-row{border-top:2px solid #c4a882;background:#faf6f0}
+    .overlap-dot{display:inline-block;min-width:24px;height:24px;border-radius:50%;font-size:12px;font-weight:700;line-height:24px;text-align:center}
+    .date-pill{display:inline-flex;align-items:center;gap:4px;background:#faf6f0;border:1px solid #e8e0d4;border-radius:16px;padding:4px 10px;font-size:13px;color:#3d2b1f;margin:3px}
+    .date-pill button{background:none;border:none;color:#c4a882;cursor:pointer;font-size:15px;line-height:1;padding:0 0 0 2px}
+    .date-pill button:hover{color:#e57373}
 
-    .add-form { background:#faf6f0; border:1px solid #e8e0d4; border-radius:10px; padding:16px; margin-bottom:16px; }
-    .grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:10px; }
-    .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px; }
-    .add-form input, .add-form select, .add-form textarea { width:100%; padding:8px 10px; border:1px solid #e8e0d4; border-radius:6px; font-size:13px; background:#fffdf9; color:#3d2b1f; outline:none; font-family:'Lora',serif; }
-    .add-form textarea { resize:vertical; min-height:70px; }
-    table.data-table { width:100%; border-collapse:collapse; font-size:13px; }
-    table.data-table th { text-align:left; padding:8px 10px; font-size:11px; color:#8b7355; text-transform:uppercase; letter-spacing:0.8px; font-weight:600; border-bottom:2px solid #e8e0d4; }
-    table.data-table td { padding:10px; border-bottom:1px solid #f0ebe3; }
-    .empty { text-align:center; color:#c4b8a8; padding:32px; font-size:14px; }
+    /* Performers */
+    .performer-list{display:flex;flex-direction:column;gap:12px}
+    .performer-card{border:1px solid #e8e0d4;border-radius:10px;padding:16px 20px}
+    .performer-card.pending{background:#fdfcfa}
+    .performer-name{font-family:'Playfair Display',serif;font-size:17px;font-weight:700}
+    .performer-piece{font-size:13px;color:#5a3e28;font-style:italic;margin-bottom:4px}
+    .performer-meta{font-size:12px;color:#8b7355}
+    .performer-note{font-size:12px;color:#a09080;margin-top:4px}
+    .edit-form{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+    .edit-form input{width:100%;padding:8px 10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;background:#fffdf9;color:#3d2b1f;outline:none;font-family:'Lora',serif}
+    .avail-checks{display:flex;flex-wrap:wrap;gap:6px}
+    .avail-checks label{display:flex;align-items:center;gap:4px;font-size:12px;cursor:pointer}
 
-    .chapter-card { border:1px solid #e8e0d4; border-radius:10px; padding:16px 20px; margin-bottom:12px; }
-    .chapter-name { font-family:'Playfair Display',serif; font-size:16px; font-weight:700; }
+    /* Tickets */
+    .ticket-stats{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+    .ticket-stat{flex:1;min-width:130px;background:#fff;border-radius:12px;padding:18px 22px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .ticket-stat .icon{font-size:22px}
+    .ticket-stat .val{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:#3d2b1f;margin-top:4px}
+    .ticket-stat .lbl{font-size:12px;color:#8b7355;margin-top:2px}
+    .inline-edit-row{display:flex;align-items:center;gap:8px;margin-top:4px}
+    .inline-edit-row input{width:80px;font-size:18px;font-weight:700;padding:2px 6px;border:1px solid #e8e0d4;border-radius:6px;font-family:'Lora',serif;outline:none}
+    .goal-bar-wrap{background:#e8e0d4;border-radius:10px;height:6px;margin-top:8px;overflow:hidden}
+    .goal-bar-fill{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);border-radius:10px;transition:width .4s}
 
-    .recital-pills { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
-    .recital-pill { padding:6px 14px; border-radius:20px; border:1px solid #e8e0d4; background:#fff; font-size:13px; cursor:pointer; font-family:'Lora',serif; color:#8b7355; transition:all 0.15s; }
-    .recital-pill.active { background:#7c5c3e; color:#fff; border-color:#7c5c3e; font-weight:600; }
-    .category-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-    .category-title { font-size:12px; text-transform:uppercase; letter-spacing:1.5px; color:#8b7355; font-weight:600; }
-    .category-progress { font-size:11px; color:#c4a882; }
-    .checklist-item { display:flex; align-items:flex-start; gap:12px; padding:10px 14px; border-radius:8px; margin-bottom:6px; background:#faf6f0; border:1px solid #f0e8dc; }
-    .checklist-item.done { background:#f0f9f4; border-color:#bbf7d0; }
-    .checklist-item input[type=checkbox] { width:16px; height:16px; cursor:pointer; accent-color:#7c5c3e; flex-shrink:0; margin-top:2px; }
-    .checklist-item .task-text { flex:1; font-size:14px; color:#3d2b1f; }
-    .checklist-item.done .task-text { text-decoration:line-through; color:#a09080; }
-    .progress-bar-wrap { background:#e8e0d4; border-radius:10px; height:8px; overflow:hidden; }
-    .progress-bar-fill { height:100%; background:linear-gradient(90deg,#7c5c3e,#c4a882); border-radius:10px; transition:width 0.4s; }
-    .progress-label { font-size:12px; color:#8b7355; margin-bottom:6px; display:flex; justify-content:space-between; }
+    /* Planning */
+    .recital-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+    .recital-pill{padding:6px 14px;border-radius:20px;border:1px solid #e8e0d4;background:#fff;font-size:13px;cursor:pointer;font-family:'Lora',serif;color:#8b7355;transition:all .15s}
+    .recital-pill.active{background:#7c5c3e;color:#fff;border-color:#7c5c3e;font-weight:600}
+    .category-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+    .category-title{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:#8b7355;font-weight:600}
+    .category-progress{font-size:11px;color:#c4a882}
+    .checklist-item{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-radius:8px;margin-bottom:6px;background:#faf6f0;border:1px solid #f0e8dc}
+    .checklist-item.done{background:#f0f9f4;border-color:#bbf7d0}
+    .checklist-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;accent-color:#7c5c3e;flex-shrink:0;margin-top:2px}
+    .checklist-item .task-text{flex:1;font-size:14px;color:#3d2b1f}
+    .checklist-item.done .task-text{text-decoration:line-through;color:#a09080}
+    .progress-bar-wrap{background:#e8e0d4;border-radius:10px;height:8px;overflow:hidden}
+    .progress-bar-fill{height:100%;background:linear-gradient(90deg,#7c5c3e,#c4a882);border-radius:10px;transition:width .4s}
+    .progress-label{font-size:12px;color:#8b7355;margin-bottom:6px;display:flex;justify-content:space-between}
 
-    .running-order-list { display:flex; flex-direction:column; gap:8px; }
-    .order-item { display:flex; align-items:center; gap:12px; padding:12px 16px; background:#faf6f0; border:1px solid #e8e0d4; border-radius:8px; }
-    .order-num { font-family:'Playfair Display',serif; font-size:20px; font-weight:700; color:#c4a882; min-width:28px; }
-    .order-info { flex:1; }
-    .order-name { font-weight:600; font-size:14px; }
-    .order-piece { font-size:12px; color:#8b7355; font-style:italic; }
-    .order-btn { background:none; border:1px solid #e8e0d4; border-radius:4px; width:28px; height:28px; cursor:pointer; font-size:14px; color:#8b7355; }
+    /* Program */
+    .running-order-list{display:flex;flex-direction:column;gap:8px}
+    .order-item{display:flex;align-items:center;gap:12px;padding:12px 16px;background:#faf6f0;border:1px solid #e8e0d4;border-radius:8px}
+    .order-num{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#c4a882;min-width:28px}
+    .order-info{flex:1}
+    .order-name{font-weight:600;font-size:14px}
+    .order-piece{font-size:12px;color:#8b7355;font-style:italic}
+    .order-btn{background:none;border:1px solid #e8e0d4;border-radius:4px;width:28px;height:28px;cursor:pointer;font-size:14px;color:#8b7355}
+    .program-preview{background:#fffdf9;border:1px solid #e8e0d4;border-radius:10px;padding:40px}
+    .program-preview h2{font-size:28px;text-align:center;color:#3d2b1f;margin-bottom:4px}
+    .prog-subtitle{text-align:center;font-family:'Lora',serif;font-size:13px;color:#8b7355;margin-bottom:32px;line-height:1.8}
+    .program-item{border-bottom:1px solid #e8e0d4;padding:16px 0}
+    .program-item:last-child{border-bottom:none}
+    .prog-piece{font-size:16px;font-weight:700;color:#3d2b1f;margin-bottom:4px}
+    .prog-performer{font-family:'Lora',serif;font-size:13px;color:#7c5c3e}
+    .prog-accompanist{font-family:'Lora',serif;font-size:12px;color:#a09080;font-style:italic}
 
-    .program-preview { background:#fffdf9; border:1px solid #e8e0d4; border-radius:10px; padding:40px; }
-    .program-preview h2 { font-size:28px; text-align:center; color:#3d2b1f; margin-bottom:4px; }
-    .prog-subtitle { text-align:center; font-family:'Lora',serif; font-size:13px; color:#8b7355; margin-bottom:32px; letter-spacing:0.5px; line-height:1.8; }
-    .program-item { border-bottom:1px solid #e8e0d4; padding:16px 0; }
-    .program-item:last-child { border-bottom:none; }
-    .prog-piece { font-size:16px; font-weight:700; color:#3d2b1f; margin-bottom:4px; }
-    .prog-performer { font-family:'Lora',serif; font-size:13px; color:#7c5c3e; }
-    .prog-accompanist { font-family:'Lora',serif; font-size:12px; color:#a09080; font-style:italic; }
+    /* Contacts */
+    .contact-card{border:1px solid #e8e0d4;border-radius:10px;padding:14px 18px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:flex-start}
+    .contact-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:2px}
+    .contact-role{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#c4a882}
+    .contact-detail{font-size:12px;color:#8b7355;margin-top:4px}
 
-    .contact-card { border:1px solid #e8e0d4; border-radius:10px; padding:14px 18px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:flex-start; }
-    .contact-name { font-family:'Playfair Display',serif; font-size:15px; font-weight:700; margin-bottom:2px; }
-    .contact-role { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#c4a882; }
-    .contact-detail { font-size:12px; color:#8b7355; margin-top:4px; }
+    /* Notes */
+    .note-card{border:1px solid #e8e0d4;border-radius:10px;padding:16px 20px;margin-bottom:12px}
+    .note-recital-label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#c4a882;margin-bottom:4px}
+    .note-text{font-size:14px;color:#3d2b1f;line-height:1.7;white-space:pre-wrap;margin-top:8px}
 
-    .note-card { border:1px solid #e8e0d4; border-radius:10px; padding:16px 20px; margin-bottom:12px; }
-    .note-recital { font-size:11px; text-transform:uppercase; letter-spacing:1px; color:#c4a882; margin-bottom:4px; }
-    .note-text { font-size:14px; color:#3d2b1f; line-height:1.7; white-space:pre-wrap; margin-top:8px; }
+    /* Venues */
+    .venue-card{border:1px solid #e8e0d4;border-radius:10px;padding:16px 20px;margin-bottom:12px}
+    .venue-name{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;margin-bottom:4px}
+    .venue-stars{color:#f59e0b;font-size:14px}
+    .venue-detail{font-size:12px;color:#8b7355;margin-top:3px}
 
-    .email-template { border:1px solid #e8e0d4; border-radius:10px; overflow:hidden; margin-bottom:12px; }
-    .email-header { background:#faf6f0; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
-    .email-title { font-weight:600; font-size:14px; color:#3d2b1f; }
-    .email-body { padding:16px; display:none; }
-    .email-body.open { display:block; }
-    .email-subject { font-size:12px; color:#8b7355; margin-bottom:8px; font-style:italic; }
-    .email-content { font-size:13px; color:#3d2b1f; line-height:1.8; background:#fffdf9; padding:16px; border-radius:6px; border:1px solid #e8e0d4; white-space:pre-wrap; font-family:'Lora',serif; }
-    .copy-btn { background:#7c5c3e; color:#fff; border:none; border-radius:6px; padding:8px 16px; font-size:12px; cursor:pointer; font-family:'Lora',serif; margin-top:12px; }
+    /* Performer history */
+    .history-card{border:1px solid #e8e0d4;border-radius:10px;padding:14px 18px;margin-bottom:10px}
+    .history-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700}
+    .history-stat{font-size:12px;color:#8b7355;margin-top:3px}
+    .history-pieces{font-size:12px;color:#a09080;font-style:italic;margin-top:4px}
 
-    .loading { text-align:center; padding:60px; color:#a0907a; font-size:15px; }
-    .hidden { display:none !important; }
-    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
-    .shake { animation:shake 0.5s ease; }
-    @media print { .tabs,.header .btn-secondary,.card-header button,.no-print{display:none!important} body{background:#fff} .card{box-shadow:none} }
+    /* Cross-chapter */
+    .chapter-overview-card{border:1px solid #e8e0d4;border-radius:10px;padding:16px 20px;margin-bottom:12px}
+    .chapter-city{font-family:'Playfair Display',serif;font-size:16px;font-weight:700}
+    .chapter-stats{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+    .chapter-stat{font-size:12px;color:#8b7355}
+    .chapter-stat strong{color:#3d2b1f;font-size:16px;font-family:'Playfair Display',serif;display:block}
+
+    /* Post-event report */
+    .report-preview{background:#fffdf9;border:1px solid #e8e0d4;border-radius:10px;padding:28px;font-size:14px;line-height:1.8;color:#3d2b1f}
+    .report-preview h3{font-family:'Playfair Display',serif;font-size:18px;margin-bottom:12px;color:#3d2b1f}
+    .report-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid #e8e0d4}
+    .report-section:last-child{border-bottom:none;margin-bottom:0}
+
+    /* Social captions */
+    .caption-box{background:#faf6f0;border:1px solid #e8e0d4;border-radius:10px;padding:16px;margin-bottom:12px}
+    .caption-platform{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#8b7355;font-weight:600;margin-bottom:8px}
+    .caption-text{font-size:14px;color:#3d2b1f;line-height:1.7;white-space:pre-wrap;font-family:'Lora',serif}
+
+    /* Reminders */
+    .reminder-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid #f0ebe3}
+    .reminder-item:last-child{border-bottom:none}
+    .reminder-timing{font-size:12px;color:#c4a882;text-transform:uppercase;letter-spacing:1px;min-width:120px;margin-top:2px}
+    .reminder-action{font-size:14px;color:#3d2b1f;font-weight:600}
+    .reminder-desc{font-size:12px;color:#8b7355;margin-top:3px}
+
+    /* Email templates */
+    .email-template{border:1px solid #e8e0d4;border-radius:10px;overflow:hidden;margin-bottom:10px}
+    .email-header{background:#faf6f0;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+    .email-title{font-weight:600;font-size:14px;color:#3d2b1f}
+    .email-body{padding:16px;display:none}
+    .email-body.open{display:block}
+    .email-subject{font-size:12px;color:#8b7355;margin-bottom:8px;font-style:italic}
+    .email-content{font-size:13px;color:#3d2b1f;line-height:1.8;background:#fffdf9;padding:16px;border-radius:6px;border:1px solid #e8e0d4;white-space:pre-wrap;font-family:'Lora',serif}
+    .copy-btn{background:#7c5c3e;color:#fff;border:none;border-radius:6px;padding:8px 16px;font-size:12px;cursor:pointer;font-family:'Lora',serif;margin-top:12px}
+
+    /* Misc */
+    .loading{text-align:center;padding:60px;color:#a0907a;font-size:15px}
+    .hidden{display:none!important}
+    .del-btn{background:none;border:none;color:#e57373;cursor:pointer;font-size:18px;flex-shrink:0;padding:0 4px}
+    .info-box{padding:12px 16px;border-radius:8px;font-size:14px;margin-bottom:16px}
+    .info-box.green{background:#f0f9f4;border:1px solid #bbf7d0;color:#166534}
+    .info-box.amber{background:#fef3c7;border:1px solid #fde68a;color:#92400e}
+    .info-box.blue{background:#eff6ff;border:1px solid #bfdbfe;color:#1e40af}
+    .info-box.gray{background:#faf6f0;border:1px solid #e8e0d4;color:#8b7355}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+    .shake{animation:shake .5s ease}
+    @media print{.tabs,.header .btn-secondary,.card-header button,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none}}
   </style>
 </head>
 <body>
 
+<!-- LOGIN -->
 <div id="login-screen">
   <div class="login-box" id="login-box">
     <div class="emoji">🎼</div>
@@ -166,322 +230,470 @@
   </div>
 </div>
 
+<!-- APP -->
 <div id="app" class="hidden">
   <div class="header">
     <div class="header-top">
       <div>
         <div class="eyebrow">Nonprofit · Yale New Haven Children's Hospital</div>
         <h1>Mobile Music Salon</h1>
-        <div class="subline">mobilemusicsalon.org · Admin <span id="saving-indicator" class="hidden" style="margin-left:6px;opacity:0.7">saving…</span></div>
+        <div class="subline">mobilemusicsalon.org · Admin <span id="saving-ind" class="hidden" style="margin-left:6px;opacity:.7">saving…</span></div>
       </div>
-      <button class="btn-secondary" style="color:#c4a882;border-color:rgba(196,168,130,0.4);font-size:12px" onclick="logout()">Sign Out</button>
+      <button class="btn-secondary" style="color:#c4a882;border-color:rgba(196,168,130,.4);font-size:12px" onclick="logout()">Sign Out</button>
     </div>
     <div class="stats">
-      <div class="stat-card"><div class="val" id="stat-confirmed">0</div><div class="lbl">Confirmed Performers</div></div>
-      <div class="stat-card"><div class="val" id="stat-tickets">0</div><div class="lbl">Tickets Sold</div></div>
-      <div class="stat-card"><div class="val" id="stat-raised">$0</div><div class="lbl">Raised for Hospital</div></div>
+      <div class="stat-card"><div class="val" id="s-confirmed">0</div><div class="lbl">Confirmed Performers</div></div>
+      <div class="stat-card"><div class="val" id="s-tickets">0</div><div class="lbl">Tickets Sold</div></div>
+      <div class="stat-card"><div class="val" id="s-raised">$0</div><div class="lbl">Raised for Hospital</div></div>
+      <div class="stat-card"><div class="val" id="s-chapters">0</div><div class="lbl">Chapters</div></div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('recital',this)">Recital</button>
-    <button class="tab-btn" onclick="switchTab('tickets',this)">Tickets</button>
-    <button class="tab-btn" onclick="switchTab('program',this)">Program</button>
-    <button class="tab-btn" onclick="switchTab('planning',this)">Planning</button>
-    <button class="tab-btn" onclick="switchTab('contacts',this)">Contacts</button>
-    <button class="tab-btn" onclick="switchTab('notes',this)">Notes</button>
-    <button class="tab-btn" onclick="switchTab('emails',this)">Email Templates</button>
-    <button class="tab-btn" onclick="switchTab('chapters',this)">Chapters</button>
+    <button class="tab-btn active" onclick="go('recital',this)">🎻 Recital</button>
+    <button class="tab-btn" onclick="go('tickets',this)">🎟 Tickets</button>
+    <button class="tab-btn" onclick="go('program',this)">📄 Program</button>
+    <button class="tab-btn" onclick="go('planning',this)">✅ Planning</button>
+    <button class="tab-btn" onclick="go('contacts',this)">📞 Contacts</button>
+    <button class="tab-btn" onclick="go('venues',this)">🏛 Venues</button>
+    <button class="tab-btn" onclick="go('history',this)">🎵 Performer History</button>
+    <button class="tab-btn" onclick="go('notes',this)">📝 Notes</button>
+    <button class="tab-btn" onclick="go('report',this)">📊 Post-Event</button>
+    <button class="tab-btn" onclick="go('social',this)">📱 Social</button>
+    <button class="tab-btn" onclick="go('reminders',this)">⏰ Reminders</button>
+    <button class="tab-btn" onclick="go('emails',this)">✉️ Emails</button>
+    <button class="tab-btn" onclick="go('chapters',this)">🗺 Chapters</button>
   </div>
 
   <div class="content">
     <div id="loading-msg" class="loading">Loading your data…</div>
 
-    <!-- RECITAL -->
+    <!-- ═══ RECITAL ═══ -->
     <div id="tab-recital" class="hidden">
       <div class="card">
-        <div class="card-header">
-          <div class="section-label">Candidate Dates</div>
-        </div>
-        <div id="dates-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px"></div>
+        <div class="card-header"><div><div class="section-label">Candidate Dates</div><div class="section-desc">Add or remove dates. Changes update the availability grid and all performer checkboxes instantly.</div></div></div>
+        <div id="dates-pills" style="margin-bottom:14px"></div>
         <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="new-date-input" placeholder="Add a date (e.g. Jul 11)" onkeydown="if(event.key==='Enter')addDate()" style="padding:7px 12px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;font-family:'Lora',serif;outline:none;background:#fffdf9;color:#3d2b1f;width:200px" />
+          <input id="new-date" placeholder="Add a date (e.g. Jul 11)" onkeydown="if(event.key==='Enter')addDate()" class="fi" style="width:220px" />
           <button class="btn-primary btn-sm" onclick="addDate()">+ Add Date</button>
         </div>
       </div>
       <div class="card">
-        <div class="section-label">Availability Overview</div>
+        <div class="section-label" style="margin-bottom:16px">Availability Overview</div>
         <div style="overflow-x:auto"><table class="avail-table" id="avail-table"></table></div>
-        <div id="best-dates-box" style="margin-top:16px;padding:12px 16px;border-radius:8px;font-size:14px"></div>
+        <div id="best-dates-box" style="margin-top:16px"></div>
       </div>
       <div class="card">
-        <div class="section-label">Performers</div>
+        <div class="section-label" style="margin-bottom:16px">Performers</div>
         <div class="performer-list" id="performer-list"></div>
       </div>
     </div>
 
-    <!-- TICKETS -->
+    <!-- ═══ TICKETS ═══ -->
     <div id="tab-tickets" class="hidden">
       <div class="ticket-stats">
-        <div class="ticket-stat"><div class="icon">🎟</div><div class="val" id="ts-tickets">0</div><div class="lbl">Tickets Sold</div></div>
+        <div class="ticket-stat"><div class="icon">🎟</div><div class="val" id="ts-qty">0</div><div class="lbl">Tickets Sold</div></div>
         <div class="ticket-stat"><div class="icon">💰</div><div class="val" id="ts-raised">$0</div><div class="lbl">Total Raised</div></div>
         <div class="ticket-stat">
           <div class="icon">🎯</div>
-          <div class="inline-edit-row" id="goal-display"><div class="val" id="goal-val">$500</div><button class="btn-secondary btn-xs" onclick="editField('goal')">Edit</button></div>
-          <div class="inline-edit-row hidden" id="goal-edit"><span style="font-size:18px;font-weight:700">$</span><input type="number" id="goal-input" /><button class="btn-primary btn-xs" onclick="saveField('goal')">✓</button><button class="btn-secondary btn-xs" onclick="cancelField('goal')">✕</button></div>
+          <div class="inline-edit-row" id="goal-disp"><div class="val" id="goal-val">$500</div><button class="btn-secondary btn-xs" onclick="editF('goal')">Edit</button></div>
+          <div class="inline-edit-row hidden" id="goal-edit"><span style="font-size:18px;font-weight:700">$</span><input type="number" id="goal-inp" /><button class="btn-primary btn-xs" onclick="saveF('goal')">✓</button><button class="btn-secondary btn-xs" onclick="cancelF('goal')">✕</button></div>
           <div class="goal-bar-wrap"><div class="goal-bar-fill" id="goal-bar" style="width:0%"></div></div>
           <div class="lbl" style="margin-top:4px">Goal <span id="goal-pct" style="color:#22c55e;font-weight:600"></span></div>
         </div>
         <div class="ticket-stat">
           <div class="icon">🏷</div>
-          <div class="inline-edit-row" id="price-display"><div class="val" id="price-val">$20</div><button class="btn-secondary btn-xs" onclick="editField('price')">Edit</button></div>
-          <div class="inline-edit-row hidden" id="price-edit"><span style="font-size:18px;font-weight:700">$</span><input type="number" id="price-input" /><button class="btn-primary btn-xs" onclick="saveField('price')">✓</button><button class="btn-secondary btn-xs" onclick="cancelField('price')">✕</button></div>
+          <div class="inline-edit-row" id="price-disp"><div class="val" id="price-val">$20</div><button class="btn-secondary btn-xs" onclick="editF('price')">Edit</button></div>
+          <div class="inline-edit-row hidden" id="price-edit"><span style="font-size:18px;font-weight:700">$</span><input type="number" id="price-inp" /><button class="btn-primary btn-xs" onclick="saveF('price')">✓</button><button class="btn-secondary btn-xs" onclick="cancelF('price')">✕</button></div>
           <div class="lbl">Ticket Price</div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="section-label">Cash Sales</div><button class="btn-primary" onclick="toggleForm('add-ticket-form')">+ Log Sale</button></div>
-        <div class="add-form hidden" id="add-ticket-form">
-          <div class="grid-3"><input type="text" id="t-buyer" placeholder="Buyer name" /><input type="number" id="t-qty" placeholder="# tickets" value="1" /><input type="number" id="t-amount" placeholder="Amount paid ($)" /></div>
-          <div class="grid-2"><input type="date" id="t-date" /><input type="text" id="t-notes" placeholder="Notes (optional)" /></div>
-          <div class="form-actions"><button class="btn-primary" onclick="addTicket()">Save</button><button class="btn-secondary" onclick="toggleForm('add-ticket-form')">Cancel</button></div>
+        <div class="card-header"><div class="section-label">Cash Sales Log</div><button class="btn-primary" onclick="tog('add-ticket')">+ Log Sale</button></div>
+        <div class="add-form hidden" id="add-ticket">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Buyer Name</div><input id="t-buyer" class="fi" placeholder="Full name" /></div>
+            <div class="form-field"><div class="form-label"># Tickets</div><input id="t-qty" type="number" class="fi" value="1" /></div>
+            <div class="form-field"><div class="form-label">Amount Paid ($)</div><input id="t-amount" type="number" class="fi" placeholder="0" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Date of Sale</div><input id="t-date" type="date" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="t-notes" class="fi" placeholder="Optional" /></div>
+          </div>
+          <div class="form-actions"><button class="btn-primary" onclick="addTicket()">Save</button><button class="btn-secondary" onclick="tog('add-ticket')">Cancel</button></div>
         </div>
-        <table class="data-table"><thead><tr><th>Buyer</th><th>Qty</th><th>Amount</th><th>Date</th><th>Notes</th><th></th></tr></thead><tbody id="ticket-tbody"></tbody></table>
-        <div class="empty hidden" id="no-tickets">No ticket sales yet.</div>
+        <table class="dt"><thead><tr><th>Buyer</th><th>Qty</th><th>Amount</th><th>Date</th><th>Notes</th><th></th></tr></thead><tbody id="ticket-tbody"></tbody></table>
+        <div class="empty hidden" id="no-tickets">No ticket sales logged yet.</div>
       </div>
     </div>
 
-    <!-- PROGRAM -->
+    <!-- ═══ PROGRAM ═══ -->
     <div id="tab-program" class="hidden">
       <div class="card">
-        <div class="card-header">
-          <div><div class="section-label" style="margin-bottom:4px">Concert Program</div><div style="font-size:13px;color:#8b7355">Auto-built from confirmed performers. Reorder, then print.</div></div>
-          <button class="btn-secondary no-print" onclick="window.print()">🖨 Print</button>
-        </div>
-        <div style="display:flex;gap:10px;margin-bottom:4px">
-          <input type="text" id="prog-date" placeholder="Date (e.g. June 13, 2025)" style="flex:1;padding:8px 10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;font-family:'Lora',serif;outline:none" oninput="saveData();renderProgramPreview()" />
-          <input type="text" id="prog-venue" placeholder="Venue name" style="flex:2;padding:8px 10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;font-family:'Lora',serif;outline:none" oninput="saveData();renderProgramPreview()" />
+        <div class="card-header"><div><div class="section-label">Concert Program</div><div class="section-desc">Auto-built from confirmed performers. Set details, reorder, then print.</div></div><button class="btn-secondary no-print" onclick="window.print()">🖨 Print</button></div>
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Event Date</div><input id="prog-date" class="fi" placeholder="e.g. June 13, 2025" oninput="saveData();renderProgramPreview()" /></div>
+          <div class="form-field"><div class="form-label">Venue</div><input id="prog-venue" class="fi" placeholder="e.g. Glastonbury Arts Center" oninput="saveData();renderProgramPreview()" /></div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="section-label">Running Order</div><div style="font-size:12px;color:#a09080">Use arrows to reorder performers</div></div>
+        <div class="card-header"><div class="section-label">Running Order</div><div style="font-size:12px;color:#a09080">Use arrows to reorder</div></div>
         <div class="running-order-list" id="running-order"></div>
+        <div class="empty hidden" id="no-program">No confirmed performers yet.</div>
       </div>
       <div class="card">
-        <div class="section-label">Preview</div>
+        <div class="section-label" style="margin-bottom:16px">Preview</div>
         <div class="program-preview" id="program-preview"></div>
       </div>
     </div>
 
-    <!-- PLANNING -->
+    <!-- ═══ PLANNING ═══ -->
     <div id="tab-planning" class="hidden">
       <div class="card">
-        <div class="card-header">
-          <div><div class="section-label" style="margin-bottom:4px">Concert Checklists</div><div style="font-size:13px;color:#8b7355">One checklist per recital. Click × next to a recital to delete it.</div></div>
-          <button class="btn-primary" onclick="addRecital()">+ New Recital</button>
-        </div>
-        <div class="recital-pills" id="recital-pills"></div>
+        <div class="card-header"><div><div class="section-label">Concert Checklists</div><div class="section-desc">One checklist per recital. Click × to delete a recital.</div></div><button class="btn-primary" onclick="addRecital()">+ New Recital</button></div>
+        <div class="recital-pills" id="recital-pills" style="margin-top:4px"></div>
       </div>
       <div id="checklist-container"></div>
     </div>
 
-    <!-- CONTACTS -->
+    <!-- ═══ CONTACTS ═══ -->
     <div id="tab-contacts" class="hidden">
       <div class="card">
-        <div class="card-header"><div class="section-label">Contact Directory</div><button class="btn-primary" onclick="toggleForm('add-contact-form')">+ Add Contact</button></div>
-        <div class="add-form hidden" id="add-contact-form">
-          <div class="grid-3"><input type="text" id="con-name" placeholder="Full name" /><input type="text" id="con-role" placeholder="Role (Performer, Venue…)" /><input type="text" id="con-phone" placeholder="Phone" /></div>
-          <div class="grid-2"><input type="email" id="con-email" placeholder="Email" /><input type="text" id="con-notes" placeholder="Notes" /></div>
-          <div class="form-actions"><button class="btn-primary" onclick="addContact()">Save</button><button class="btn-secondary" onclick="toggleForm('add-contact-form')">Cancel</button></div>
+        <div class="card-header"><div class="section-label">Contact Directory</div><button class="btn-primary" onclick="tog('add-contact')">+ Add Contact</button></div>
+        <div class="add-form hidden" id="add-contact">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Full Name</div><input id="con-name" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Role</div><input id="con-role" class="fi" placeholder="Performer, Venue, Chapter Lead…" /></div>
+            <div class="form-field"><div class="form-label">Phone</div><input id="con-phone" class="fi" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Email</div><input id="con-email" type="email" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="con-notes" class="fi" /></div>
+          </div>
+          <div class="form-actions"><button class="btn-primary" onclick="addContact()">Save</button><button class="btn-secondary" onclick="tog('add-contact')">Cancel</button></div>
         </div>
         <div id="contact-list"></div>
-        <div class="empty hidden" id="no-contacts">No contacts yet. Add performers, venue contacts, and chapter leads.</div>
+        <div class="empty hidden" id="no-contacts">No contacts yet.</div>
       </div>
     </div>
 
-    <!-- NOTES -->
+    <!-- ═══ VENUES ═══ -->
+    <div id="tab-venues" class="hidden">
+      <div class="card">
+        <div class="card-header"><div><div class="section-label">Venue Tracker</div><div class="section-desc">Log venues you've used or are considering. Rate them so you always know the best spots.</div></div><button class="btn-primary" onclick="tog('add-venue')">+ Add Venue</button></div>
+        <div class="add-form hidden" id="add-venue">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Venue Name</div><input id="v-name" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Address</div><input id="v-address" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Capacity</div><input id="v-capacity" class="fi" placeholder="e.g. 50 people" /></div>
+          </div>
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Contact Name</div><input id="v-contact" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Contact Email/Phone</div><input id="v-contactinfo" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Cost</div><input id="v-cost" class="fi" placeholder="e.g. Free, $200, Donation" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Rating (1–5 ⭐)</div><select id="v-rating" class="fi"><option value="5">⭐⭐⭐⭐⭐ Excellent</option><option value="4">⭐⭐⭐⭐ Good</option><option value="3">⭐⭐⭐ OK</option><option value="2">⭐⭐ Below average</option><option value="1">⭐ Poor</option></select></div>
+            <div class="form-field"><div class="form-label">Status</div><select id="v-status" class="fi"><option>Used</option><option>Considering</option><option>Contacted</option><option>Not available</option></select></div>
+          </div>
+          <div class="form-field" style="margin-bottom:0"><div class="form-label">Notes</div><textarea id="v-notes" class="fi"></textarea></div>
+          <div class="form-actions"><button class="btn-primary" onclick="addVenue()">Save</button><button class="btn-secondary" onclick="tog('add-venue')">Cancel</button></div>
+        </div>
+        <div id="venue-list"></div>
+        <div class="empty hidden" id="no-venues">No venues yet. Add venues you've used or are considering.</div>
+      </div>
+    </div>
+
+    <!-- ═══ PERFORMER HISTORY ═══ -->
+    <div id="tab-history" class="hidden">
+      <div class="card">
+        <div class="card-header"><div><div class="section-label">Performer History</div><div class="section-desc">Track which performers have played in past recitals, how many times, and what they performed.</div></div><button class="btn-primary" onclick="tog('add-history')">+ Log Performance</button></div>
+        <div class="add-form hidden" id="add-history">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Performer Name</div><input id="h-name" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Recital</div><input id="h-recital" class="fi" placeholder="e.g. Recital #1 — Glastonbury" /></div>
+            <div class="form-field"><div class="form-label">Date</div><input id="h-date" type="date" class="fi" /></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Piece Performed</div><input id="h-piece" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="h-notes" class="fi" placeholder="Optional" /></div>
+          </div>
+          <div class="form-actions"><button class="btn-primary" onclick="addHistory()">Save</button><button class="btn-secondary" onclick="tog('add-history')">Cancel</button></div>
+        </div>
+        <div id="history-list"></div>
+        <div class="empty hidden" id="no-history">No performance history yet.</div>
+      </div>
+    </div>
+
+    <!-- ═══ NOTES ═══ -->
     <div id="tab-notes" class="hidden">
       <div class="card">
-        <div class="card-header">
-          <div><div class="section-label" style="margin-bottom:4px">Recital Notes & Journal</div><div style="font-size:13px;color:#8b7355">Log reflections, feedback, and ideas per recital.</div></div>
-          <button class="btn-primary" onclick="showAddNote()">+ New Note</button>
-        </div>
-        <div class="add-form hidden" id="add-note-form">
-          <div class="grid-2"><input type="text" id="note-recital" placeholder="Recital (e.g. Recital #1 — Glastonbury)" /><input type="text" id="note-title" placeholder="Title (e.g. Venue feedback)" /></div>
-          <textarea id="note-text" placeholder="Write your note here…" style="width:100%;padding:10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;background:#fffdf9;font-family:'Lora',serif;outline:none;resize:vertical;min-height:100px;line-height:1.7;margin-bottom:10px"></textarea>
-          <div class="form-actions"><button class="btn-primary" onclick="addNote()">Save Note</button><button class="btn-secondary" onclick="toggleForm('add-note-form')">Cancel</button></div>
+        <div class="card-header"><div><div class="section-label">Recital Notes & Journal</div><div class="section-desc">Log reflections, feedback, and ideas per recital.</div></div><button class="btn-primary" onclick="tog('add-note')">+ New Note</button></div>
+        <div class="add-form hidden" id="add-note">
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Recital</div><input id="note-recital" class="fi" placeholder="e.g. Recital #1 — Glastonbury" /></div>
+            <div class="form-field"><div class="form-label">Title</div><input id="note-title" class="fi" placeholder="e.g. Venue feedback, Ideas for next time" /></div>
+          </div>
+          <div class="form-field"><div class="form-label">Note</div><textarea id="note-text" class="fi" style="min-height:100px"></textarea></div>
+          <div class="form-actions"><button class="btn-primary" onclick="addNote()">Save</button><button class="btn-secondary" onclick="tog('add-note')">Cancel</button></div>
         </div>
         <div id="notes-list"></div>
         <div class="empty hidden" id="no-notes">No notes yet.</div>
       </div>
     </div>
 
-    <!-- EMAIL TEMPLATES -->
+    <!-- ═══ POST-EVENT REPORT ═══ -->
+    <div id="tab-report" class="hidden">
+      <div class="card">
+        <div class="card-header"><div><div class="section-label">Post-Event Report Generator</div><div class="section-desc">Fill in the details and get a ready-to-send summary for donors and the hospital.</div></div><button class="btn-secondary no-print" onclick="window.print()">🖨 Print</button></div>
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Recital Name</div><input id="rep-name" class="fi" placeholder="e.g. Recital #1 — Glastonbury" oninput="renderReport()" /></div>
+          <div class="form-field"><div class="form-label">Date</div><input id="rep-date" class="fi" placeholder="e.g. June 13, 2025" oninput="renderReport()" /></div>
+        </div>
+        <div class="grid-3">
+          <div class="form-field"><div class="form-label">Venue</div><input id="rep-venue" class="fi" oninput="renderReport()" /></div>
+          <div class="form-field"><div class="form-label">Attendance</div><input id="rep-attendance" type="number" class="fi" placeholder="# guests" oninput="renderReport()" /></div>
+          <div class="form-field"><div class="form-label">Amount Raised ($)</div><input id="rep-raised" type="number" class="fi" oninput="renderReport()" /></div>
+        </div>
+        <div class="form-field" style="margin-bottom:12px"><div class="form-label">Highlights / What Went Well</div><textarea id="rep-highlights" class="fi" oninput="renderReport()"></textarea></div>
+        <div class="form-field" style="margin-bottom:0"><div class="form-label">What to Improve Next Time</div><textarea id="rep-improve" class="fi" oninput="renderReport()"></textarea></div>
+      </div>
+      <div class="card">
+        <div class="section-label" style="margin-bottom:16px">Report Preview</div>
+        <div class="report-preview" id="report-preview"><div style="color:#c4b8a8;text-align:center;padding:20px">Fill in the details above to generate your report.</div></div>
+      </div>
+    </div>
+
+    <!-- ═══ SOCIAL CAPTIONS ═══ -->
+    <div id="tab-social" class="hidden">
+      <div class="card">
+        <div class="card-header"><div><div class="section-label">Social Media Caption Generator</div><div class="section-desc">Fill in the event details and get ready-to-post captions for Instagram and Facebook.</div></div></div>
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Event Date</div><input id="soc-date" class="fi" placeholder="e.g. June 13" oninput="renderCaptions()" /></div>
+          <div class="form-field"><div class="form-label">Venue</div><input id="soc-venue" class="fi" placeholder="e.g. Glastonbury Arts Center" oninput="renderCaptions()" /></div>
+        </div>
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Ticket Price</div><input id="soc-price" class="fi" placeholder="e.g. $20" oninput="renderCaptions()" /></div>
+          <div class="form-field"><div class="form-label">Performers (comma separated)</div><input id="soc-performers" class="fi" placeholder="e.g. Matt, Tamana, Marc" oninput="renderCaptions()" /></div>
+        </div>
+        <div class="form-field" style="margin-bottom:0"><div class="form-label">Pieces Being Performed</div><input id="soc-pieces" class="fi" placeholder="e.g. Haydn Cello Concerto, The Lark" oninput="renderCaptions()" /></div>
+      </div>
+      <div id="captions-container"></div>
+    </div>
+
+    <!-- ═══ REMINDERS ═══ -->
+    <div id="tab-reminders" class="hidden">
+      <div class="card">
+        <div class="card-header"><div><div class="section-label">Event Reminder Timeline</div><div class="section-desc">Enter your recital date and get a timeline of exactly what to do and when.</div></div></div>
+        <div class="form-field" style="margin-bottom:0"><div class="form-label">Recital Date</div><input id="rem-date" type="date" class="fi" style="max-width:220px" oninput="renderReminders()" /></div>
+      </div>
+      <div id="reminders-container"></div>
+    </div>
+
+    <!-- ═══ EMAIL TEMPLATES ═══ -->
     <div id="tab-emails" class="hidden">
       <div class="card">
-        <div class="section-label">Email Draft Templates</div>
-        <p style="font-size:13px;color:#8b7355;margin-bottom:20px">Click to expand. Copy the template and paste into your email client, filling in the bracketed details.</p>
+        <div class="section-label" style="margin-bottom:8px">Email Draft Templates</div>
+        <p style="font-size:13px;color:#8b7355;margin-bottom:20px">Click any template to expand. Copy and paste into your email client, then fill in the bracketed details.</p>
         <div id="email-list"></div>
       </div>
     </div>
 
-    <!-- CHAPTERS -->
+    <!-- ═══ CHAPTERS ═══ -->
     <div id="tab-chapters" class="hidden">
       <div class="card">
-        <div class="section-label">Expansion Vision</div>
-        <p style="font-size:15px;line-height:1.7;color:#5a3e28">Each chapter runs the same recital template — performers sign up via Google Form, ticket sales go to a local children's hospital, and everything is tracked here. Use this to grow Mobile Music Salon city by city.</p>
+        <div class="section-label" style="margin-bottom:8px">Cross-Chapter Overview</div>
+        <div id="chapter-overview"></div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="section-label">Chapters</div><button class="btn-primary" onclick="toggleForm('add-chapter-form')">+ Add Chapter</button></div>
-        <div class="add-form hidden" id="add-chapter-form">
-          <div class="grid-3"><input type="text" id="c-city" placeholder="City, State" /><input type="text" id="c-lead" placeholder="Chapter lead name" /><select id="c-status"><option>Planning</option><option>Active</option><option>On Hold</option></select></div>
-          <input type="text" id="c-notes" placeholder="Notes" style="width:100%;padding:8px 10px;border:1px solid #e8e0d4;border-radius:6px;font-size:13px;margin-bottom:10px;font-family:'Lora',serif;outline:none" />
-          <div class="form-actions"><button class="btn-primary" onclick="addChapter()">Save</button><button class="btn-secondary" onclick="toggleForm('add-chapter-form')">Cancel</button></div>
+        <div class="card-header"><div class="section-label">All Chapters</div><button class="btn-primary" onclick="tog('add-chapter')">+ Add Chapter</button></div>
+        <div class="add-form hidden" id="add-chapter">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">City, State</div><input id="c-city" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Chapter Lead</div><input id="c-lead" class="fi" /></div>
+            <div class="form-field"><div class="form-label">Status</div><select id="c-status" class="fi"><option>Planning</option><option>Active</option><option>On Hold</option></select></div>
+          </div>
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Recitals Held</div><input id="c-recitals" type="number" class="fi" value="0" /></div>
+            <div class="form-field"><div class="form-label">Total Raised ($)</div><input id="c-raised" type="number" class="fi" value="0" /></div>
+            <div class="form-field"><div class="form-label">Hospital Partner</div><input id="c-hospital" class="fi" placeholder="e.g. Boston Children's Hospital" /></div>
+          </div>
+          <div class="form-field"><div class="form-label">Notes</div><input id="c-notes" class="fi" /></div>
+          <div class="form-actions"><button class="btn-primary" onclick="addChapter()">Save</button><button class="btn-secondary" onclick="tog('add-chapter')">Cancel</button></div>
         </div>
         <div id="chapter-list"></div>
         <div class="empty hidden" id="no-chapters">No chapters yet.</div>
       </div>
+      <div class="card">
+        <div class="section-label" style="margin-bottom:8px">Chapter Lead Onboarding Guide</div>
+        <p style="font-size:13px;color:#8b7355;margin-bottom:16px">Share this with anyone starting a new chapter.</p>
+        <div id="onboarding-guide"></div>
+      </div>
     </div>
-  </div>
-</div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
 
 <script>
+// ═══════════════════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════════════════
 const ADMIN_PASSWORD = "MobileMusic2025";
 const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
-const DATES_DEFAULT = ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"];
-const ALL_TABS = ["recital","tickets","program","planning","contacts","notes","emails","chapters"];
+
+const ALL_TABS = ["recital","tickets","program","planning","contacts","venues","history","notes","report","social","reminders","emails","chapters"];
 
 const DEFAULT_DATA = {
-  performers:[
+  dates: ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"],
+  performers: [
     {id:1,name:"Matt",piece:"Haydn Cello Concerto in C major, Mvt. 1",accompaniment:"TBD (leaning yes — Tamana)",availability:["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"],preference:"Prefers June",status:"confirmed",notes:"Piece ready by May 22"},
     {id:2,name:"Tamana",piece:"The Lark (Glinka/Balakirev)",accompaniment:"None (she is the accompanist)",availability:["Apr 25","May 9","May 30","Jun 13","Jun 20"],preference:"",status:"confirmed",notes:"Available to accompany others"},
     {id:3,name:"Marc",piece:"Cello Suite No. 5 in C minor, Prelude",accompaniment:"None",availability:["May 16","May 30","Jun 6","Jun 13","Jun 20"],preference:"",status:"confirmed",notes:"Unaccompanied"},
     {id:4,name:"Arya",piece:"—",accompaniment:"—",availability:[],preference:"",status:"pending",notes:"Awaiting Google Form response"},
     {id:5,name:"Jacob",piece:"—",accompaniment:"—",availability:[],preference:"",status:"pending",notes:"Awaiting Google Form response"},
   ],
-  dates: ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"],
-  runningOrder:[1,2,3],
-  tickets:[],
-  chapters:[{id:1,city:"Glastonbury, CT",status:"Active",lead:"Matt",notes:"First recital in planning"}],
-  ticketPrice:20, fundraisingGoal:500,
-  contacts:[], notes:[], recitals:null,
-  progDate:"", progVenue:"",
+  runningOrder: [1,2,3],
+  tickets: [],
+  ticketPrice: 20,
+  fundraisingGoal: 500,
+  chapters: [{id:1,city:"Glastonbury, CT",status:"Active",lead:"Matt",notes:"First recital in planning",recitals:0,raised:0,hospital:"Yale New Haven Children's Hospital"}],
+  contacts: [],
+  venues: [],
+  history: [],
+  notes: [],
+  recitals: null,
+  progDate: "", progVenue: "",
 };
 
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
 let db=null, state=JSON.parse(JSON.stringify(DEFAULT_DATA)), editingPerformer=null, savingTimeout=null, activeRecitalId=null;
 
-// ── Supabase ──
-function initSupabase(){ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
+// ═══════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════
+function initSB(){ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
 async function loadData(){
   if(!db){renderAll();return;}
-  try{ const{data}=await db.from("app_data").select("*").eq("key","main").single(); if(data&&data.value) state={...DEFAULT_DATA,...data.value}; }catch(e){console.log("defaults");}
+  try{
+    const{data}=await db.from("app_data").select("*").eq("key","main").single();
+    if(data&&data.value) state={...DEFAULT_DATA,...data.value};
+  }catch(e){console.log("Using defaults");}
   renderAll();
 }
 async function saveData(){
   if(!db)return;
-  document.getElementById("saving-indicator").classList.remove("hidden");
+  document.getElementById("saving-ind").classList.remove("hidden");
   clearTimeout(savingTimeout);
   savingTimeout=setTimeout(async()=>{
     try{
-      const pd=document.getElementById("prog-date"),pv=document.getElementById("prog-venue");
-      if(pd)state.progDate=pd.value; if(pv)state.progVenue=pv.value;
+      // capture live input values
+      ["prog-date","prog-venue"].forEach(id=>{const el=document.getElementById(id);if(el)state[id.replace("-","")]=el.value;});
       await db.from("app_data").upsert({key:"main",value:state,updated_at:new Date().toISOString()});
     }catch(e){console.error(e);}
-    document.getElementById("saving-indicator").classList.add("hidden");
+    document.getElementById("saving-ind").classList.add("hidden");
   },800);
 }
 
-// ── Auth ──
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
 function tryLogin(){
   if(document.getElementById("pw-input").value===ADMIN_PASSWORD){
-    sessionStorage.setItem("mms_auth","1");
+    sessionStorage.setItem("mms","1");
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
-    initSupabase(); loadData();
+    initSB(); loadData();
   } else {
     document.getElementById("pw-error").classList.remove("hidden");
-    const b=document.getElementById("login-box"); b.classList.add("shake"); setTimeout(()=>b.classList.remove("shake"),500);
+    const b=document.getElementById("login-box");
+    b.classList.add("shake"); setTimeout(()=>b.classList.remove("shake"),500);
   }
 }
-function logout(){sessionStorage.removeItem("mms_auth");location.reload();}
+function logout(){sessionStorage.removeItem("mms");location.reload();}
 document.getElementById("pw-input").addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin();});
-if(sessionStorage.getItem("mms_auth")==="1"){
+if(sessionStorage.getItem("mms")==="1"){
   document.getElementById("login-screen").classList.add("hidden");
   document.getElementById("app").classList.remove("hidden");
-  initSupabase(); loadData();
-} else { document.getElementById("loading-msg").classList.add("hidden"); document.getElementById("tab-recital").classList.remove("hidden"); }
-
-// ── Tabs ──
-function switchTab(name,btn){
-  ALL_TABS.forEach(t=>document.getElementById("tab-"+t).classList.add("hidden"));
-  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
-  document.getElementById("tab-"+name).classList.remove("hidden"); btn.classList.add("active");
-  if(name==="planning")renderPlanning();
-  if(name==="program")renderProgram();
-  if(name==="emails")renderEmails();
-  if(name==="contacts")renderContacts();
-  if(name==="notes")renderNotes();
-  if(name==="chapters")renderChapters();
+  initSB(); loadData();
+} else {
+  document.getElementById("loading-msg").classList.add("hidden");
+  document.getElementById("tab-recital").classList.remove("hidden");
 }
 
-// ── Utils ──
-function toggleForm(id){document.getElementById(id).classList.toggle("hidden");}
-function getDates(){ return state.dates && state.dates.length ? state.dates : DATES_DEFAULT; }
+// ═══════════════════════════════════════════════════════
+// TABS & UTILS
+// ═══════════════════════════════════════════════════════
+function go(name,btn){
+  ALL_TABS.forEach(t=>document.getElementById("tab-"+t).classList.add("hidden"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+name).classList.remove("hidden");
+  btn.classList.add("active");
+  const renders={planning:renderPlanning,program:renderProgram,emails:renderEmails,contacts:renderContacts,venues:renderVenues,history:renderHistory,notes:renderNotes,chapters:renderChapters,report:renderReport,social:renderCaptions,reminders:renderReminders};
+  if(renders[name]) renders[name]();
+}
+function tog(id){document.getElementById(id).classList.toggle("hidden");}
+function getDates(){return (state.dates&&state.dates.length)?state.dates:DEFAULT_DATA.dates.slice();}
 
-// ── Render All ──
+// ═══════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════
 function renderAll(){
   document.getElementById("loading-msg").classList.add("hidden");
   document.getElementById("tab-recital").classList.remove("hidden");
-  renderStats(); renderDates(); renderAvailability(); renderPerformers(); renderTickets(); renderChapters();
+  renderStats(); renderDatePills(); renderAvailability(); renderPerformers(); renderTickets();
 }
 
 function renderStats(){
   const conf=state.performers.filter(p=>p.status==="confirmed").length;
   const qty=state.tickets.reduce((s,t)=>s+Number(t.quantity||0),0);
   const raised=state.tickets.reduce((s,t)=>s+Number(t.amountPaid||0),0);
-  document.getElementById("stat-confirmed").textContent=conf+"/"+state.performers.length;
-  document.getElementById("stat-tickets").textContent=qty;
-  document.getElementById("stat-raised").textContent="$"+raised;
-  document.getElementById("ts-tickets").textContent=qty;
+  document.getElementById("s-confirmed").textContent=conf+"/"+state.performers.length;
+  document.getElementById("s-tickets").textContent=qty;
+  document.getElementById("s-raised").textContent="$"+raised;
+  document.getElementById("s-chapters").textContent=(state.chapters||[]).length;
+  document.getElementById("ts-qty").textContent=qty;
   document.getElementById("ts-raised").textContent="$"+raised;
   document.getElementById("price-val").textContent="$"+(state.ticketPrice||20);
-  document.getElementById("price-input").value=state.ticketPrice||20;
+  document.getElementById("price-inp").value=state.ticketPrice||20;
   const goal=state.fundraisingGoal||0;
   document.getElementById("goal-val").textContent="$"+goal;
-  document.getElementById("goal-input").value=goal;
+  document.getElementById("goal-inp").value=goal;
   const pct=goal>0?Math.min(100,Math.round((raised/goal)*100)):0;
   document.getElementById("goal-bar").style.width=pct+"%";
   document.getElementById("goal-pct").textContent=goal>0?pct+"%":"";
 }
 
-// ── Dates ──
-function renderDates(){
-  const dates = getDates();
-  document.getElementById("dates-list").innerHTML = dates.map((d,i)=>`
-    <span style="display:inline-flex;align-items:center;gap:4px;background:#faf6f0;border:1px solid #e8e0d4;border-radius:16px;padding:4px 10px;font-size:13px;color:#3d2b1f">
-      ${d}
-      <button onclick="deleteDate(${i})" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:15px;line-height:1;padding:0 0 0 2px" title="Remove date">×</button>
-    </span>`).join("");
+// ═══════════════════════════════════════════════════════
+// DATES
+// ═══════════════════════════════════════════════════════
+function renderDatePills(){
+  const dates=getDates();
+  document.getElementById("dates-pills").innerHTML=dates.map((d,i)=>`
+    <span class="date-pill">${d}<button onclick="deleteDate(${i})" title="Remove">×</button></span>`).join("");
 }
 function addDate(){
-  const input=document.getElementById("new-date-input");
-  const val=input.value.trim(); if(!val)return;
-  if(!state.dates)state.dates=[...DATES_DEFAULT];
+  const inp=document.getElementById("new-date"),val=inp.value.trim();
+  if(!val)return;
+  if(!state.dates)state.dates=getDates();
   if(state.dates.includes(val)){alert("That date is already in the list.");return;}
-  state.dates.push(val); input.value="";
-  saveData(); renderDates(); renderAvailability(); renderPerformers();
+  state.dates.push(val); inp.value="";
+  saveData(); renderDatePills(); renderAvailability(); renderPerformers();
 }
 function deleteDate(idx){
-  if(!state.dates)state.dates=[...DATES_DEFAULT];
+  if(!state.dates)state.dates=getDates();
   const d=state.dates[idx];
-  if(!confirm(`Remove "${d}" from the date list? This will also remove it from all performer availability.`))return;
+  if(!confirm(`Remove "${d}"? This also removes it from all performer availability.`))return;
   state.dates.splice(idx,1);
   state.performers=state.performers.map(p=>({...p,availability:p.availability.filter(x=>x!==d)}));
-  saveData(); renderDates(); renderAvailability(); renderPerformers();
+  saveData(); renderDatePills(); renderAvailability(); renderPerformers();
 }
 
-// ── Availability ──
+// ═══════════════════════════════════════════════════════
+// AVAILABILITY
+// ═══════════════════════════════════════════════════════
 function renderAvailability(){
   const dates=getDates();
   const conf=state.performers.filter(p=>p.status==="confirmed");
@@ -495,7 +707,7 @@ function renderAvailability(){
     });
     html+=`</tr>`;
   });
-  html+=`<tr class="overlap-row"><td style="font-size:12px;font-weight:700;text-transform:uppercase">Overlap</td>`;
+  html+=`<tr class="overlap-row"><td style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Overlap</td>`;
   dates.forEach(d=>{
     const n=conf.filter(p=>p.availability.includes(d)).length;
     const all=conf.length>0&&conf.every(p=>p.availability.includes(d));
@@ -506,60 +718,82 @@ function renderAvailability(){
 
   const box=document.getElementById("best-dates-box");
   const pending=state.performers.filter(p=>p.status==="pending").length;
-  if(conf.length===0){box.innerHTML="<strong>Best dates:</strong> No confirmed performers yet.";box.style.cssText="background:#faf6f0;border:1px solid #e8e0d4;color:#8b7355;padding:12px 16px;border-radius:8px;font-size:14px";return;}
+  const pendingNote=pending>0?`<br><span style="font-size:12px;opacity:.8;display:block;margin-top:4px">⏳ ${pending} performer${pending>1?'s':''} still pending — dates may change.</span>`:"";
+  if(conf.length===0){
+    box.innerHTML="<strong>Best dates:</strong> No confirmed performers yet.";
+    box.className="info-box gray"; return;
+  }
   const allDates=dates.filter(d=>conf.every(p=>p.availability.includes(d)));
   const maxN=Math.max(...dates.map(d=>conf.filter(p=>p.availability.includes(d)).length));
   const mostDates=dates.filter(d=>conf.filter(p=>p.availability.includes(d)).length===maxN);
-  const pendingNote=pending>0?`<br><span style="font-size:12px;opacity:0.8;display:block;margin-top:4px">⏳ ${pending} performer${pending>1?'s':''} still pending — dates may change once they respond.</span>`:"";
   if(allDates.length>0){
     box.innerHTML=`<strong>✅ Best dates — all ${conf.length} confirmed performers available:</strong> ${allDates.join(", ")}${pendingNote}`;
-    box.style.cssText="background:#f0f9f4;border:1px solid #bbf7d0;color:#166534;padding:12px 16px;border-radius:8px;font-size:14px";
+    box.className="info-box green";
   } else {
     box.innerHTML=`<strong>⚠️ No single date works for everyone yet.</strong> Best overlap (${maxN}/${conf.length} confirmed): ${mostDates.join(", ")}${pendingNote}`;
-    box.style.cssText="background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:12px 16px;border-radius:8px;font-size:14px";
+    box.className="info-box amber";
   }
 }
 
-// ── Performers ──
+// ═══════════════════════════════════════════════════════
+// PERFORMERS
+// ═══════════════════════════════════════════════════════
 function renderPerformers(){
   document.getElementById("performer-list").innerHTML=state.performers.map(p=>{
     const bc=p.status==="confirmed"?"badge-confirmed":"badge-pending";
-    if(editingPerformer===p.id) return `<div class="performer-card ${p.status==='pending'?'pending':''}">
-      <div style="display:flex;align-items:center;margin-bottom:10px"><span class="performer-name">${p.name}</span><span class="badge ${bc}">${p.status}</span></div>
-      <div class="edit-form">
-        <input value="${p.piece}" onchange="upP(${p.id},'piece',this.value)" placeholder="Piece" />
-        <input value="${p.accompaniment}" onchange="upP(${p.id},'accompaniment',this.value)" placeholder="Accompaniment" />
-        <input value="${p.notes}" onchange="upP(${p.id},'notes',this.value)" placeholder="Notes" />
-        <input value="${p.preference}" onchange="upP(${p.id},'preference',this.value)" placeholder="Preference" />
-        <div><div style="font-size:11px;color:#8b7355;margin-bottom:6px">Availability:</div>
-        <div class="avail-checks">${getDates().map(d=>`<label><input type="checkbox" ${p.availability.includes(d)?'checked':''} onchange="togAvail(${p.id},'${d}',this.checked)" />${d}</label>`).join("")}</div></div>
-        <div class="form-actions"><button class="btn-primary" onclick="confirmP(${p.id})">Save & Confirm</button><button class="btn-secondary" onclick="cancelEdit()">Cancel</button></div>
-      </div></div>`;
-    return `<div class="performer-card ${p.status==='pending'?'pending':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div style="flex:1">
-          <div style="margin-bottom:6px"><span class="performer-name">${p.name}</span><span class="badge ${bc}">${p.status}</span></div>
-          <div class="performer-piece">${p.piece}</div>
-          <div class="performer-meta">Accompaniment: ${p.accompaniment}</div>
-          ${p.notes?`<div class="performer-note">📝 ${p.notes}</div>`:""}
-          ${p.preference?`<div class="performer-note">⭐ ${p.preference}</div>`:""}
+    if(editingPerformer===p.id) return `
+      <div class="performer-card ${p.status==='pending'?'pending':''}">
+        <div style="display:flex;align-items:center;margin-bottom:10px"><span class="performer-name">${p.name}</span><span class="badge ${bc}">${p.status}</span></div>
+        <div class="edit-form">
+          <input value="${p.piece}" onchange="upP(${p.id},'piece',this.value)" placeholder="Piece" />
+          <input value="${p.accompaniment}" onchange="upP(${p.id},'accompaniment',this.value)" placeholder="Accompaniment" />
+          <input value="${p.notes}" onchange="upP(${p.id},'notes',this.value)" placeholder="Notes" />
+          <input value="${p.preference}" onchange="upP(${p.id},'preference',this.value)" placeholder="Preference (e.g. Prefers June)" />
+          <div><div style="font-size:11px;color:#8b7355;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px">Availability</div>
+          <div class="avail-checks">${getDates().map(d=>`<label><input type="checkbox" ${p.availability.includes(d)?'checked':''} onchange="togAvail(${p.id},'${d}',this.checked)" />${d}</label>`).join("")}</div></div>
+          <div class="form-actions"><button class="btn-primary" onclick="confirmP(${p.id})">Save & Confirm</button><button class="btn-secondary" onclick="cancelEdit()">Cancel</button></div>
         </div>
-        <button class="btn-secondary btn-sm" onclick="startEdit(${p.id})">Edit</button>
-      </div></div>`;
+      </div>`;
+    return `
+      <div class="performer-card ${p.status==='pending'?'pending':''}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            <div style="margin-bottom:6px"><span class="performer-name">${p.name}</span><span class="badge ${bc}">${p.status}</span></div>
+            <div class="performer-piece">${p.piece}</div>
+            <div class="performer-meta">Accompaniment: ${p.accompaniment}</div>
+            ${p.notes?`<div class="performer-note">📝 ${p.notes}</div>`:""}
+            ${p.preference?`<div class="performer-note">⭐ ${p.preference}</div>`:""}
+          </div>
+          <button class="btn-secondary btn-sm" onclick="startEdit(${p.id})">Edit</button>
+        </div>
+      </div>`;
   }).join("");
 }
 function startEdit(id){editingPerformer=id;renderPerformers();}
 function cancelEdit(){editingPerformer=null;renderPerformers();}
 function upP(id,f,v){state.performers=state.performers.map(p=>p.id===id?{...p,[f]:v}:p);saveData();}
-function togAvail(id,d,c){state.performers=state.performers.map(p=>{if(p.id!==id)return p;const a=c?[...p.availability,d]:p.availability.filter(x=>x!==d);return{...p,availability:a};});saveData();}
+function togAvail(id,d,c){
+  state.performers=state.performers.map(p=>{
+    if(p.id!==id)return p;
+    const a=c?[...p.availability,d]:p.availability.filter(x=>x!==d);
+    return{...p,availability:a};
+  }); saveData();
+}
 function confirmP(id){upP(id,"status","confirmed");editingPerformer=null;renderAll();}
 
-// ── Tickets ──
+// ═══════════════════════════════════════════════════════
+// TICKETS
+// ═══════════════════════════════════════════════════════
 function renderTickets(){
   const tbody=document.getElementById("ticket-tbody"),empty=document.getElementById("no-tickets");
   if(!state.tickets.length){tbody.innerHTML="";empty.classList.remove("hidden");return;}
   empty.classList.add("hidden");
-  tbody.innerHTML=state.tickets.map(t=>`<tr><td style="font-weight:600">${t.buyerName}</td><td>${t.quantity}</td><td style="color:#166534;font-weight:700">$${t.amountPaid}</td><td style="color:#8b7355">${t.date}</td><td style="color:#a09080;font-style:italic">${t.notes}</td><td><button onclick="removeTicket(${t.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:16px">✕</button></td></tr>`).join("");
+  tbody.innerHTML=state.tickets.map(t=>`<tr>
+    <td style="font-weight:600">${t.buyerName}</td><td>${t.quantity}</td>
+    <td style="color:#166534;font-weight:700">$${t.amountPaid}</td>
+    <td style="color:#8b7355">${t.date}</td><td style="color:#a09080;font-style:italic">${t.notes}</td>
+    <td><button class="del-btn" onclick="rmTicket(${t.id})">✕</button></td>
+  </tr>`).join("");
   renderStats();
 }
 function addTicket(){
@@ -567,37 +801,42 @@ function addTicket(){
   state.tickets.push({id:Date.now(),buyerName:b,quantity:document.getElementById("t-qty").value,amountPaid:document.getElementById("t-amount").value,date:document.getElementById("t-date").value,notes:document.getElementById("t-notes").value});
   ["t-buyer","t-amount","t-notes","t-date"].forEach(id=>document.getElementById(id).value="");
   document.getElementById("t-qty").value="1";
-  document.getElementById("add-ticket-form").classList.add("hidden");
+  document.getElementById("add-ticket").classList.add("hidden");
   saveData(); renderTickets();
 }
-function removeTicket(id){state.tickets=state.tickets.filter(t=>t.id!==id);saveData();renderTickets();}
-function editField(f){document.getElementById(f+"-display").classList.add("hidden");document.getElementById(f+"-edit").classList.remove("hidden");}
-function saveField(f){
-  if(f==="price") state.ticketPrice=Number(document.getElementById("price-input").value);
-  if(f==="goal") state.fundraisingGoal=Number(document.getElementById("goal-input").value);
-  document.getElementById(f+"-display").classList.remove("hidden"); document.getElementById(f+"-edit").classList.add("hidden");
+function rmTicket(id){state.tickets=state.tickets.filter(t=>t.id!==id);saveData();renderTickets();}
+function editF(f){document.getElementById(f+"-disp").classList.add("hidden");document.getElementById(f+"-edit").classList.remove("hidden");}
+function saveF(f){
+  if(f==="price")state.ticketPrice=Number(document.getElementById("price-inp").value);
+  if(f==="goal")state.fundraisingGoal=Number(document.getElementById("goal-inp").value);
+  document.getElementById(f+"-disp").classList.remove("hidden");document.getElementById(f+"-edit").classList.add("hidden");
   saveData(); renderStats();
 }
-function cancelField(f){document.getElementById(f+"-display").classList.remove("hidden");document.getElementById(f+"-edit").classList.add("hidden");}
+function cancelF(f){document.getElementById(f+"-disp").classList.remove("hidden");document.getElementById(f+"-edit").classList.add("hidden");}
 
-// ── Program ──
+// ═══════════════════════════════════════════════════════
+// PROGRAM
+// ═══════════════════════════════════════════════════════
 function renderProgram(){
-  if(!state.runningOrder)state.runningOrder=state.performers.filter(p=>p.status==="confirmed").map(p=>p.id);
+  if(!state.runningOrder)state.runningOrder=[];
   const conf=state.performers.filter(p=>p.status==="confirmed");
   let order=state.runningOrder.filter(id=>conf.find(p=>p.id===id));
   conf.forEach(p=>{if(!order.includes(p.id))order.push(p.id);});
   state.runningOrder=order;
   const pd=document.getElementById("prog-date"),pv=document.getElementById("prog-venue");
-  if(pd&&state.progDate)pd.value=state.progDate;
-  if(pv&&state.progVenue)pv.value=state.progVenue;
+  if(pd&&state.progdate)pd.value=state.progdate;
+  if(pv&&state.progvenue)pv.value=state.progvenue;
   const ordered=order.map(id=>conf.find(p=>p.id===id)).filter(Boolean);
-  document.getElementById("running-order").innerHTML=ordered.map((p,i)=>`
+  const ro=document.getElementById("running-order"),np=document.getElementById("no-program");
+  if(!ordered.length){ro.innerHTML="";np.classList.remove("hidden");return;}
+  np.classList.add("hidden");
+  ro.innerHTML=ordered.map((p,i)=>`
     <div class="order-item">
       <div class="order-num">${i+1}</div>
       <div class="order-info"><div class="order-name">${p.name}</div><div class="order-piece">${p.piece}</div></div>
       <div style="display:flex;gap:4px">
-        <button class="order-btn" onclick="moveOrder(${p.id},-1)" ${i===0?"disabled style='opacity:0.2'":""}>↑</button>
-        <button class="order-btn" onclick="moveOrder(${p.id},1)" ${i===ordered.length-1?"disabled style='opacity:0.2'":""}>↓</button>
+        <button class="order-btn" onclick="moveOrder(${p.id},-1)" ${i===0?"disabled style='opacity:.2'":""}>↑</button>
+        <button class="order-btn" onclick="moveOrder(${p.id},1)" ${i===ordered.length-1?"disabled style='opacity:.2'":""}>↓</button>
       </div>
     </div>`).join("");
   renderProgramPreview();
@@ -614,25 +853,27 @@ function renderProgramPreview(){
     ${ordered.map(p=>`<div class="program-item">
       <div class="prog-piece">${p.piece}</div>
       <div class="prog-performer">${p.name}</div>
-      ${p.accompaniment&&p.accompaniment!=="None"&&p.accompaniment!=="—"?`<div class="prog-accompanist">Piano accompaniment: Tamana</div>`:""}
+      ${p.accompaniment&&p.accompaniment!=="None"&&p.accompaniment!=="—"?`<div class="prog-accompanist">Piano: Tamana</div>`:""}
     </div>`).join("")}
     <div style="margin-top:28px;text-align:center;font-family:'Lora',serif;font-size:12px;color:#a09080;border-top:1px solid #e8e0d4;padding-top:16px">Thank you for your support · mobilemusicsalon.org</div>`;
 }
 function moveOrder(id,dir){
-  const idx=state.runningOrder.indexOf(id); if(idx<0)return;
-  const ni=idx+dir; if(ni<0||ni>=state.runningOrder.length)return;
+  const idx=state.runningOrder.indexOf(id);if(idx<0)return;
+  const ni=idx+dir;if(ni<0||ni>=state.runningOrder.length)return;
   const a=[...state.runningOrder];[a[idx],a[ni]]=[a[ni],a[idx]];state.runningOrder=a;
-  saveData(); renderProgram();
+  saveData();renderProgram();
 }
 
-// ── Planning ──
+// ═══════════════════════════════════════════════════════
+// PLANNING / CHECKLISTS
+// ═══════════════════════════════════════════════════════
 const PLAN_TASKS=[
   {cat:"Venue & Logistics",tasks:["Confirm venue booking and date","Get venue address and parking info","Check piano availability at venue","Arrange chairs and stage layout","Confirm venue capacity","Plan arrival and setup time"]},
-  {cat:"Performers & Scheduling",tasks:["Collect availability via Google Form","Confirm final performer list","Confirm each performer's piece","Confirm accompaniment arrangements","Send performers the final date and time","Set running order","Schedule rehearsal or run-through if needed"]},
-  {cat:"Tickets & Fundraising",tasks:["Set ticket price","Set fundraising goal","Start selling tickets","Track all cash sales in dashboard","Send donation to Yale New Haven Children's Hospital after event","Get donation receipt for records"]},
+  {cat:"Performers & Scheduling",tasks:["Collect availability via Google Form","Confirm final performer list","Confirm each performer's piece","Confirm accompaniment arrangements","Send performers the final date","Set running order","Schedule rehearsal if needed"]},
+  {cat:"Tickets & Fundraising",tasks:["Set ticket price","Set fundraising goal","Start selling tickets","Track all cash sales in dashboard","Send donation to hospital after event","Get donation receipt"]},
   {cat:"Marketing & Social Media",tasks:["Create event post for Instagram","Post on Facebook","Update mobilemusicsalon.org","Send email to mailing list","Share in local community groups","Post reminder 1 week before","Post reminder day before"]},
   {cat:"Day-Of Tasks",tasks:["Arrive early to set up","Confirm piano is tuned","Set up ticket collection at door","Brief performers on running order","Welcome guests and open the event","Collect all cash payments","Take photos for social media"]},
-  {cat:"Post-Event Tasks",tasks:["Count total revenue","Send donation to hospital","Post thank-you on social media","Email performers thank you","Log totals in dashboard","Debrief: what went well, what to improve","Start planning next recital"]},
+  {cat:"Post-Event Tasks",tasks:["Count total revenue","Send donation to hospital","Post thank-you on social media","Email performers thank you","Log totals in dashboard","Add post-event note/debrief","Start planning next recital"]},
 ];
 function buildChecks(){const c={};PLAN_TASKS.forEach(cat=>cat.tasks.forEach((t,i)=>{c[cat.cat+"_"+i]=false;}));return c;}
 function initRecitals(){
@@ -645,18 +886,21 @@ function addRecital(){
   state.recitals.push(r); activeRecitalId=r.id; saveData(); renderPlanning();
 }
 function deleteRecital(id){
-  if(!confirm("Delete this recital checklist? This cannot be undone."))return;
+  if(!confirm("Delete this checklist? This cannot be undone."))return;
   state.recitals=state.recitals.filter(r=>r.id!==id);
   if(activeRecitalId===id) activeRecitalId=state.recitals.length>0?state.recitals[0].id:null;
   saveData(); renderPlanning();
 }
 function selectRecital(id){activeRecitalId=id;renderPlanning();}
-function toggleCheck(rid,key){const r=state.recitals.find(r=>r.id===rid);if(r){r.checks[key]=!r.checks[key];saveData();renderPlanning();}}
+function toggleCheck(rid,key){
+  const r=state.recitals.find(r=>r.id===rid);
+  if(r){r.checks[key]=!r.checks[key];saveData();renderPlanning();}
+}
 function renderPlanning(){
   initRecitals();
   document.getElementById("recital-pills").innerHTML=state.recitals.map(r=>`
     <button class="recital-pill ${r.id===activeRecitalId?'active':''}" onclick="selectRecital(${r.id})">${r.name}</button>
-    <button onclick="deleteRecital(${r.id})" title="Delete recital" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:17px;padding:0 4px;margin-left:-4px;margin-right:6px;line-height:1">×</button>
+    <button onclick="deleteRecital(${r.id})" title="Delete" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:17px;padding:0 4px;margin-left:-4px;margin-right:6px">×</button>
   `).join("");
   const container=document.getElementById("checklist-container");
   const rec=state.recitals.find(r=>r.id===activeRecitalId);
@@ -664,7 +908,7 @@ function renderPlanning(){
   const total=PLAN_TASKS.reduce((s,c)=>s+c.tasks.length,0);
   const done=Object.values(rec.checks).filter(Boolean).length;
   const pct=Math.round((done/total)*100);
-  let html=`<div class="card"><div class="progress-label"><span style="font-weight:600">${rec.name}</span><span>${done}/${total} tasks complete</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div><div style="font-size:12px;color:#8b7355;margin-top:6px">${pct}% complete</div></div>`;
+  let html=`<div class="card"><div class="progress-label"><span style="font-weight:600">${rec.name}</span><span>${done}/${total} tasks</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div><div style="font-size:12px;color:#8b7355;margin-top:6px">${pct}% complete</div></div>`;
   PLAN_TASKS.forEach(cat=>{
     const catDone=cat.tasks.filter((_,i)=>rec.checks[cat.cat+"_"+i]).length;
     html+=`<div class="card"><div class="category-header"><span class="category-title">${cat.cat}</span><span class="category-progress">${catDone}/${cat.tasks.length}</span></div>`;
@@ -677,33 +921,111 @@ function renderPlanning(){
   container.innerHTML=html;
 }
 
-// ── Contacts ──
+// ═══════════════════════════════════════════════════════
+// CONTACTS
+// ═══════════════════════════════════════════════════════
 function renderContacts(){
   if(!state.contacts)state.contacts=[];
   const list=document.getElementById("contact-list"),empty=document.getElementById("no-contacts");
   if(!state.contacts.length){list.innerHTML="";empty.classList.remove("hidden");return;}
   empty.classList.add("hidden");
   list.innerHTML=state.contacts.map(c=>`<div class="contact-card">
-    <div>
-      <div class="contact-name">${c.name}</div>
-      <div class="contact-role">${c.role}</div>
-      ${c.email?`<div class="contact-detail">✉️ <a href="mailto:${c.email}" style="color:#7c5c3e">${c.email}</a></div>`:""}
-      ${c.phone?`<div class="contact-detail">📞 ${c.phone}</div>`:""}
-      ${c.notes?`<div class="contact-detail" style="color:#a09080;font-style:italic">📝 ${c.notes}</div>`:""}
-    </div>
-    <button onclick="removeContact(${c.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:18px">✕</button>
+    <div><div class="contact-name">${c.name}</div><div class="contact-role">${c.role}</div>
+    ${c.email?`<div class="contact-detail">✉️ <a href="mailto:${c.email}" style="color:#7c5c3e">${c.email}</a></div>`:""}
+    ${c.phone?`<div class="contact-detail">📞 ${c.phone}</div>`:""}
+    ${c.notes?`<div class="contact-detail" style="color:#a09080;font-style:italic">📝 ${c.notes}</div>`:""}
+    </div><button class="del-btn" onclick="rmContact(${c.id})">✕</button>
   </div>`).join("");
 }
 function addContact(){
   const name=document.getElementById("con-name").value; if(!name)return;
+  if(!state.contacts)state.contacts=[];
   state.contacts.push({id:Date.now(),name,role:document.getElementById("con-role").value,phone:document.getElementById("con-phone").value,email:document.getElementById("con-email").value,notes:document.getElementById("con-notes").value});
   ["con-name","con-role","con-phone","con-email","con-notes"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("add-contact-form").classList.add("hidden");
+  document.getElementById("add-contact").classList.add("hidden");
   saveData(); renderContacts();
 }
-function removeContact(id){state.contacts=state.contacts.filter(c=>c.id!==id);saveData();renderContacts();}
+function rmContact(id){state.contacts=state.contacts.filter(c=>c.id!==id);saveData();renderContacts();}
 
-// ── Notes ──
+// ═══════════════════════════════════════════════════════
+// VENUES
+// ═══════════════════════════════════════════════════════
+function renderVenues(){
+  if(!state.venues)state.venues=[];
+  const list=document.getElementById("venue-list"),empty=document.getElementById("no-venues");
+  if(!state.venues.length){list.innerHTML="";empty.classList.remove("hidden");return;}
+  empty.classList.add("hidden");
+  list.innerHTML=state.venues.map(v=>`<div class="venue-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div class="venue-name">${v.name}</div>
+          <span class="badge ${v.status==='Used'?'badge-confirmed':v.status==='Considering'?'badge-planning':'badge-on-hold'}">${v.status}</span>
+        </div>
+        <div class="venue-stars">${"⭐".repeat(Number(v.rating)||0)}</div>
+        ${v.address?`<div class="venue-detail">📍 ${v.address}</div>`:""}
+        ${v.capacity?`<div class="venue-detail">👥 Capacity: ${v.capacity}</div>`:""}
+        ${v.cost?`<div class="venue-detail">💰 Cost: ${v.cost}</div>`:""}
+        ${v.contact?`<div class="venue-detail">👤 Contact: ${v.contact}${v.contactinfo?` — ${v.contactinfo}`:""}</div>`:""}
+        ${v.notes?`<div class="venue-detail" style="color:#a09080;font-style:italic;margin-top:6px">📝 ${v.notes}</div>`:""}
+      </div>
+      <button class="del-btn" onclick="rmVenue(${v.id})">✕</button>
+    </div>
+  </div>`).join("");
+}
+function addVenue(){
+  const name=document.getElementById("v-name").value; if(!name)return;
+  if(!state.venues)state.venues=[];
+  state.venues.push({id:Date.now(),name,address:document.getElementById("v-address").value,capacity:document.getElementById("v-capacity").value,contact:document.getElementById("v-contact").value,contactinfo:document.getElementById("v-contactinfo").value,cost:document.getElementById("v-cost").value,rating:document.getElementById("v-rating").value,status:document.getElementById("v-status").value,notes:document.getElementById("v-notes").value});
+  ["v-name","v-address","v-capacity","v-contact","v-contactinfo","v-cost","v-notes"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("add-venue").classList.add("hidden");
+  saveData(); renderVenues();
+}
+function rmVenue(id){state.venues=state.venues.filter(v=>v.id!==id);saveData();renderVenues();}
+
+// ═══════════════════════════════════════════════════════
+// PERFORMER HISTORY
+// ═══════════════════════════════════════════════════════
+function renderHistory(){
+  if(!state.history)state.history=[];
+  const list=document.getElementById("history-list"),empty=document.getElementById("no-history");
+  if(!state.history.length){list.innerHTML="";empty.classList.remove("hidden");return;}
+  empty.classList.add("hidden");
+  // Group by performer name
+  const grouped={};
+  state.history.forEach(h=>{
+    if(!grouped[h.name])grouped[h.name]={name:h.name,count:0,pieces:[],entries:[]};
+    grouped[h.name].count++;
+    if(!grouped[h.name].pieces.includes(h.piece))grouped[h.name].pieces.push(h.piece);
+    grouped[h.name].entries.push(h);
+  });
+  list.innerHTML=Object.values(grouped).map(g=>`<div class="history-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div style="flex:1">
+        <div class="history-name">${g.name}</div>
+        <div class="history-stat">🎭 ${g.count} performance${g.count>1?'s':''}</div>
+        <div class="history-pieces">${g.pieces.join(" · ")}</div>
+        <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
+          ${g.entries.map(e=>`<div style="font-size:12px;color:#8b7355;padding:6px 10px;background:#faf6f0;border-radius:6px"><strong>${e.recital}</strong>${e.date?' · '+e.date:''}<br><span style="font-style:italic">${e.piece}</span>${e.notes?'<br><span style="color:#a09080">'+e.notes+'</span>':''}</div>`).join("")}
+        </div>
+      </div>
+      <button class="del-btn" onclick="rmHistory(${g.entries[0].id})" style="align-self:flex-start">✕</button>
+    </div>
+  </div>`).join("");
+}
+function addHistory(){
+  const name=document.getElementById("h-name").value; if(!name)return;
+  if(!state.history)state.history=[];
+  state.history.unshift({id:Date.now(),name,recital:document.getElementById("h-recital").value,date:document.getElementById("h-date").value,piece:document.getElementById("h-piece").value,notes:document.getElementById("h-notes").value});
+  ["h-name","h-recital","h-date","h-piece","h-notes"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("add-history").classList.add("hidden");
+  saveData(); renderHistory();
+}
+function rmHistory(id){state.history=state.history.filter(h=>h.id!==id);saveData();renderHistory();}
+
+// ═══════════════════════════════════════════════════════
+// NOTES
+// ═══════════════════════════════════════════════════════
 function renderNotes(){
   if(!state.notes)state.notes=[];
   const list=document.getElementById("notes-list"),empty=document.getElementById("no-notes");
@@ -711,48 +1033,145 @@ function renderNotes(){
   empty.classList.add("hidden");
   list.innerHTML=state.notes.map(n=>`<div class="note-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-      <div><div class="note-recital">${n.recital}</div><div style="font-weight:600;font-size:15px">${n.title}</div><div style="font-size:11px;color:#c4a882;margin-top:2px">${n.date}</div></div>
-      <button onclick="removeNote(${n.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:18px">✕</button>
+      <div><div class="note-recital-label">${n.recital||"General"}</div><div style="font-weight:600;font-size:15px">${n.title}</div><div style="font-size:11px;color:#c4a882;margin-top:2px">${n.date}</div></div>
+      <button class="del-btn" onclick="rmNote(${n.id})">✕</button>
     </div>
     <div class="note-text">${n.text}</div>
   </div>`).join("");
 }
-function showAddNote(){document.getElementById("add-note-form").classList.remove("hidden");}
 function addNote(){
-  const recital=document.getElementById("note-recital").value,title=document.getElementById("note-title").value,text=document.getElementById("note-text").value;
+  const title=document.getElementById("note-title").value,text=document.getElementById("note-text").value;
   if(!title||!text)return;
-  state.notes.unshift({id:Date.now(),recital:recital||"General",title,text,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});
+  if(!state.notes)state.notes=[];
+  state.notes.unshift({id:Date.now(),recital:document.getElementById("note-recital").value||"General",title,text,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});
   ["note-recital","note-title","note-text"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("add-note-form").classList.add("hidden");
+  document.getElementById("add-note").classList.add("hidden");
   saveData(); renderNotes();
 }
-function removeNote(id){state.notes=state.notes.filter(n=>n.id!==id);saveData();renderNotes();}
+function rmNote(id){state.notes=state.notes.filter(n=>n.id!==id);saveData();renderNotes();}
 
-// ── Email Templates ──
+// ═══════════════════════════════════════════════════════
+// POST-EVENT REPORT
+// ═══════════════════════════════════════════════════════
+function renderReport(){
+  const name=document.getElementById("rep-name")?.value||"";
+  const date=document.getElementById("rep-date")?.value||"";
+  const venue=document.getElementById("rep-venue")?.value||"";
+  const attendance=document.getElementById("rep-attendance")?.value||"";
+  const raised=document.getElementById("rep-raised")?.value||"";
+  const highlights=document.getElementById("rep-highlights")?.value||"";
+  const improve=document.getElementById("rep-improve")?.value||"";
+  if(!name&&!date){document.getElementById("report-preview").innerHTML='<div style="color:#c4b8a8;text-align:center;padding:20px">Fill in the details above to generate your report.</div>';return;}
+  const conf=state.performers.filter(p=>p.status==="confirmed");
+  document.getElementById("report-preview").innerHTML=`
+    <h3>Post-Event Report — Mobile Music Salon</h3>
+    <div class="report-section">
+      <strong>${name||"Recital"}</strong><br>
+      ${date?`📅 ${date}<br>`:""}${venue?`📍 ${venue}<br>`:""}
+      ${attendance?`👥 ${attendance} guests attended<br>`:""}
+      ${raised?`💰 $${raised} raised for Yale New Haven Children's Hospital`:""}</div>
+    ${conf.length?`<div class="report-section"><strong>Performers</strong><br>${conf.map(p=>`• ${p.name} — <em>${p.piece}</em>`).join('<br>')}</div>`:""}
+    ${highlights?`<div class="report-section"><strong>What Went Well</strong><br>${highlights}</div>`:""}
+    ${improve?`<div class="report-section"><strong>What to Improve Next Time</strong><br>${improve}</div>`:""}
+    <div style="margin-top:12px;font-size:12px;color:#a09080">Generated by Mobile Music Salon Admin · mobilemusicsalon.org</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// SOCIAL CAPTIONS
+// ═══════════════════════════════════════════════════════
+function renderCaptions(){
+  const date=document.getElementById("soc-date")?.value||"[Date]";
+  const venue=document.getElementById("soc-venue")?.value||"[Venue]";
+  const price=document.getElementById("soc-price")?.value||"[Price]";
+  const performers=document.getElementById("soc-performers")?.value||"[Performers]";
+  const pieces=document.getElementById("soc-pieces")?.value||"[Pieces]";
+  const container=document.getElementById("captions-container");
+  if(!document.getElementById("soc-date")?.value){container.innerHTML='<div class="card"><div style="color:#c4b8a8;text-align:center;padding:20px">Fill in the event details above to generate captions.</div></div>';return;}
+  const captions=[
+    {platform:"Instagram — Announcement",text:`🎶 Save the date! Mobile Music Salon is coming to ${venue} on ${date}.\n\nJoin us for an evening of beautiful live classical music — featuring ${performers} performing works including ${pieces}.\n\n🎟 Tickets: ${price} per person\n💛 All proceeds benefit Yale New Haven Children's Hospital\n\nDM us or visit our link in bio to get your tickets!\n\n#MobileMusicSalon #ClassicalMusic #LiveMusic #ForGoodCause #YaleNewHaven`},
+    {platform:"Instagram — Reminder (1 Week Before)",text:`⏰ One week away! Mobile Music Salon is on ${date} at ${venue}.\n\nSpots are filling up — grab your tickets before they're gone!\n🎟 ${price} per person · All proceeds to Yale New Haven Children's Hospital\n\n#MobileMusicSalon #ClassicalMusic #LiveMusic`},
+    {platform:"Instagram — Day Before",text:`🎼 Tomorrow's the night! Mobile Music Salon is happening at ${venue}.\n\nWe can't wait to see you there for an unforgettable evening of live music.\n\nDoors open at [Time]. See you soon! ✨\n\n#MobileMusicSalon`},
+    {platform:"Facebook — Full Announcement",text:`🎻 We're excited to announce the next Mobile Music Salon recital!\n\n📅 ${date}\n📍 ${venue}\n🎶 Featuring: ${performers}\n🎵 Program includes: ${pieces}\n🎟 Tickets: ${price} per person\n💛 All proceeds benefit Yale New Haven Children's Hospital\n\nMobile Music Salon is a nonprofit bringing live classical music to local venues — and supporting children's hospitals with every ticket sold.\n\nReply to this post or message us directly to reserve your tickets. Space is limited!\n\nLearn more at mobilemusicsalon.org`},
+    {platform:"Facebook — Post-Event Thank You",text:`Thank you to everyone who joined us at Mobile Music Salon! 🎶\n\nWhat an incredible evening. Together we raised $[Amount] for Yale New Haven Children's Hospital — a testament to the generosity and love in this community.\n\nA huge thank you to our performers: ${performers}. You were absolutely wonderful.\n\nStay tuned for details about our next recital. We hope to see you again soon!\n\n💛 mobilemusicsalon.org`},
+  ];
+  container.innerHTML=captions.map((c,i)=>`<div class="card">
+    <div class="caption-platform">${c.platform}</div>
+    <div class="caption-text" id="cap-${i}">${c.text}</div>
+    <button class="copy-btn" onclick="copyCap(${i})">Copy to clipboard</button>
+  </div>`).join("");
+}
+function copyCap(i){
+  navigator.clipboard.writeText(document.getElementById("cap-"+i).textContent).then(()=>{
+    const btn=event.target;btn.textContent="Copied!";btn.style.background="#22c55e";
+    setTimeout(()=>{btn.textContent="Copy to clipboard";btn.style.background="#7c5c3e";},2000);
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// REMINDERS
+// ═══════════════════════════════════════════════════════
+function renderReminders(){
+  const inp=document.getElementById("rem-date")?.value;
+  const container=document.getElementById("reminders-container");
+  if(!inp){container.innerHTML='<div class="card"><div style="color:#c4b8a8;text-align:center;padding:20px">Enter your recital date above to see your reminder timeline.</div></div>';return;}
+  const eventDate=new Date(inp);
+  function daysFrom(n){const d=new Date(eventDate);d.setDate(d.getDate()+n);return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
+  const reminders=[
+    {offset:-42,timing:"6 weeks before",action:"Send Google Form to all performers",desc:"Collect availability, piece selection, and accompaniment needs."},
+    {offset:-35,timing:"5 weeks before",action:"Follow up with performers who haven't responded",desc:"Give them one more week before finalizing the date."},
+    {offset:-28,timing:"4 weeks before",action:"Lock in the date and confirm the venue",desc:"Book the space officially and notify all performers."},
+    {offset:-28,timing:"4 weeks before",action:"Start selling tickets",desc:"Begin reaching out to your network. Cash or payment link."},
+    {offset:-21,timing:"3 weeks before",action:"Post event announcement on Instagram & Facebook",desc:"Include date, venue, ticket price, and cause."},
+    {offset:-21,timing:"3 weeks before",action:"Send announcement email to your mailing list",desc:"Use the email template in the Emails tab."},
+    {offset:-14,timing:"2 weeks before",action:"Update mobilemusicsalon.org with event details",desc:"Make sure guests can find info online."},
+    {offset:-14,timing:"2 weeks before",action:"Check in with all performers",desc:"Confirm they're on track and have what they need."},
+    {offset:-7,timing:"1 week before",action:"Post reminder on social media",desc:"Create urgency — limited spots remaining."},
+    {offset:-7,timing:"1 week before",action:"Send reminder email to ticket buyers",desc:"Include venue address, parking, and start time."},
+    {offset:-3,timing:"3 days before",action:"Confirm running order with all performers",desc:"Make sure everyone knows when they go on."},
+    {offset:-1,timing:"Day before",action:"Post day-before reminder on social media",desc:"Build excitement. Mention doors opening time."},
+    {offset:-1,timing:"Day before",action:"Prepare cash box and ticket list",desc:"Know who has paid and who is paying at the door."},
+    {offset:0,timing:"Day of — morning",action:"Arrive early and set up the venue",desc:"Check piano tuning, arrange chairs, set up ticket table."},
+    {offset:0,timing:"Day of — event",action:"Welcome guests and run the show",desc:"Enjoy it — you've earned this!"},
+    {offset:1,timing:"Day after",action:"Count and log all ticket revenue",desc:"Update the Tickets tab in your dashboard."},
+    {offset:1,timing:"Day after",action:"Post thank-you on social media with photos",desc:"Use the post-event caption template."},
+    {offset:2,timing:"2 days after",action:"Email performers a personal thank-you",desc:"Use the email template in the Emails tab."},
+    {offset:7,timing:"1 week after",action:"Send donation to Yale New Haven Children's Hospital",desc:"Get a receipt and log it in your records."},
+    {offset:7,timing:"1 week after",action:"Write a post-event debrief note",desc:"Use the Notes tab. What went well? What to improve?"},
+    {offset:14,timing:"2 weeks after",action:"Start planning the next recital",desc:"Open a new checklist in the Planning tab."},
+  ];
+  container.innerHTML=`<div class="card"><div class="section-label" style="margin-bottom:16px">Your Timeline for Recital on ${eventDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</div>${reminders.map(r=>`<div class="reminder-item">
+    <div class="reminder-timing">${daysFrom(r.offset)}<br><span style="font-size:10px">(${r.timing})</span></div>
+    <div><div class="reminder-action">${r.action}</div><div class="reminder-desc">${r.desc}</div></div>
+  </div>`).join("")}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// EMAIL TEMPLATES
+// ═══════════════════════════════════════════════════════
 const EMAILS=[
   {title:"Confirming a Performer",subject:"You're confirmed for Mobile Music Salon!",body:`Hi [Name],
 
 Great news — you're all set for Mobile Music Salon!
 
-Here are your details:
+Here are your confirmed details:
 • Piece: [Piece Name]
 • Date: [Date]
 • Venue: [Venue Name & Address]
 • Please arrive by: [Time]
 
-Let me know if anything changes. Looking forward to performing with you!
+Let me know if anything changes with your piece or schedule. I'm really looking forward to performing with you!
 
 Warm regards,
 Matt
 Mobile Music Salon`},
   {title:"Following Up on Google Form",subject:"Quick follow-up — Mobile Music Salon availability",body:`Hi [Name],
 
-Hope you're well! I'm finalizing the schedule for our upcoming Mobile Music Salon recital and I haven't yet received your availability form.
+Hope you're doing well! I'm finalizing the schedule for our upcoming Mobile Music Salon recital and I haven't yet received your availability form.
 
 Could you fill it out when you get a chance? It only takes a minute:
 [Google Form Link]
 
-I need to lock in a date soon — the sooner the better. Thanks so much!
+I'm hoping to lock in a date very soon, so the sooner the better. Thank you so much!
 
 Best,
 Matt`},
@@ -764,109 +1183,206 @@ We have a date! Our next Mobile Music Salon recital will be:
 📍 [Venue Name], [Address]
 🎟 Tickets: $[Price] — all proceeds to Yale New Haven Children's Hospital
 
-More details coming soon. Reply to reserve your tickets!
+More details and ticket info coming soon. Reply to this email to reserve your spot!
 
-See you there,
+Can't wait to see you there,
 Matt
 mobilemusicsalon.org`},
-  {title:"Selling Tickets to Guests",subject:"Tickets now available — Mobile Music Salon",body:`Hi [Name],
+  {title:"Selling Tickets to Guests",subject:"Tickets available — Mobile Music Salon, [Date]",body:`Hi [Name],
 
-Tickets are now available for our upcoming recital!
+Tickets are now available for our upcoming Mobile Music Salon recital!
 
 📅 [Date] at [Time]
 📍 [Venue]
 🎶 Featuring: [Performer names]
-🎟 $[Price] per ticket — all proceeds to Yale New Haven Children's Hospital
+🎵 Program: [Pieces]
+🎟 $[Price] per ticket — all proceeds go to Yale New Haven Children's Hospital
 
-To get your tickets, reply to this email or reach me at [phone/email].
+To reserve your tickets, simply reply to this email or reach me at [phone/email]. Cash accepted at the door.
 
-Thank you for your support!
+Thank you so much for your support — it truly makes a difference.
 
 Matt
 mobilemusicsalon.org`},
-  {title:"Thank You to Performers (Post-Event)",subject:"Thank you — you were wonderful!",body:`Hi [Name],
+  {title:"Requesting to Use a Venue",subject:"Request to use [Venue Name] for a charity music recital",body:`Hi [Name],
 
-I just wanted to say thank you for performing at Mobile Music Salon. Your performance of [Piece] was truly special and the audience loved every moment.
+My name is Matt Siciliano and I run Mobile Music Salon, a nonprofit that organizes classical music recitals where all ticket proceeds go to children's hospitals. We are currently benefiting Yale New Haven Children's Hospital.
 
-Together we raised $[Amount] for Yale New Haven Children's Hospital. It would not have happened without you.
+I am reaching out because I believe [Venue Name] would be a wonderful setting for our next recital. We typically host intimate events with 20–60 guests, featuring a small number of classical musicians performing for about 90 minutes.
 
-I hope to have you back for a future recital. Thank you from the bottom of my heart.
+I would love to discuss the possibility of using your space. Specifically, I'd like to learn about:
+• Availability around [proposed dates]
+• Any rental fees or requirements
+• Whether a piano is available on-site
+• Capacity and setup options
+
+We are a nonprofit and all proceeds benefit a great cause. I'm happy to provide any additional information about our organization.
+
+Thank you so much for considering us. I hope to hear from you!
+
+Best regards,
+Matt Siciliano
+Mobile Music Salon
+mobilemusicsalon.org
+[Your phone number]`},
+  {title:"Thank You to Performers (Post-Event)",subject:"Thank you — you were absolutely wonderful",body:`Hi [Name],
+
+I just wanted to take a moment to say a heartfelt thank you for performing at Mobile Music Salon. Your performance of [Piece] was truly moving and the audience loved every moment.
+
+Together we raised $[Amount] for Yale New Haven Children's Hospital. It would not have happened without your talent and generosity.
+
+I hope very much to have you back for a future recital. In the meantime, thank you from the bottom of my heart.
 
 With gratitude,
 Matt
 Mobile Music Salon`},
   {title:"Thank You to the Audience (Post-Event)",subject:"Thank you for coming to Mobile Music Salon!",body:`Dear friends,
 
-Thank you so much for joining us at Mobile Music Salon. Your presence and generosity made the evening truly memorable.
+Thank you so much for joining us at Mobile Music Salon. Your presence and generosity made the evening truly special.
 
-Together we raised $[Amount] for Yale New Haven Children's Hospital. Every dollar makes a difference for the children and families they serve.
+Together we raised $[Amount] for Yale New Haven Children's Hospital — every dollar makes a real difference for the children and families they serve.
 
-Stay tuned for our next recital at mobilemusicsalon.org.
+We would love to have you back at our next recital. Stay tuned for details at mobilemusicsalon.org, and feel free to reply to this email to be added to our mailing list if you haven't already.
 
 With warm appreciation,
 Matt & the Mobile Music Salon team`},
+  {title:"Donor / Sponsor Outreach",subject:"Support Mobile Music Salon — music for a great cause",body:`Hi [Name],
+
+My name is Matt Siciliano and I run Mobile Music Salon, a nonprofit that organizes classical music recitals to raise money for children's hospitals. All ticket proceeds from our events go directly to Yale New Haven Children's Hospital.
+
+We are currently planning our [upcoming/next] recital in [location] and are looking for [sponsors / donors / supporters] who share our passion for music and giving back.
+
+A contribution of any size would help us cover [event costs / printing / venue fees] and ensure every dollar from ticket sales goes directly to the hospital.
+
+In return, I'd love to [mention your name/business in the program / thank you on social media / invite you as a VIP guest / other].
+
+Would you be open to a brief call to learn more? I'd be happy to share more about our mission and impact.
+
+Thank you so much for your time and consideration.
+
+Warm regards,
+Matt Siciliano
+Mobile Music Salon
+mobilemusicsalon.org`},
   {title:"Inviting a Chapter Lead",subject:"Bringing Mobile Music Salon to [City] — want to lead it?",body:`Hi [Name],
 
-I hope you're doing well! I wanted to reach out about something I think you'd be a natural fit for.
+I hope you're doing well! I wanted to reach out about something I think you'd be a wonderful fit for.
 
-I run a nonprofit called Mobile Music Salon — we organize classical music recitals where all ticket proceeds go to children's hospitals. We just completed our first recital in Glastonbury, CT, and I'm now looking to expand to other cities.
+I run a nonprofit called Mobile Music Salon — we organize intimate classical music recitals where all ticket proceeds go to local children's hospitals. We just completed our first recital in Glastonbury, CT, and I'm now looking to expand to other cities.
 
-I'd love for you to lead the [City] chapter. It involves finding a few local musicians, booking a small venue, and selling tickets. I'll guide you through the whole process and provide all the tools and templates you need.
+I'd love for you to lead the [City] chapter. The role involves:
+• Finding a few local musicians to perform
+• Booking a small venue (a living room, library, community space — anything works)
+• Selling tickets and collecting proceeds for a local children's hospital
+
+I'll guide you through every step and provide all the tools, templates, and support you need. It's a deeply rewarding way to bring your community together around music and do real good.
 
 Would you be open to a quick call to learn more?
 
 Best,
-Matt
+Matt Siciliano
+Mobile Music Salon
 mobilemusicsalon.org`},
+  {title:"Media / Press Outreach",subject:"Local nonprofit brings classical music and charity together — story idea",body:`Hi [Name],
+
+I wanted to reach out with a story idea that I think your readers would love.
+
+Mobile Music Salon is a local nonprofit that organizes intimate classical music recitals — and donates 100% of ticket proceeds to children's hospitals. We recently held our first event in [Location], raising $[Amount] for Yale New Haven Children's Hospital.
+
+What makes us unique: these aren't formal concert hall performances. They're warm, accessible, community-driven events that bring live classical music to everyday spaces — and make charity feel personal and joyful.
+
+We have an upcoming recital on [Date] at [Venue] and I'd love to invite you to attend, speak with our performers, or feature our story. I'm happy to provide photos, quotes, or any additional information.
+
+Thank you so much for your time — I hope this is of interest!
+
+Best regards,
+Matt Siciliano
+Mobile Music Salon
+mobilemusicsalon.org
+[Phone number]`},
 ];
 function renderEmails(){
   document.getElementById("email-list").innerHTML=EMAILS.map((e,i)=>`
     <div class="email-template">
-      <div class="email-header" onclick="toggleEmail(${i})">
+      <div class="email-header" onclick="togEmail(${i})">
         <span class="email-title">✉️ ${e.title}</span>
-        <span id="earrow-${i}" style="font-size:18px;color:#c4a882">▸</span>
+        <span id="earr-${i}" style="font-size:18px;color:#c4a882">▸</span>
       </div>
-      <div class="email-body" id="ebody-${i}">
+      <div class="email-body" id="ebod-${i}">
         <div class="email-subject"><strong>Subject:</strong> ${e.subject}</div>
-        <div class="email-content" id="econtent-${i}">${e.body}</div>
+        <div class="email-content" id="econt-${i}">${e.body}</div>
         <button class="copy-btn" onclick="copyEmail(${i})">Copy to clipboard</button>
       </div>
     </div>`).join("");
 }
-function toggleEmail(i){const b=document.getElementById("ebody-"+i),a=document.getElementById("earrow-"+i);const o=b.classList.toggle("open");a.textContent=o?"▾":"▸";}
+function togEmail(i){const b=document.getElementById("ebod-"+i),a=document.getElementById("earr-"+i);const o=b.classList.toggle("open");a.textContent=o?"▾":"▸";}
 function copyEmail(i){
-  navigator.clipboard.writeText(document.getElementById("econtent-"+i).textContent).then(()=>{
-    const btn=event.target; btn.textContent="Copied!"; btn.style.background="#22c55e";
+  navigator.clipboard.writeText(document.getElementById("econt-"+i).textContent).then(()=>{
+    const btn=event.target;btn.textContent="Copied!";btn.style.background="#22c55e";
     setTimeout(()=>{btn.textContent="Copy to clipboard";btn.style.background="#7c5c3e";},2000);
   });
 }
 
-// ── Chapters ──
+// ═══════════════════════════════════════════════════════
+// CHAPTERS
+// ═══════════════════════════════════════════════════════
 function renderChapters(){
+  if(!state.chapters)state.chapters=[];
+  // Cross-chapter overview
+  const totalRaisedAll=state.chapters.reduce((s,c)=>s+Number(c.raised||0),0);
+  const totalRecitals=state.chapters.reduce((s,c)=>s+Number(c.recitals||0),0);
+  document.getElementById("chapter-overview").innerHTML=`<div style="display:flex;gap:20px;flex-wrap:wrap">
+    <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#3d2b1f">${state.chapters.length}</div><div style="font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Total Chapters</div></div>
+    <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#3d2b1f">${totalRecitals}</div><div style="font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Total Recitals Held</div></div>
+    <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#3d2b1f">$${totalRaisedAll}</div><div style="font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Total Raised (All Chapters)</div></div>
+  </div>`;
   const list=document.getElementById("chapter-list"),empty=document.getElementById("no-chapters");
   if(!state.chapters.length){list.innerHTML="";empty.classList.remove("hidden");return;}
   empty.classList.add("hidden");
   list.innerHTML=state.chapters.map(c=>{
     const bc=c.status==="Active"?"badge-active":c.status==="Planning"?"badge-planning":"badge-on-hold";
-    return `<div class="chapter-card">
+    return `<div class="chapter-overview-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div>
-          <div><span class="chapter-name">${c.city}</span><span class="badge ${bc}">${c.status}</span></div>
+        <div style="flex:1">
+          <div><span class="chapter-city">${c.city}</span><span class="badge ${bc}">${c.status}</span></div>
           <div style="font-size:12px;color:#8b7355;margin-top:4px">Lead: ${c.lead}</div>
-          ${c.notes?`<div style="font-size:12px;color:#a09080;margin-top:3px">📝 ${c.notes}</div>`:""}
+          ${c.hospital?`<div style="font-size:12px;color:#8b7355">Hospital: ${c.hospital}</div>`:""}
+          <div class="chapter-stats">
+            <div class="chapter-stat"><strong>${c.recitals||0}</strong>Recitals held</div>
+            <div class="chapter-stat"><strong>$${c.raised||0}</strong>Total raised</div>
+          </div>
+          ${c.notes?`<div style="font-size:12px;color:#a09080;margin-top:6px;font-style:italic">📝 ${c.notes}</div>`:""}
         </div>
-        <button onclick="removeChapter(${c.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:18px">✕</button>
-      </div></div>`;
+        <button class="del-btn" onclick="rmChapter(${c.id})">✕</button>
+      </div>
+    </div>`;
   }).join("");
+  // Onboarding guide
+  document.getElementById("onboarding-guide").innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">
+    ${[
+      {num:1,title:"Recruit 3–5 performers",desc:"Reach out to local musicians — friends, conservatory students, community musicians. Use the Google Form to collect their availability and piece selection."},
+      {num:2,title:"Find a venue",desc:"Look for community spaces, libraries, churches, arts centers, or even a generous host's living room. Use the venue inquiry email template in the Emails tab."},
+      {num:3,title:"Set a date",desc:"Use the availability grid in the Recital tab to find a date that works for all performers. Aim for 4–6 weeks of lead time."},
+      {num:4,title:"Set your ticket price and fundraising goal",desc:"$15–$25 per ticket is typical. Set a goal in the Tickets tab to track progress."},
+      {num:5,title:"Promote the event",desc:"Use the social media caption generator and email templates in this dashboard. Post 3–4 weeks out, then remind 1 week and 1 day before."},
+      {num:6,title:"Run the recital",desc:"Follow the day-of checklist in the Planning tab. Collect tickets at the door, take photos, enjoy the music."},
+      {num:7,title:"Send the donation",desc:"After the event, send all proceeds to your chosen children's hospital. Get a receipt and log it in your dashboard."},
+      {num:8,title:"Debrief and plan the next one",desc:"Use the Notes tab to capture what went well. Then open a new checklist in Planning and start again!"},
+    ].map(s=>`<div style="display:flex;gap:14px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #f0ebe3">
+      <div style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#c4a882;min-width:28px">${s.num}</div>
+      <div><div style="font-weight:600;font-size:14px;color:#3d2b1f;margin-bottom:3px">${s.title}</div><div style="font-size:13px;color:#8b7355;line-height:1.6">${s.desc}</div></div>
+    </div>`).join("")}
+  </div>`;
 }
 function addChapter(){
   const city=document.getElementById("c-city").value; if(!city)return;
-  state.chapters.push({id:Date.now(),city,lead:document.getElementById("c-lead").value,status:document.getElementById("c-status").value,notes:document.getElementById("c-notes").value});
-  ["c-city","c-lead","c-notes"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("add-chapter-form").classList.add("hidden");
-  saveData(); renderChapters();
+  if(!state.chapters)state.chapters=[];
+  state.chapters.push({id:Date.now(),city,lead:document.getElementById("c-lead").value,status:document.getElementById("c-status").value,recitals:Number(document.getElementById("c-recitals").value)||0,raised:Number(document.getElementById("c-raised").value)||0,hospital:document.getElementById("c-hospital").value,notes:document.getElementById("c-notes").value});
+  ["c-city","c-lead","c-notes","c-hospital"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("add-chapter").classList.add("hidden");
+  saveData(); renderChapters(); renderStats();
 }
-function removeChapter(id){if(!confirm("Remove this chapter?"))return;state.chapters=state.chapters.filter(c=>c.id!==id);saveData();renderChapters();}
+function rmChapter(id){if(!confirm("Remove this chapter?"))return;state.chapters=state.chapters.filter(c=>c.id!==id);saveData();renderChapters();renderStats();}
 </script>
 </body>
 </html>
