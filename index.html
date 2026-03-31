@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mobil Music Salon — Admin</title>
+  <title>Mobile Music Salon — Admin</title>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
@@ -157,7 +157,7 @@
 <div id="login-screen">
   <div class="login-box" id="login-box">
     <div class="emoji">🎼</div>
-    <h1>Mobil Music Salon</h1>
+    <h1>Mobile Music Salon</h1>
     <div class="subtitle">Admin Dashboard</div>
     <input type="password" id="pw-input" placeholder="Enter password" />
     <div class="err-msg hidden" id="pw-error">Incorrect password. Try again.</div>
@@ -171,8 +171,8 @@
     <div class="header-top">
       <div>
         <div class="eyebrow">Nonprofit · Yale New Haven Children's Hospital</div>
-        <h1>Mobil Music Salon</h1>
-        <div class="subline">mobilmusicsalon.org · Admin <span id="saving-indicator" class="hidden" style="margin-left:6px;opacity:0.7">saving…</span></div>
+        <h1>Mobile Music Salon</h1>
+        <div class="subline">Mobilemusicsalon.org · Admin <span id="saving-indicator" class="hidden" style="margin-left:6px;opacity:0.7">saving…</span></div>
       </div>
       <button class="btn-secondary" style="color:#c4a882;border-color:rgba(196,168,130,0.4);font-size:12px" onclick="logout()">Sign Out</button>
     </div>
@@ -319,7 +319,7 @@
     <div id="tab-chapters" class="hidden">
       <div class="card">
         <div class="section-label">Expansion Vision</div>
-        <p style="font-size:15px;line-height:1.7;color:#5a3e28">Each chapter runs the same recital template — performers sign up via Google Form, ticket sales go to a local children's hospital, and everything is tracked here. Use this to grow Mobil Music Salon city by city.</p>
+        <p style="font-size:15px;line-height:1.7;color:#5a3e28">Each chapter runs the same recital template — performers sign up via Google Form, ticket sales go to a local children's hospital, and everything is tracked here. Use this to grow Mobile Music Salon city by city.</p>
       </div>
       <div class="card">
         <div class="card-header"><div class="section-label">Chapters</div><button class="btn-primary" onclick="toggleForm('add-chapter-form')">+ Add Chapter</button></div>
@@ -336,7 +336,7 @@
 </div>
 
 <script>
-const ADMIN_PASSWORD = "MobileMusic2025";
+const ADMIN_PASSWORD = "MobileeMusic2025";
 const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
 const DATES = ["Apr 25","May 9","May 16","May 30","Jun 6","Jun 13","Jun 20"];
@@ -570,14 +570,14 @@ function renderProgramPreview(){
   const date=document.getElementById("prog-date")?.value||"[Date TBD]";
   const venue=document.getElementById("prog-venue")?.value||"[Venue TBD]";
   document.getElementById("program-preview").innerHTML=`
-    <h2>Mobil Music Salon</h2>
+    <h2>Mobile Music Salon</h2>
     <div class="prog-subtitle">${date}<br>${venue}<br><span style="font-size:12px;color:#c4a882">Benefiting Yale New Haven Children's Hospital</span></div>
     ${ordered.map(p=>`<div class="program-item">
       <div class="prog-piece">${p.piece}</div>
       <div class="prog-performer">${p.name}</div>
       ${p.accompaniment&&p.accompaniment!=="None"&&p.accompaniment!=="—"?`<div class="prog-accompanist">Piano accompaniment: Tamana</div>`:""}
     </div>`).join("")}
-    <div style="margin-top:28px;text-align:center;font-family:'Lora',serif;font-size:12px;color:#a09080;border-top:1px solid #e8e0d4;padding-top:16px">Thank you for your support · mobilmusicsalon.org</div>`;
+    <div style="margin-top:28px;text-align:center;font-family:'Lora',serif;font-size:12px;color:#a09080;border-top:1px solid #e8e0d4;padding-top:16px">Thank you for your support · Mobilemusicsalon.org</div>`;
 }
 function moveOrder(id,dir){
   const idx=state.runningOrder.indexOf(id); if(idx<0)return;
@@ -591,7 +591,7 @@ const PLAN_TASKS=[
   {cat:"Venue & Logistics",tasks:["Confirm venue booking and date","Get venue address and parking info","Check piano availability at venue","Arrange chairs and stage layout","Confirm venue capacity","Plan arrival and setup time"]},
   {cat:"Performers & Scheduling",tasks:["Collect availability via Google Form","Confirm final performer list","Confirm each performer's piece","Confirm accompaniment arrangements","Send performers the final date and time","Set running order","Schedule rehearsal or run-through if needed"]},
   {cat:"Tickets & Fundraising",tasks:["Set ticket price","Set fundraising goal","Start selling tickets","Track all cash sales in dashboard","Send donation to Yale New Haven Children's Hospital after event","Get donation receipt for records"]},
-  {cat:"Marketing & Social Media",tasks:["Create event post for Instagram","Post on Facebook","Update mobilmusicsalon.org","Send email to mailing list","Share in local community groups","Post reminder 1 week before","Post reminder day before"]},
+  {cat:"Marketing & Social Media",tasks:["Create event post for Instagram","Post on Facebook","Update Mobilemusicsalon.org","Send email to mailing list","Share in local community groups","Post reminder 1 week before","Post reminder day before"]},
   {cat:"Day-Of Tasks",tasks:["Arrive early to set up","Confirm piano is tuned","Set up ticket collection at door","Brief performers on running order","Welcome guests and open the event","Collect all cash payments","Take photos for social media"]},
   {cat:"Post-Event Tasks",tasks:["Count total revenue","Send donation to hospital","Post thank-you on social media","Email performers thank you","Log totals in dashboard","Debrief: what went well, what to improve","Start planning next recital"]},
 ];
@@ -691,9 +691,9 @@ function removeNote(id){state.notes=state.notes.filter(n=>n.id!==id);saveData();
 
 // ── Email Templates ──
 const EMAILS=[
-  {title:"Confirming a Performer",subject:"You're confirmed for Mobil Music Salon!",body:`Hi [Name],
+  {title:"Confirming a Performer",subject:"You're confirmed for Mobile Music Salon!",body:`Hi [Name],
 
-Great news — you're all set for Mobil Music Salon!
+Great news — you're all set for Mobile Music Salon!
 
 Here are your details:
 • Piece: [Piece Name]
@@ -705,10 +705,10 @@ Let me know if anything changes. Looking forward to performing with you!
 
 Warm regards,
 Matt
-Mobil Music Salon`},
-  {title:"Following Up on Google Form",subject:"Quick follow-up — Mobil Music Salon availability",body:`Hi [Name],
+Mobile Music Salon`},
+  {title:"Following Up on Google Form",subject:"Quick follow-up — Mobile Music Salon availability",body:`Hi [Name],
 
-Hope you're well! I'm finalizing the schedule for our upcoming Mobil Music Salon recital and I haven't yet received your availability form.
+Hope you're well! I'm finalizing the schedule for our upcoming Mobile Music Salon recital and I haven't yet received your availability form.
 
 Could you fill it out when you get a chance? It only takes a minute:
 [Google Form Link]
@@ -717,9 +717,9 @@ I need to lock in a date soon — the sooner the better. Thanks so much!
 
 Best,
 Matt`},
-  {title:"Announcing the Recital Date",subject:"Mobil Music Salon — Save the Date!",body:`Hi everyone,
+  {title:"Announcing the Recital Date",subject:"Mobile Music Salon — Save the Date!",body:`Hi everyone,
 
-We have a date! Our next Mobil Music Salon recital will be:
+We have a date! Our next Mobile Music Salon recital will be:
 
 📅 [Date] at [Time]
 📍 [Venue Name], [Address]
@@ -729,8 +729,8 @@ More details coming soon. Reply to reserve your tickets!
 
 See you there,
 Matt
-mobilmusicsalon.org`},
-  {title:"Selling Tickets to Guests",subject:"Tickets now available — Mobil Music Salon",body:`Hi [Name],
+Mobilemusicsalon.org`},
+  {title:"Selling Tickets to Guests",subject:"Tickets now available — Mobile Music Salon",body:`Hi [Name],
 
 Tickets are now available for our upcoming recital!
 
@@ -744,10 +744,10 @@ To get your tickets, reply to this email or reach me at [phone/email].
 Thank you for your support!
 
 Matt
-mobilmusicsalon.org`},
+Mobilemusicsalon.org`},
   {title:"Thank You to Performers (Post-Event)",subject:"Thank you — you were wonderful!",body:`Hi [Name],
 
-I just wanted to say thank you for performing at Mobil Music Salon. Your performance of [Piece] was truly special and the audience loved every moment.
+I just wanted to say thank you for performing at Mobile Music Salon. Your performance of [Piece] was truly special and the audience loved every moment.
 
 Together we raised $[Amount] for Yale New Haven Children's Hospital. It would not have happened without you.
 
@@ -755,22 +755,22 @@ I hope to have you back for a future recital. Thank you from the bottom of my he
 
 With gratitude,
 Matt
-Mobil Music Salon`},
-  {title:"Thank You to the Audience (Post-Event)",subject:"Thank you for coming to Mobil Music Salon!",body:`Dear friends,
+Mobile Music Salon`},
+  {title:"Thank You to the Audience (Post-Event)",subject:"Thank you for coming to Mobile Music Salon!",body:`Dear friends,
 
-Thank you so much for joining us at Mobil Music Salon. Your presence and generosity made the evening truly memorable.
+Thank you so much for joining us at Mobile Music Salon. Your presence and generosity made the evening truly memorable.
 
 Together we raised $[Amount] for Yale New Haven Children's Hospital. Every dollar makes a difference for the children and families they serve.
 
-Stay tuned for our next recital at mobilmusicsalon.org.
+Stay tuned for our next recital at Mobilemusicsalon.org.
 
 With warm appreciation,
-Matt & the Mobil Music Salon team`},
-  {title:"Inviting a Chapter Lead",subject:"Bringing Mobil Music Salon to [City] — want to lead it?",body:`Hi [Name],
+Matt & the Mobile Music Salon team`},
+  {title:"Inviting a Chapter Lead",subject:"Bringing Mobile Music Salon to [City] — want to lead it?",body:`Hi [Name],
 
 I hope you're doing well! I wanted to reach out about something I think you'd be a natural fit for.
 
-I run a nonprofit called Mobil Music Salon — we organize classical music recitals where all ticket proceeds go to children's hospitals. We just completed our first recital in Glastonbury, CT, and I'm now looking to expand to other cities.
+I run a nonprofit called Mobile Music Salon — we organize classical music recitals where all ticket proceeds go to children's hospitals. We just completed our first recital in Glastonbury, CT, and I'm now looking to expand to other cities.
 
 I'd love for you to lead the [City] chapter. It involves finding a few local musicians, booking a small venue, and selling tickets. I'll guide you through the whole process and provide all the tools and templates you need.
 
@@ -778,7 +778,7 @@ Would you be open to a quick call to learn more?
 
 Best,
 Matt
-mobilmusicsalon.org`},
+Mobilemusicsalon.org`},
 ];
 function renderEmails(){
   document.getElementById("email-list").innerHTML=EMAILS.map((e,i)=>`
