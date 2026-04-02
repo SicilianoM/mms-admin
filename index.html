@@ -630,7 +630,20 @@ async function loadData(){
   if(!db){renderAll();return;}
   try{
     const{data}=await db.from("app_data").select("*").eq("key","main").single();
-    if(data&&data.value) state={...DEFAULT_DATA,...data.value};
+    if(data&&data.value){
+      const saved=data.value;
+      // Deep merge — keep all saved fields, fill in missing ones from defaults
+      state={...DEFAULT_DATA,...saved};
+      // Ensure recitals array is valid and has the right structure
+      if(!state.recitals||!Array.isArray(state.recitals)||!state.recitals.length){
+        state.recitals=JSON.parse(JSON.stringify(DEFAULT_DATA.recitals));
+      }
+      // Ensure each recital has all required fields
+      state.recitals=state.recitals.map(r=>({
+        dates:[], performers:[], runningOrder:[], progDate:"", progVenue:"",
+        ...r
+      }));
+    }
   }catch(e){console.log("Using defaults");}
   renderAll();
 }
@@ -728,7 +741,7 @@ function renderRecitalPills(){
   `).join("");
 }
 function selectRecital(id){
-  activeRecitalId=id; editingPerformer=null;
+  activeRecitalId=id; editingPerformer=null; showingAddPerformer=false;
   renderRecitalPills(); renderRecitalContent();
 }
 function createRecital(){
@@ -814,7 +827,7 @@ function renderRecitalContent(){
         <div class="section-label">Performers</div>
         <button class="btn-primary" onclick="showAddPerformer()">+ Add Performer</button>
       </div>
-      <div class="add-form hidden" id="rc-add-performer">
+      <div class="add-form" id="rc-add-performer" style="${showingAddPerformer?'':'display:none'}">
         <div class="grid-2">
           <div class="form-field"><div class="form-label">Name</div><input id="rc-p-name" class="fi"/></div>
           <div class="form-field"><div class="form-label">Piece</div><input id="rc-p-piece" class="fi"/></div>
@@ -830,7 +843,7 @@ function renderRecitalContent(){
           </div>
           <div class="form-field"><div class="form-label">Notes</div><input id="rc-p-notes" class="fi" placeholder="Optional"/></div>
         </div>
-        <div class="form-actions"><button class="btn-primary" onclick="addPerformerToRecital()">Add Performer</button><button class="btn-secondary" onclick="tog('rc-add-performer')">Cancel</button></div>
+        <div class="form-actions"><button class="btn-primary" onclick="addPerformerToRecital()">Add Performer</button><button class="btn-secondary" onclick="hideAddPerformer()">Cancel</button></div>
       </div>
       <div class="performer-list" id="rc-performer-list"></div>
     </div>
@@ -939,6 +952,9 @@ function renderAvailability(rec){
 
 // ── Performers ──
 function showAddPerformer(){ tog("rc-add-performer"); }
+let showingAddPerformer=false;
+function showAddPerformer(){ showingAddPerformer=true; renderRecitalContent(); }
+function hideAddPerformer(){ showingAddPerformer=false; renderRecitalContent(); }
 function addPerformerToRecital(){
   const rec=activeRecital(); if(!rec)return;
   const name=document.getElementById("rc-p-name").value.trim(); if(!name)return;
@@ -950,9 +966,7 @@ function addPerformerToRecital(){
     availability:[], preference:"", status:"pending"
   };
   rec.performers.push(newP);
-  ["rc-p-name","rc-p-piece","rc-p-notes"].forEach(id=>document.getElementById(id).value="");
-  document.getElementById("rc-p-accompaniment").value="None";
-  document.getElementById("rc-add-performer").classList.add("hidden");
+  showingAddPerformer=false;
   saveData(); renderRecitalContent();
 }
 function deletePerformerFromRecital(pid){
