@@ -629,7 +629,9 @@ function initSB(){ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
 async function loadData(){
   if(!db){renderAll();return;}
   try{
-    const{data}=await db.from("app_data").select("*").eq("key","main").single();
+    const{data,error}=await db.from("app_data").select("*").eq("key","main")
+  .order("updated_at",{ascending:false}).limit(1).maybeSingle();
+if(error) console.warn("Load error:",error.message);
     if(data&&data.value){
       const saved=data.value;
       // Deep merge — keep all saved fields, fill in missing ones from defaults
@@ -649,12 +651,29 @@ async function loadData(){
 }
 async function saveData(){
   if(!db)return;
-  document.getElementById("saving-ind").classList.remove("hidden");
+  document.getElementById("save-status").textContent="saving…";
+  document.getElementById("save-status").style.color="#c4a882";
   clearTimeout(savingTimeout);
   savingTimeout=setTimeout(async()=>{
-    try{ await db.from("app_data").upsert({key:"main",value:state,updated_at:new Date().toISOString()}); }
-    catch(e){console.error(e);}
-    document.getElementById("saving-ind").classList.add("hidden");
+    try{
+      const{error}=await db.from("app_data").upsert(
+        {key:"main",value:state,updated_at:new Date().toISOString()},
+        {onConflict:"key"}
+      );
+      if(error){
+        console.error("Save error:",error.message);
+        document.getElementById("save-status").textContent="⚠ Save failed";
+        document.getElementById("save-status").style.color="#e57373";
+      } else {
+        document.getElementById("save-status").textContent="✓ Saved";
+        document.getElementById("save-status").style.color="#22c55e";
+        setTimeout(()=>{document.getElementById("save-status").textContent="";},3000);
+      }
+    }catch(e){
+      console.error(e);
+      document.getElementById("save-status").textContent="⚠ Save failed";
+      document.getElementById("save-status").style.color="#e57373";
+    }
   },800);
 }
 
