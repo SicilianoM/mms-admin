@@ -585,7 +585,10 @@ function renderAll(){
   document.getElementById("loading-msg").classList.add("hidden");
   document.getElementById("tab-recitals").classList.remove("hidden");
   if(!state.recitals||!state.recitals.length) state.recitals=JSON.parse(JSON.stringify(DEFAULT_DATA.recitals));
-  if(!activeRecitalId) activeRecitalId=state.recitals[0].id;
+ if(!activeRecitalId){
+  const first=state.recitals.find(r=>!r.archived)||state.recitals[0];
+  activeRecitalId=first.id;
+}
   renderStats(); renderRecitalPills(); renderRecitalContent(); renderTickets();
 }
 
@@ -612,10 +615,14 @@ function renderStats(){
 // RECITALS — PILLS & CREATION
 // ═══════════════════════════════════════════════
 function renderRecitalPills(){
-  document.getElementById("recital-pills").innerHTML=state.recitals.map(r=>`
-    <button class="recital-tab-pill ${r.id===activeRecitalId?'active':''}" onclick="selectRecital(${r.id})">
-      ${r.name}${r.lockedDate?` <span style="font-size:10px;background:${r.id===activeRecitalId?'rgba(255,255,255,0.25)':'#d4f4e2'};color:${r.id===activeRecitalId?'#fff':'#1a6b3a'};padding:1px 7px;border-radius:8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-left:4px">✓ Confirmed</span>`:''}
+  const sorted=[...state.recitals].sort((a,b)=>(a.archived?1:0)-(b.archived?1:0));
+  document.getElementById("recital-pills").innerHTML=sorted.map(r=>`
+    <button class="recital-tab-pill ${r.id===activeRecitalId?'active':''}" onclick="selectRecital(${r.id})" style="${r.archived?'opacity:0.45':''}">
+      ${r.name}
+      ${r.lockedDate?`<span style="font-size:10px;background:${r.id===activeRecitalId?'rgba(255,255,255,0.25)':'#d4f4e2'};color:${r.id===activeRecitalId?'#fff':'#1a6b3a'};padding:1px 7px;border-radius:8px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;margin-left:4px">✓ Confirmed</span>`:''}
+      ${r.archived?`<span style="font-size:10px;background:${r.id===activeRecitalId?'rgba(255,255,255,0.2)':'#f3f4f6'};color:${r.id===activeRecitalId?'rgba(255,255,255,0.7)':'#6b7280'};padding:1px 7px;border-radius:8px;font-weight:600;text-transform:uppercase;margin-left:4px">Archived</span>`:''}
     </button>
+    <button onclick="toggleArchiveRecital(${r.id})" title="${r.archived?'Unarchive':'Archive'}" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:14px;padding:0 4px;margin-left:-4px">${r.archived?'↩':'📦'}</button>
     <button onclick="deleteRecital(${r.id})" title="Delete recital" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:17px;padding:0 4px;margin-left:-4px;margin-right:6px">×</button>
   `).join("");
 }
@@ -631,6 +638,15 @@ function createRecital(){
   document.getElementById("new-recital-name").value="";
   document.getElementById("new-recital-form").classList.add("hidden");
   saveData(); renderRecitalPills(); renderRecitalContent(); renderStats();
+}
+  function toggleArchiveRecital(id){
+  const rec=getRecital(id); if(!rec)return;
+  rec.archived=!rec.archived;
+  if(rec.archived&&activeRecitalId===id){
+    const first=state.recitals.find(r=>!r.archived);
+    if(first) activeRecitalId=first.id;
+  }
+  saveData(); renderRecitalPills(); renderRecitalContent();
 }
 function deleteRecital(id){
   if(state.recitals.length<=1){alert("You need at least one recital.");return;}
