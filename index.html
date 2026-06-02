@@ -482,7 +482,7 @@ const DEFAULT_DATA = {
 // STATE
 // ═══════════════════════════════════════════════
 let db=null, state=JSON.parse(JSON.stringify(DEFAULT_DATA));
-let activeRecitalId=null, editingPerformer=null, savingTimeout=null, activeChecklistId=null;
+let activeRecitalId=null, editingPerformer=null, editingProfile=null, savingTimeout=null, activeChecklistId=null;
 
 // ═══════════════════════════════════════════════
 // SUPABASE
@@ -1399,8 +1399,29 @@ function renderPerformerProfiles(){
   const empty=document.getElementById("no-performer-profiles");
   if(!state.performerProfiles.length){list.innerHTML="";empty.classList.remove("hidden");return;}
   empty.classList.add("hidden");
+  const chapterOptions=`<option value="">None / Unassigned</option>`+
+    (state.chapters||[]).map(c=>`<option value="${c.id}">${c.city}</option>`).join('');
   list.innerHTML=state.performerProfiles.map(p=>{
     const chapter=(state.chapters||[]).find(c=>String(c.id)===String(p.chapter));
+    if(editingProfile===p.id) return `
+      <div class="contact-card" style="flex-direction:column;align-items:stretch;gap:10px">
+        <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:2px">Editing: ${p.name}</div>
+        <div class="grid-3">
+          <div class="form-field"><div class="form-label">Full Name</div><input id="ep-name" class="fi" value="${p.name||''}"/></div>
+          <div class="form-field"><div class="form-label">Instrument</div><input id="ep-instrument" class="fi" value="${p.instrument||''}"/></div>
+          <div class="form-field"><div class="form-label">Chapter</div><select id="ep-chapter" class="fi">${chapterOptions}</select></div>
+        </div>
+        <div class="grid-3">
+          <div class="form-field"><div class="form-label">School / Affiliation</div><input id="ep-school" class="fi" value="${p.school||''}"/></div>
+          <div class="form-field"><div class="form-label">Email</div><input id="ep-email" type="email" class="fi" value="${p.email||''}"/></div>
+          <div class="form-field"><div class="form-label">Phone</div><input id="ep-phone" class="fi" value="${p.phone||''}"/></div>
+        </div>
+        <div class="form-field"><div class="form-label">Notes</div><textarea id="ep-notes" class="fi">${p.notes||''}</textarea></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="saveEditProfile(${p.id})">Save</button>
+          <button class="btn-secondary" onclick="cancelEditProfile()">Cancel</button>
+        </div>
+      </div>`;
     return `<div class="contact-card">
       <div>
         <div class="contact-name">${p.name}</div>
@@ -1411,9 +1432,18 @@ function renderPerformerProfiles(){
         ${p.phone?`<div class="contact-detail">📞 ${p.phone}</div>`:''}
         ${p.notes?`<div class="contact-detail" style="color:#a09080;font-style:italic">📝 ${p.notes}</div>`:''}
       </div>
-      <button class="del-btn" onclick="rmPerformerProfile(${p.id})">✕</button>
+      <div style="display:flex;gap:6px">
+        <button class="btn-secondary btn-sm" onclick="startEditProfile(${p.id})">Edit</button>
+        <button class="del-btn" onclick="rmPerformerProfile(${p.id})">✕</button>
+      </div>
     </div>`;
   }).join('');
+  // Set chapter dropdown to saved value after DOM is built
+  if(editingProfile){
+    const p=state.performerProfiles.find(x=>x.id===editingProfile);
+    const sel=document.getElementById("ep-chapter");
+    if(p&&sel) sel.value=p.chapter||"";
+  }
 }
 function addPerformerProfile(){
   const name=document.getElementById("pp-name").value.trim(); if(!name)return;
@@ -1436,7 +1466,21 @@ function rmPerformerProfile(id){
   state.performerProfiles=state.performerProfiles.filter(p=>p.id!==id);
   saveData(); renderPerformerProfiles();
 }
-
+function startEditProfile(id){ editingProfile=id; renderPerformerProfiles(); }
+function cancelEditProfile(){ editingProfile=null; renderPerformerProfiles(); }
+function saveEditProfile(id){
+  const p=state.performerProfiles.find(x=>x.id===id); if(!p)return;
+  const name=document.getElementById("ep-name").value.trim();
+  if(name) p.name=name;
+  p.instrument=document.getElementById("ep-instrument").value;
+  p.chapter=document.getElementById("ep-chapter").value;
+  p.school=document.getElementById("ep-school").value;
+  p.email=document.getElementById("ep-email").value;
+  p.phone=document.getElementById("ep-phone").value;
+  p.notes=document.getElementById("ep-notes").value;
+  editingProfile=null;
+  saveData(); renderPerformerProfiles();
+}
 // ═══════════════════════════════════════════════
 // CHAPTERS
 // ═══════════════════════════════════════════════
