@@ -141,6 +141,20 @@
     .hidden{display:none!important}
     @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
     .shake{animation:shake .5s ease}
+    .activity-feed-wrap{margin-top:14px}
+.activity-feed-title{font-size:10px;letter-spacing:2px;color:rgba(196,168,130,.7);text-transform:uppercase;margin-bottom:8px}
+.activity-item{font-size:12px;color:#e8d8c4;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.08);display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.activity-item:last-child{border-bottom:none}
+.activity-time{color:#c4a882;font-size:11px;white-space:nowrap;flex-shrink:0}
+.user-card{border:1px solid #e8e0d4;border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.user-card-row{display:flex;justify-content:space-between;align-items:flex-start}
+.user-name{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:2px}
+.role-badge-admin{background:#fce7f3;color:#9d174d;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+.role-badge-cl{background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+.message-card{border:1px solid #e8e0d4;border-radius:10px;padding:14px 18px;margin-bottom:10px}
+.message-card.unread{border-color:#7c5c3e;background:#faf6f0}
+.message-meta{font-size:11px;color:#c4a882;margin-bottom:6px}
+.message-text{font-size:14px;color:#3d2b1f;line-height:1.6}
     @media print{.tabs,.header .btn-secondary,.card-header button,.no-print{display:none!important}body{background:#fff}.card{box-shadow:none}}
   </style>
 </head>
@@ -151,7 +165,8 @@
   <div class="login-box" id="login-box">
     <div class="emoji">🎼</div>
     <h1>Mobile Music Salon</h1>
-    <div class="subtitle">Admin Dashboard</div>
+    <div class="subtitle">Dashboard</div>
+    <input type="text" id="name-input" placeholder="Your name (chapter leaders)" style="margin-bottom:8px"/>
     <input type="password" id="pw-input" placeholder="Enter password"/>
     <div class="err-msg hidden" id="pw-error">Incorrect password. Try again.</div>
     <button class="btn-primary" style="width:100%;padding:12px;margin-top:8px" onclick="tryLogin()">Sign In</button>
@@ -177,7 +192,10 @@
       <div class="stat-card"><div class="val" id="s-chapters">0</div><div class="lbl">Chapters</div></div>
     </div>
   </div>
-
+<div id="admin-activity-feed" class="activity-feed-wrap hidden">
+  <div class="activity-feed-title">Recent Chapter Activity</div>
+  <div id="activity-feed-items"></div>
+</div>
   <div class="tabs">
     <button class="tab-btn active" onclick="go('recitals',this)">🎻 Recitals</button>
     <button class="tab-btn" onclick="go('tickets',this)">🎟 Tickets</button>
@@ -190,6 +208,7 @@
     <button class="tab-btn" onclick="go('emails',this)">✉️ Emails</button>
     <button class="tab-btn" onclick="go('performers',this)">🎼 Performers</button>
     <button class="tab-btn" onclick="go('chapters',this)">🗺 Chapters</button>
+    <button class="tab-btn" id="users-tab-btn" onclick="go('users',this)">👥 Users</button>
   </div>
 
   <div class="content">
@@ -203,18 +222,24 @@
             <div class="section-label">Your Recitals</div>
             <div class="section-desc">Each recital has its own performers, dates, and availability schedule.</div>
           </div>
-          <button class="btn-primary" onclick="tog('new-recital-form')">+ New Recital</button>
+          <button class="btn-primary" onclick="showNewRecitalForm()">+ New Recital</button>
         </div>
-        <div class="add-form hidden" id="new-recital-form" style="margin-bottom:16px">
-          <div class="form-field" style="margin-bottom:10px">
-            <div class="form-label">Recital Name</div>
-            <input id="new-recital-name" class="fi" placeholder="e.g. Recital #2 — Boston" onkeydown="if(event.key==='Enter')createRecital()"/>
-          </div>
-          <div class="form-actions">
-            <button class="btn-primary" onclick="createRecital()">Create Recital</button>
-            <button class="btn-secondary" onclick="tog('new-recital-form')">Cancel</button>
-          </div>
-        </div>
+       <div class="add-form hidden" id="new-recital-form" style="margin-bottom:16px">
+  <div class="grid-2">
+    <div class="form-field">
+      <div class="form-label">Recital Name</div>
+      <input id="new-recital-name" class="fi" placeholder="e.g. Recital #2 — Boston"/>
+    </div>
+    <div class="form-field">
+      <div class="form-label">Chapter</div>
+      <select id="new-recital-chapter" class="fi"><option value="">Admin / National</option></select>
+    </div>
+  </div>
+  <div class="form-actions">
+    <button class="btn-primary" onclick="createRecital()">Create Recital</button>
+    <button class="btn-secondary" onclick="tog('new-recital-form')">Cancel</button>
+  </div>
+</div>
         <div class="recital-selector-bar" id="recital-pills"></div>
       </div>
       <div id="recital-content"></div>
@@ -442,9 +467,174 @@
         <div class="empty hidden" id="no-chapters">No chapters yet.</div>
       </div>
     </div>
-
+<!-- USERS & MESSAGES -->
+<div id="tab-users" class="hidden">
+  <div class="card">
+    <div class="card-header">
+      <div><div class="section-label">User Accounts</div><div class="section-desc">Passwords stored in Supabase under key "users".</div></div>
+      <button class="btn-primary" onclick="tog('add-user-form')">+ Add User</button>
+    </div>
+    <div class="add-form hidden" id="add-user-form">
+      <div class="grid-3">
+        <div class="form-field"><div class="form-label">Full Name</div><input id="u-name" class="fi"/></div>
+        <div class="form-field"><div class="form-label">Password</div><input id="u-password" class="fi" placeholder="Set a password"/></div>
+        <div class="form-field"><div class="form-label">Role</div>
+          <select id="u-role" class="fi" onchange="toggleChapterSelect()">
+            <option value="admin">Admin</option>
+            <option value="chapter_leader">Chapter Leader</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" id="u-chapter-field" style="display:none;margin-top:10px">
+        <div class="form-label">Assigned Chapter</div>
+        <select id="u-chapter" class="fi"><option value="">Select chapter…</option></select>
+      </div>
+      <div class="form-actions" style="margin-top:12px">
+        <button class="btn-primary" onclick="addUser()">Save User</button>
+        <button class="btn-secondary" onclick="tog('add-user-form')">Cancel</button>
+      </div>
+    </div>
+    <div id="users-list"><div class="empty">No users yet.</div></div>
+  </div>
+  <div class="card" style="margin-top:20px">
+    <div class="card-header">
+      <div><div class="section-label">Messages to Chapters</div><div class="section-desc">Chapter leaders see these in their Messages tab.</div></div>
+    </div>
+    <div class="add-form" style="margin-bottom:16px">
+      <div class="grid-2">
+        <div class="form-field"><div class="form-label">Send To</div>
+          <select id="msg-to-chapter" class="fi"><option value="">Select chapter…</option></select>
+        </div>
+        <div class="form-field"><div class="form-label">Message</div>
+          <input id="msg-text" class="fi" placeholder="Type your message…"/>
+        </div>
+      </div>
+      <div class="form-actions"><button class="btn-primary" onclick="sendMessage()">Send Message</button></div>
+    </div>
+    <div id="sent-messages-list"></div>
+  </div>
+</div>
   </div><!-- /content -->
 </div><!-- /app -->
+  <!-- CHAPTER LEADER APP -->
+<div id="cl-app" class="hidden">
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="eyebrow">Nonprofit · Yale New Haven Children's Hospital</div>
+        <h1 id="cl-title" style="font-family:'Playfair Display',serif;font-size:24px;color:#fff;font-weight:700;margin-bottom:2px">Chapter — Mobile Music Salon</h1>
+        <div class="subline">mobilemusicsalon.org</div>
+      </div>
+      <button class="btn-secondary" style="color:#c4a882;border-color:rgba(196,168,130,.4);font-size:12px" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="tabs" id="cl-tabs">
+    <button class="tab-btn active" onclick="clGo('recitals',this)">🎻 Recitals</button>
+    <button class="tab-btn" onclick="clGo('tickets',this)">🎟 Tickets</button>
+    <button class="tab-btn" onclick="clGo('planning',this)">✅ Planning</button>
+    <button class="tab-btn" onclick="clGo('history',this)">🎵 Performer History</button>
+    <button class="tab-btn" onclick="clGo('notes',this)">📝 Notes</button>
+    <button class="tab-btn" id="cl-messages-tab-btn" onclick="clGo('messages',this)">✉️ Messages</button>
+  </div>
+  <div class="content">
+    <!-- CL Recitals -->
+    <div id="cl-tab-recitals">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="section-label">Your Chapter's Recitals</div><div class="section-desc">Recitals assigned to your chapter by admin.</div></div>
+        </div>
+        <div class="recital-selector-bar" id="cl-recital-pills"></div>
+        <div class="empty hidden" id="cl-no-recitals">No recitals assigned to your chapter yet.</div>
+      </div>
+      <div id="cl-recital-content"></div>
+    </div>
+    <!-- CL Tickets -->
+    <div id="cl-tab-tickets" class="hidden">
+      <div class="card">
+        <div class="card-header"><div class="section-label">Ticket Sales</div><button class="btn-primary" onclick="tog('cl-add-ticket')">+ Log Sale</button></div>
+        <div class="add-form hidden" id="cl-add-ticket">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Buyer Name</div><input id="cl-t-buyer" class="fi"/></div>
+            <div class="form-field"><div class="form-label"># Tickets</div><input id="cl-t-qty" type="number" class="fi" value="1"/></div>
+            <div class="form-field"><div class="form-label">Amount Paid ($)</div><input id="cl-t-amount" type="number" class="fi"/></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Date</div><input id="cl-t-date" type="date" class="fi"/></div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="cl-t-notes" class="fi" placeholder="Optional"/></div>
+          </div>
+          <div class="form-actions"><button class="btn-primary" onclick="clAddTicket()">Save</button><button class="btn-secondary" onclick="tog('cl-add-ticket')">Cancel</button></div>
+        </div>
+        <table class="dt"><thead><tr><th>Buyer</th><th>Qty</th><th>Amount</th><th>Date</th><th>Notes</th><th></th></tr></thead><tbody id="cl-ticket-tbody"></tbody></table>
+        <div class="empty hidden" id="cl-no-tickets">No ticket sales yet.</div>
+      </div>
+    </div>
+    <!-- CL Planning -->
+    <div id="cl-tab-planning" class="hidden">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="section-label">Concert Checklists</div></div>
+          <button class="btn-primary" onclick="tog('cl-new-checklist-form')">+ New Checklist</button>
+        </div>
+        <div class="add-form hidden" id="cl-new-checklist-form" style="margin-bottom:16px">
+          <div class="form-field" style="margin-bottom:10px">
+            <div class="form-label">Checklist Name</div>
+            <input id="cl-new-checklist-name" class="fi" placeholder="e.g. Spring Recital"/>
+          </div>
+          <div class="form-actions">
+            <button class="btn-primary" onclick="clAddChecklist()">Create</button>
+            <button class="btn-secondary" onclick="tog('cl-new-checklist-form')">Cancel</button>
+          </div>
+        </div>
+        <div class="checklist-pills" id="cl-checklist-pills"></div>
+      </div>
+      <div id="cl-checklist-container"></div>
+    </div>
+    <!-- CL History -->
+    <div id="cl-tab-history" class="hidden">
+      <div class="card">
+        <div class="card-header"><div class="section-label">Performer History</div><button class="btn-primary" onclick="tog('cl-add-history')">+ Log Performance</button></div>
+        <div class="add-form hidden" id="cl-add-history">
+          <div class="grid-3">
+            <div class="form-field"><div class="form-label">Performer Name</div><input id="cl-h-name" class="fi"/></div>
+            <div class="form-field"><div class="form-label">Recital</div><input id="cl-h-recital" class="fi"/></div>
+            <div class="form-field"><div class="form-label">Date</div><input id="cl-h-date" type="date" class="fi"/></div>
+          </div>
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Piece</div><input id="cl-h-piece" class="fi"/></div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="cl-h-notes" class="fi" placeholder="Optional"/></div>
+          </div>
+          <div class="form-actions"><button class="btn-primary" onclick="clAddHistory()">Save</button><button class="btn-secondary" onclick="tog('cl-add-history')">Cancel</button></div>
+        </div>
+        <div id="cl-history-list"></div>
+        <div class="empty hidden" id="cl-no-history">No performance history yet.</div>
+      </div>
+    </div>
+    <!-- CL Notes -->
+    <div id="cl-tab-notes" class="hidden">
+      <div class="card">
+        <div class="card-header"><div class="section-label">Notes</div><button class="btn-primary" onclick="tog('cl-add-note')">+ New Note</button></div>
+        <div class="add-form hidden" id="cl-add-note">
+          <div class="grid-2">
+            <div class="form-field"><div class="form-label">Recital</div><input id="cl-note-recital" class="fi" placeholder="e.g. Spring Recital"/></div>
+            <div class="form-field"><div class="form-label">Title</div><input id="cl-note-title" class="fi"/></div>
+          </div>
+          <div class="form-field"><div class="form-label">Note</div><textarea id="cl-note-text" class="fi" style="min-height:100px"></textarea></div>
+          <div class="form-actions"><button class="btn-primary" onclick="clAddNote()">Save</button><button class="btn-secondary" onclick="tog('cl-add-note')">Cancel</button></div>
+        </div>
+        <div id="cl-notes-list"></div>
+        <div class="empty hidden" id="cl-no-notes">No notes yet.</div>
+      </div>
+    </div>
+    <!-- CL Messages -->
+    <div id="cl-tab-messages" class="hidden">
+      <div class="card">
+        <div class="section-label" style="margin-bottom:16px">Messages from Admin</div>
+        <div id="cl-messages-list"></div>
+        <div class="empty hidden" id="cl-no-messages">No messages yet.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ═══════════════════════════════════════════════
@@ -454,7 +644,7 @@ const ADMIN_PASSWORD = "mms2026";
 const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
 
-const ALL_TABS = ["recitals","tickets","planning","contacts","venues","history","notes","reminders","emails","performers","chapters"];
+const ALL_TABS = ["recitals","tickets","planning","contacts","venues","history","notes","reminders","emails","performers","chapters","users"];
 
 const DEFAULT_DATA = {
   recitals: [
@@ -489,7 +679,7 @@ let activeRecitalId=null, editingPerformer=null, editingProfile=null, savingTime
 // ═══════════════════════════════════════════════
 function initSB(){ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY); }
 async function loadData(){
-  if(!db){renderAll();return;}
+  if(!db){return;}
   try{
     const{data,error}=await db.from("app_data").select("*").eq("key","main")
       .order("updated_at",{ascending:false}).limit(1).maybeSingle();
@@ -507,7 +697,7 @@ async function loadData(){
       if(!state.performerProfiles) state.performerProfiles=[];
     }
   }catch(e){console.log("Using defaults");}
-  renderAll();
+ 
 }
 async function saveData(){
   if(!db)return;
@@ -540,29 +730,59 @@ async function saveData(){
 // ═══════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════
-function tryLogin(){
-  if(document.getElementById("pw-input").value===ADMIN_PASSWORD){
-    sessionStorage.setItem("mms","1");
+async function tryLogin(){
+  const nameVal=document.getElementById("name-input").value.trim();
+  const pwVal=document.getElementById("pw-input").value;
+  const errEl=document.getElementById("pw-error");
+  const btn=document.querySelector("#login-box .btn-primary");
+  btn.textContent="Signing in…"; btn.disabled=true;
+  errEl.classList.add("hidden");
+  if(pwVal===ADMIN_PASSWORD){
+    session={userId:"admin",role:"admin",chapterId:null,userName:nameVal||"Admin"};
+    sessionStorage.setItem("mms_session",JSON.stringify(session));
     document.getElementById("login-screen").classList.add("hidden");
     document.getElementById("app").classList.remove("hidden");
-    initSB(); loadData();
+    initSB();
+    await loadData();
+    await loadExtraData();
+    startApp();
+    btn.textContent="Sign In"; btn.disabled=false;
+    return;
+  }
+  initSB();
+  await loadExtraData();
+  const user=appUsers.find(u=>u.name===nameVal&&u.password===pwVal);
+  if(user){
+    session={userId:user.id,role:user.role,chapterId:user.chapterId,userName:user.name};
+    sessionStorage.setItem("mms_session",JSON.stringify(session));
+    document.getElementById("login-screen").classList.add("hidden");
+    await loadData();
+    startApp();
   } else {
-    document.getElementById("pw-error").classList.remove("hidden");
+    errEl.textContent="Incorrect name or password."; errEl.classList.remove("hidden");
     const b=document.getElementById("login-box");
     b.classList.add("shake"); setTimeout(()=>b.classList.remove("shake"),500);
   }
+  btn.textContent="Sign In"; btn.disabled=false;
 }
-function logout(){sessionStorage.removeItem("mms");location.reload();}
+function logout(){sessionStorage.removeItem("mms_session");sessionStorage.removeItem("mms");location.reload();}
 document.getElementById("pw-input").addEventListener("keydown",e=>{if(e.key==="Enter")tryLogin();});
-if(sessionStorage.getItem("mms")==="1"){
-  document.getElementById("login-screen").classList.add("hidden");
-  document.getElementById("app").classList.remove("hidden");
-  initSB(); loadData();
-} else {
-  document.getElementById("loading-msg").classList.add("hidden");
-  document.getElementById("tab-recitals").classList.remove("hidden");
-}
-
+(function initApp(){
+  const saved=sessionStorage.getItem("mms_session");
+  const legacy=sessionStorage.getItem("mms");
+  if(saved||legacy==="1"){
+    try{session=saved?JSON.parse(saved):{userId:"admin",role:"admin",chapterId:null,userName:"Admin"};}
+    catch(e){session={userId:"admin",role:"admin",chapterId:null,userName:"Admin"};}
+    if(session.role==="admin"){
+      document.getElementById("login-screen").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+    } else {
+      document.getElementById("login-screen").classList.add("hidden");
+    }
+    initSB();
+    loadData().then(()=>loadExtraData().then(()=>startApp()));
+  }
+})();
 // ═══════════════════════════════════════════════
 // TABS & UTILS
 // ═══════════════════════════════════════════════
@@ -571,7 +791,7 @@ function go(name,btn){
   document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
   document.getElementById("tab-"+name).classList.remove("hidden");
   btn.classList.add("active");
-  const m={planning:renderPlanning,emails:renderEmails,contacts:renderContacts,venues:renderVenues,history:renderHistory,notes:renderNotes,chapters:renderChapters,performers:renderPerformerProfiles,reminders:renderReminders};
+  const m={planning:renderPlanning,emails:renderEmails,contacts:renderContacts,venues:renderVenues,history:renderHistory,notes:renderNotes,chapters:renderChapters,performers:renderPerformerProfiles,reminders:renderReminders,users:renderUsersTab};
   if(m[name]) m[name]();
 }
 function tog(id){document.getElementById(id).classList.toggle("hidden");}
@@ -633,7 +853,8 @@ function selectRecital(id){
 function createRecital(){
   const name=document.getElementById("new-recital-name").value.trim(); if(!name)return;
   const id=Date.now();
-  state.recitals.push({id,name,dates:[],performers:[],runningOrder:[],progDate:"",progVenue:""});
+  const chapterId=document.getElementById("new-recital-chapter")?.value||null;
+state.recitals.push({id,name,dates:[],performers:[],runningOrder:[],progDate:"",progVenue:"",chapterId});
   activeRecitalId=id;
   document.getElementById("new-recital-name").value="";
   document.getElementById("new-recital-form").classList.add("hidden");
@@ -1540,6 +1761,487 @@ function addChapter(){
   saveData(); renderChapters(); renderStats();
 }
 function rmChapter(id){state.chapters=state.chapters.filter(c=>c.id!==id);saveData();renderChapters();renderStats();}
+  // ═══════════════════════════════════════════════
+// NEW: SESSION & EXTRA-DATA GLOBALS
+// ═══════════════════════════════════════════════
+let session=null, appUsers=[], activityLog=[], messages=[], editingUser=null;
+let clActiveRecitalId=null, clActiveChecklistId=null;
+const CL_TABS=["recitals","tickets","planning","history","notes","messages"];
+
+function timeAgo(iso){
+  const diff=Date.now()-new Date(iso),min=Math.floor(diff/6e4),hr=Math.floor(diff/36e5),day=Math.floor(diff/864e5);
+  if(min<1)return"just now";if(min<60)return min+"m ago";
+  if(hr<24)return hr+"h ago";if(day===1)return"yesterday";return day+"d ago";
+}
+
+async function loadExtraData(){
+  if(!db)return;
+  try{
+    const{data}=await db.from("app_data").select("*").in("key",["users","activity_log","messages"]);
+    if(data)data.forEach(row=>{
+      if(row.key==="users")appUsers=row.value||[];
+      if(row.key==="activity_log")activityLog=row.value||[];
+      if(row.key==="messages")messages=row.value||[];
+    });
+  }catch(e){console.log("loadExtraData error",e);}
+}
+
+async function saveKey(key,value){
+  if(!db)return;
+  try{await db.from("app_data").upsert({key,value,updated_at:new Date().toISOString()},{onConflict:"key"});}
+  catch(e){console.error("saveKey",key,e);}
+}
+
+async function logActivity(action){
+  if(!session||session.role!=="chapter_leader")return;
+  activityLog.unshift({id:Date.now(),userId:session.userId,userName:session.userName,action,timestamp:new Date().toISOString()});
+  if(activityLog.length>100)activityLog=activityLog.slice(0,100);
+  await saveKey("activity_log",activityLog);
+}
+
+// ═══════════════════════════════════════════════
+// startApp — routes to admin or CL view
+// ═══════════════════════════════════════════════
+function startApp(){
+  if(!session)return;
+  if(session.role==="admin"){
+    document.getElementById("app").classList.remove("hidden");
+    renderAll();
+    renderActivityFeed();
+    renderUsersChapterDropdowns();
+  } else {
+    document.getElementById("cl-app").classList.remove("hidden");
+    renderCLApp();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// ACTIVITY FEED (admin header)
+// ═══════════════════════════════════════════════
+function renderActivityFeed(){
+  const feed=document.getElementById("admin-activity-feed");
+  const items=document.getElementById("activity-feed-items");
+  if(!feed||!items)return;
+  if(!activityLog.length){feed.classList.add("hidden");return;}
+  feed.classList.remove("hidden");
+  items.innerHTML=activityLog.slice(0,10).map(e=>`
+    <div class="activity-item">
+      <span><strong>${e.userName}</strong> ${e.action}</span>
+      <span class="activity-time">${timeAgo(e.timestamp)}</span>
+    </div>`).join("");
+}
+
+// ═══════════════════════════════════════════════
+// showNewRecitalForm (populates chapter dropdown)
+// ═══════════════════════════════════════════════
+function showNewRecitalForm(){
+  const sel=document.getElementById("new-recital-chapter");
+  if(sel)sel.innerHTML='<option value="">Admin / National</option>'+(state.chapters||[]).map(c=>`<option value="${c.id}">${c.city}</option>`).join('');
+  tog('new-recital-form');
+}
+
+// ═══════════════════════════════════════════════
+// USERS TAB
+// ═══════════════════════════════════════════════
+function renderUsersChapterDropdowns(){
+  const opts='<option value="">Select chapter…</option>'+(state.chapters||[]).map(c=>`<option value="${c.id}">${c.city}</option>`).join('');
+  const uCh=document.getElementById("u-chapter");
+  const msgCh=document.getElementById("msg-to-chapter");
+  if(uCh)uCh.innerHTML=opts;
+  if(msgCh)msgCh.innerHTML=opts;
+}
+
+function toggleChapterSelect(){
+  const role=document.getElementById("u-role")?.value;
+  const f=document.getElementById("u-chapter-field");
+  if(f)f.style.display=role==="chapter_leader"?"block":"none";
+}
+
+function renderUsersTab(){
+  renderUsersChapterDropdowns();
+  const list=document.getElementById("users-list");if(!list)return;
+  if(!appUsers.length){list.innerHTML='<div class="empty">No users yet. Add one above.</div>';renderSentMessages();return;}
+  const chOpts='<option value="">None</option>'+(state.chapters||[]).map(c=>`<option value="${c.id}">${c.city}</option>`).join('');
+  list.innerHTML=appUsers.map(u=>{
+    const ch=(state.chapters||[]).find(c=>String(c.id)===String(u.chapterId));
+    if(editingUser===u.id)return`<div class="user-card">
+      <div class="grid-3" style="margin-bottom:10px">
+        <div class="form-field"><div class="form-label">Name</div><input id="eu-name" class="fi" value="${u.name}"/></div>
+        <div class="form-field"><div class="form-label">New Password</div><input id="eu-password" class="fi" placeholder="Leave blank to keep"/></div>
+        <div class="form-field"><div class="form-label">Role</div>
+          <select id="eu-role" class="fi">
+            <option value="admin" ${u.role==="admin"?"selected":""}>Admin</option>
+            <option value="chapter_leader" ${u.role==="chapter_leader"?"selected":""}>Chapter Leader</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-field" style="margin-bottom:10px"><div class="form-label">Chapter</div><select id="eu-chapter" class="fi">${chOpts}</select></div>
+      <div class="form-actions">
+        <button class="btn-primary" onclick="saveEditUser('${u.id}')">Save</button>
+        <button class="btn-secondary" onclick="cancelEditUser()">Cancel</button>
+      </div>
+    </div>`;
+    return`<div class="user-card"><div class="user-card-row">
+      <div>
+        <div class="user-name">${u.name}<span class="${u.role==="admin"?"role-badge-admin":"role-badge-cl"}">${u.role==="admin"?"Admin":"Chapter Leader"}</span></div>
+        ${ch?`<div style="font-size:12px;color:#8b7355;margin-top:3px">🗺 ${ch.city}</div>`:''}
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn-secondary btn-sm" onclick="editUser('${u.id}')">Edit</button>
+        <button class="del-btn" onclick="deleteUser('${u.id}')">✕</button>
+      </div>
+    </div></div>`;
+  }).join('');
+  if(editingUser){const u=appUsers.find(x=>x.id===editingUser);const sel=document.getElementById("eu-chapter");if(u&&sel)sel.value=u.chapterId||"";}
+  renderSentMessages();
+}
+
+async function addUser(){
+  const name=document.getElementById("u-name").value.trim();
+  const pw=document.getElementById("u-password").value.trim();
+  if(!name||!pw){alert("Name and password required.");return;}
+  appUsers.push({id:String(Date.now()),name,password:pw,role:document.getElementById("u-role").value,chapterId:document.getElementById("u-chapter").value||null});
+  await saveKey("users",appUsers);
+  ["u-name","u-password"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("add-user-form").classList.add("hidden");
+  renderUsersTab();
+}
+function editUser(id){editingUser=id;renderUsersTab();}
+function cancelEditUser(){editingUser=null;renderUsersTab();}
+async function saveEditUser(id){
+  const u=appUsers.find(x=>x.id===id);if(!u)return;
+  const name=document.getElementById("eu-name").value.trim();
+  const pw=document.getElementById("eu-password").value.trim();
+  if(name)u.name=name;if(pw)u.password=pw;
+  u.role=document.getElementById("eu-role").value;
+  u.chapterId=document.getElementById("eu-chapter").value||null;
+  await saveKey("users",appUsers);editingUser=null;renderUsersTab();
+}
+async function deleteUser(id){
+  if(!confirm("Delete this user?"))return;
+  appUsers=appUsers.filter(u=>u.id!==id);
+  await saveKey("users",appUsers);renderUsersTab();
+}
+
+// ═══════════════════════════════════════════════
+// MESSAGES (admin sends, CL receives)
+// ═══════════════════════════════════════════════
+function renderSentMessages(){
+  const list=document.getElementById("sent-messages-list");if(!list)return;
+  if(!messages.length){list.innerHTML='<div style="color:#c4b8a8;font-size:13px;padding:8px 0">No messages sent yet.</div>';return;}
+  list.innerHTML=messages.map(m=>{
+    const ch=(state.chapters||[]).find(c=>String(c.id)===String(m.toChapterId));
+    return`<div class="message-card">
+      <div class="message-meta">To: ${ch?ch.city:"Unknown"} · ${timeAgo(m.timestamp)} · ${m.read?'<span style="color:#22c55e">✓ Read</span>':'<span style="color:#c4a882">Unread</span>'}</div>
+      <div class="message-text">${m.text}</div>
+    </div>`;
+  }).join('');
+}
+
+async function sendMessage(){
+  const chapterId=document.getElementById("msg-to-chapter").value;
+  const text=document.getElementById("msg-text").value.trim();
+  if(!chapterId||!text){alert("Select a chapter and enter a message.");return;}
+  messages.unshift({id:Date.now(),toChapterId:chapterId,from:session.userName||"Admin",text,timestamp:new Date().toISOString(),read:false});
+  await saveKey("messages",messages);
+  document.getElementById("msg-text").value="";
+  renderSentMessages();
+}
+
+// ═══════════════════════════════════════════════
+// CHAPTER LEADER VIEW
+// ═══════════════════════════════════════════════
+function renderCLApp(){
+  const ch=(state.chapters||[]).find(c=>String(c.id)===String(session.chapterId));
+  const t=document.getElementById("cl-title");
+  if(t)t.textContent=(ch?ch.city:session.userName)+"'s Chapter — Mobile Music Salon";
+  renderCLRecitals();
+  updateCLMessagesBadge();
+}
+
+function clGo(name,btn){
+  CL_TABS.forEach(t=>document.getElementById("cl-tab-"+t).classList.add("hidden"));
+  document.querySelectorAll("#cl-tabs .tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("cl-tab-"+name).classList.remove("hidden");
+  btn.classList.add("active");
+  const m={tickets:renderCLTickets,planning:renderCLPlanning,history:renderCLHistory,notes:renderCLNotes,messages:renderCLMessages};
+  if(m[name])m[name]();
+}
+
+// — Recitals —
+function renderCLRecitals(){
+  const mine=(state.recitals||[]).filter(r=>String(r.chapterId)===String(session.chapterId)&&!r.archived);
+  const pills=document.getElementById("cl-recital-pills");
+  const noMsg=document.getElementById("cl-no-recitals");
+  if(!mine.length){if(pills)pills.innerHTML="";if(noMsg)noMsg.classList.remove("hidden");document.getElementById("cl-recital-content").innerHTML="";return;}
+  if(noMsg)noMsg.classList.add("hidden");
+  if(!clActiveRecitalId||!mine.find(r=>r.id===clActiveRecitalId))clActiveRecitalId=mine[0].id;
+  if(pills)pills.innerHTML=mine.map(r=>`
+    <button class="recital-tab-pill ${r.id===clActiveRecitalId?'active':''}" onclick="clSelectRecital(${r.id})">${r.name}
+      ${r.lockedDate?`<span style="font-size:10px;background:${r.id===clActiveRecitalId?'rgba(255,255,255,.25)':'#d4f4e2'};color:${r.id===clActiveRecitalId?'#fff':'#1a6b3a'};padding:1px 7px;border-radius:8px;font-weight:600;margin-left:4px">✓ ${r.lockedDate}</span>`:''}
+    </button>`).join('');
+  renderCLRecitalContent();
+}
+
+function clSelectRecital(id){clActiveRecitalId=id;renderCLRecitals();}
+
+function renderCLRecitalContent(){
+  const rec=(state.recitals||[]).find(r=>r.id===clActiveRecitalId);
+  const el=document.getElementById("cl-recital-content");
+  if(!rec||!el){if(el)el.innerHTML="";return;}
+  const profiles=state.performerProfiles||[];
+  const profileDrop=profiles.length
+    ?`<select id="cl-rc-p-profile" class="fi"><option value="">Select performer…</option>${profiles.map(p=>`<option value="${p.id}">${p.name}${p.instrument?" ("+p.instrument+")":""}</option>`).join('')}</select>`
+    :`<div style="font-size:12px;color:#c4b8a8;font-style:italic;padding:8px 0">No performer profiles yet — ask admin to add them.</div>`;
+  el.innerHTML=`
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="section-label">${rec.name}</div>
+          ${rec.lockedDate?`<div style="color:#22c55e;font-weight:600;margin-top:4px">📅 ${rec.lockedDate}</div>`:`<div style="font-size:13px;color:#c4b8a8;margin-top:4px">Date not yet confirmed</div>`}
+        </div>
+        <button class="btn-secondary btn-sm" onclick="clTogEditRecital()">Edit</button>
+      </div>
+      <div class="add-form hidden" id="cl-edit-recital-form">
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Recital Name</div><input id="cl-edit-name" class="fi" value="${rec.name}"/></div>
+          <div class="form-field"><div class="form-label">Confirmed Date</div><input id="cl-edit-date" class="fi" placeholder="e.g. Jun 14" value="${rec.lockedDate||''}"/></div>
+        </div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="clSaveRecital()">Save</button>
+          <button class="btn-secondary" onclick="clTogEditRecital()">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div class="section-label">Performers</div>
+        <button class="btn-primary" onclick="clShowAddPerformer()">+ Add Performer</button>
+      </div>
+      <div class="add-form hidden" id="cl-add-performer-form">
+        <div class="grid-2">
+          <div class="form-field"><div class="form-label">Performer</div>${profileDrop}</div>
+          <div class="form-field"><div class="form-label">Piece</div><input id="cl-rc-p-piece" class="fi"/></div>
+        </div>
+        <div class="form-field"><div class="form-label">Notes</div><input id="cl-rc-p-notes" class="fi" placeholder="Optional"/></div>
+        <div class="form-actions">
+          <button class="btn-primary" onclick="clAddPerformerToRecital()">Add</button>
+          <button class="btn-secondary" onclick="clHideAddPerformer()">Cancel</button>
+        </div>
+      </div>
+      <div class="performer-list" id="cl-performer-list"></div>
+    </div>`;
+  renderCLPerformerList(rec);
+}
+
+function clTogEditRecital(){tog('cl-edit-recital-form');}
+
+async function clSaveRecital(){
+  const rec=(state.recitals||[]).find(r=>r.id===clActiveRecitalId);if(!rec)return;
+  const n=document.getElementById("cl-edit-name").value.trim();
+  const d=document.getElementById("cl-edit-date").value.trim();
+  if(n)rec.name=n; rec.lockedDate=d||null;
+  await saveData();
+  await logActivity(`updated recital "${rec.name}"`);
+  clTogEditRecital(); renderCLRecitals();
+}
+
+function clShowAddPerformer(){document.getElementById("cl-add-performer-form")?.classList.remove("hidden");}
+function clHideAddPerformer(){document.getElementById("cl-add-performer-form")?.classList.add("hidden");}
+
+async function clAddPerformerToRecital(){
+  const rec=(state.recitals||[]).find(r=>r.id===clActiveRecitalId);if(!rec)return;
+  const profileId=document.getElementById("cl-rc-p-profile")?.value;
+  if(!profileId){alert("Please select a performer.");return;}
+  const profile=(state.performerProfiles||[]).find(p=>String(p.id)===String(profileId));
+  if(!profile)return;
+  rec.performers.push({id:Date.now(),name:profile.name,profileId:profile.id,instrument:profile.instrument||'',piece:document.getElementById("cl-rc-p-piece").value,notes:document.getElementById("cl-rc-p-notes").value,accompaniment:"None",availability:[],preference:"",status:"pending"});
+  document.getElementById("cl-rc-p-piece").value=""; document.getElementById("cl-rc-p-notes").value="";
+  clHideAddPerformer(); await saveData();
+  await logActivity(`added performer "${profile.name}" to recital "${rec.name}"`);
+  renderCLPerformerList(rec);
+}
+
+function renderCLPerformerList(rec){
+  const el=document.getElementById("cl-performer-list");if(!el)return;
+  if(!rec.performers.length){el.innerHTML='<div class="empty">No performers yet.</div>';return;}
+  el.innerHTML=rec.performers.map(p=>`
+    <div class="performer-card ${p.status==='pending'?'pending':''}">
+      <div style="display:flex;justify-content:space-between">
+        <div>
+          <div><span class="performer-name">${p.name}</span><span class="badge ${p.status==='confirmed'?'badge-confirmed':'badge-pending'}">${p.status}</span></div>
+          <div class="performer-piece">${p.piece||'—'}</div>
+          ${p.notes?`<div class="performer-note">📝 ${p.notes}</div>`:''}
+        </div>
+        <button class="del-btn" onclick="clRemovePerformer(${p.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+async function clRemovePerformer(pid){
+  const rec=(state.recitals||[]).find(r=>r.id===clActiveRecitalId);if(!rec)return;
+  rec.performers=rec.performers.filter(p=>p.id!==pid);
+  await saveData(); renderCLPerformerList(rec);
+}
+
+// — Tickets —
+function renderCLTickets(){
+  const mine=(state.tickets||[]).filter(t=>String(t.chapterId)===String(session.chapterId));
+  const tbody=document.getElementById("cl-ticket-tbody");
+  const empty=document.getElementById("cl-no-tickets");
+  if(!mine.length){if(tbody)tbody.innerHTML="";if(empty)empty.classList.remove("hidden");return;}
+  if(empty)empty.classList.add("hidden");
+  if(tbody)tbody.innerHTML=mine.map(t=>`<tr>
+    <td style="font-weight:600">${t.buyerName}</td><td>${t.quantity}</td>
+    <td style="color:#166534;font-weight:700">$${t.amountPaid}</td>
+    <td style="color:#8b7355">${t.date}</td>
+    <td style="color:#a09080;font-style:italic">${t.notes}</td>
+    <td><button class="del-btn" onclick="clRmTicket(${t.id})">✕</button></td>
+  </tr>`).join('');
+}
+
+async function clAddTicket(){
+  const buyer=document.getElementById("cl-t-buyer").value;if(!buyer)return;
+  state.tickets.push({id:Date.now(),buyerName:buyer,quantity:document.getElementById("cl-t-qty").value,amountPaid:document.getElementById("cl-t-amount").value,date:document.getElementById("cl-t-date").value,notes:document.getElementById("cl-t-notes").value,chapterId:session.chapterId});
+  ["cl-t-buyer","cl-t-amount","cl-t-notes","cl-t-date"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cl-t-qty").value="1";
+  document.getElementById("cl-add-ticket").classList.add("hidden");
+  await saveData(); await logActivity("added a ticket sale"); renderCLTickets();
+}
+
+async function clRmTicket(id){state.tickets=state.tickets.filter(t=>t.id!==id);await saveData();renderCLTickets();}
+
+// — Planning —
+function renderCLPlanning(){
+  if(!state.checklists)state.checklists=[];
+  const pills=document.getElementById("cl-checklist-pills");
+  const container=document.getElementById("cl-checklist-container");
+  if(state.checklists.length&&!clActiveChecklistId)clActiveChecklistId=state.checklists[0].id;
+  if(pills)pills.innerHTML=state.checklists.map(r=>`
+    <button class="checklist-pill ${r.id===clActiveChecklistId?'active':''}" onclick="clSelectChecklist(${r.id})">${r.name}</button>
+    <button onclick="clDeleteChecklist(${r.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:17px;padding:0 4px;margin-left:-4px;margin-right:6px">×</button>`).join('');
+  if(!container)return;
+  const rec=state.checklists.find(r=>r.id===clActiveChecklistId);
+  if(!rec){container.innerHTML="";return;}
+  const total=PLAN_TASKS.reduce((s,c)=>s+c.tasks.length,0);
+  const done=Object.values(rec.checks).filter(Boolean).length;
+  const pct=Math.round((done/total)*100);
+  let html=`<div class="card"><div class="progress-label"><span style="font-weight:600">${rec.name}</span><span>${done}/${total} tasks</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div></div>`;
+  PLAN_TASKS.forEach(cat=>{
+    const catDone=cat.tasks.filter((_,i)=>rec.checks[cat.cat+"_"+i]).length;
+    html+=`<div class="card"><div class="category-header"><span class="category-title">${cat.cat}</span><span class="category-progress">${catDone}/${cat.tasks.length}</span></div>`;
+    cat.tasks.forEach((task,i)=>{const key=cat.cat+"_"+i,isDone=rec.checks[key];html+=`<div class="checklist-item ${isDone?'done':''}"><input type="checkbox" ${isDone?'checked':''} onchange="clToggleCheck(${rec.id},'${key}')"/><span class="task-text">${task}</span></div>`;});
+    html+=`</div>`;
+  });
+  container.innerHTML=html;
+}
+function clSelectChecklist(id){clActiveChecklistId=id;renderCLPlanning();}
+function clDeleteChecklist(id){
+  if(state.checklists.length<=1){alert("Keep at least one checklist.");return;}
+  state.checklists=state.checklists.filter(r=>r.id!==id);
+  if(clActiveChecklistId===id)clActiveChecklistId=state.checklists[0]?.id||null;
+  saveData(); renderCLPlanning();
+}
+function clAddChecklist(){
+  const name=document.getElementById("cl-new-checklist-name").value.trim();if(!name)return;
+  const r={id:Date.now(),name,checks:buildChecks()};
+  state.checklists.push(r); clActiveChecklistId=r.id;
+  document.getElementById("cl-new-checklist-name").value="";
+  document.getElementById("cl-new-checklist-form").classList.add("hidden");
+  saveData(); renderCLPlanning();
+}
+function clToggleCheck(cid,key){
+  const c=state.checklists.find(r=>r.id===cid);
+  if(c){c.checks[key]=!c.checks[key];saveData();renderCLPlanning();}
+}
+
+// — History —
+function renderCLHistory(){
+  const mine=(state.history||[]).filter(h=>String(h.chapterId)===String(session.chapterId));
+  const list=document.getElementById("cl-history-list");
+  const empty=document.getElementById("cl-no-history");
+  if(!mine.length){if(list)list.innerHTML="";if(empty)empty.classList.remove("hidden");return;}
+  if(empty)empty.classList.add("hidden");
+  const grouped={};
+  mine.forEach(h=>{if(!grouped[h.name])grouped[h.name]={name:h.name,entries:[]};grouped[h.name].entries.push(h);});
+  if(list)list.innerHTML=Object.values(grouped).map(g=>`<div class="history-card">
+    <div class="history-name">${g.name}</div>
+    <div style="font-size:12px;color:#8b7355;margin-top:3px">🎭 ${g.entries.length} performance${g.entries.length>1?'s':''}</div>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
+      ${g.entries.map(e=>`<div style="font-size:12px;color:#8b7355;padding:6px 10px;background:#faf6f0;border-radius:6px"><strong>${e.recital}</strong>${e.date?" · "+e.date:""}<br><em>${e.piece}</em>${e.notes?"<br><span style='color:#a09080'>"+e.notes+"</span>":""}</div>`).join('')}
+    </div>
+  </div>`).join('');
+}
+
+async function clAddHistory(){
+  const name=document.getElementById("cl-h-name").value;if(!name)return;
+  if(!state.history)state.history=[];
+  state.history.unshift({id:Date.now(),name,recital:document.getElementById("cl-h-recital").value,date:document.getElementById("cl-h-date").value,piece:document.getElementById("cl-h-piece").value,notes:document.getElementById("cl-h-notes").value,chapterId:session.chapterId});
+  ["cl-h-name","cl-h-recital","cl-h-date","cl-h-piece","cl-h-notes"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cl-add-history").classList.add("hidden");
+  await saveData(); renderCLHistory();
+}
+
+// — Notes —
+function renderCLNotes(){
+  const mine=(state.notes||[]).filter(n=>String(n.chapterId)===String(session.chapterId));
+  const list=document.getElementById("cl-notes-list");
+  const empty=document.getElementById("cl-no-notes");
+  if(!mine.length){if(list)list.innerHTML="";if(empty)empty.classList.remove("hidden");return;}
+  if(empty)empty.classList.add("hidden");
+  if(list)list.innerHTML=mine.map(n=>`<div class="note-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+      <div><div class="note-recital-label">${n.recital||"General"}</div><div style="font-weight:600;font-size:15px">${n.title}</div><div style="font-size:11px;color:#c4a882;margin-top:2px">${n.date}</div></div>
+      <button class="del-btn" onclick="clRmNote(${n.id})">✕</button>
+    </div>
+    <div class="note-text">${n.text}</div>
+  </div>`).join('');
+}
+
+async function clAddNote(){
+  const title=document.getElementById("cl-note-title").value;
+  const text=document.getElementById("cl-note-text").value;
+  if(!title||!text)return;
+  if(!state.notes)state.notes=[];
+  state.notes.unshift({id:Date.now(),recital:document.getElementById("cl-note-recital").value||"General",title,text,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),chapterId:session.chapterId});
+  ["cl-note-recital","cl-note-title","cl-note-text"].forEach(id=>document.getElementById(id).value="");
+  document.getElementById("cl-add-note").classList.add("hidden");
+  await saveData();
+  await logActivity(`added a note: "${title}"`);
+  renderCLNotes();
+}
+
+async function clRmNote(id){
+  state.notes=state.notes.filter(n=>n.id!==id);
+  await saveData(); renderCLNotes();
+}
+
+// — Messages —
+function renderCLMessages(){
+  const mine=messages.filter(m=>String(m.toChapterId)===String(session.chapterId));
+  const list=document.getElementById("cl-messages-list");
+  const empty=document.getElementById("cl-no-messages");
+  if(!mine.length){if(list)list.innerHTML="";if(empty)empty.classList.remove("hidden");return;}
+  if(empty)empty.classList.add("hidden");
+  if(list)list.innerHTML=mine.map(m=>`<div class="message-card ${m.read?'':'unread'}">
+    <div class="message-meta">From: ${m.from} · ${timeAgo(m.timestamp)}${m.read?' · <span style="color:#22c55e">✓ Read</span>':''}</div>
+    <div class="message-text">${m.text}</div>
+    ${!m.read?`<button class="btn-secondary btn-sm" style="margin-top:10px" onclick="clMarkRead(${m.id})">Mark as read</button>`:''}
+  </div>`).join('');
+}
+
+async function clMarkRead(id){
+  const msg=messages.find(m=>m.id===id);
+  if(msg){msg.read=true;await saveKey("messages",messages);renderCLMessages();updateCLMessagesBadge();}
+}
+
+function updateCLMessagesBadge(){
+  const btn=document.getElementById("cl-messages-tab-btn");if(!btn)return;
+  const unread=messages.filter(m=>String(m.toChapterId)===String(session.chapterId)&&!m.read).length;
+  btn.innerHTML=unread>0
+    ?`✉️ Messages <span style="background:#e57373;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;margin-left:4px">${unread}</span>`
+    :"✉️ Messages";
+}
 </script>
 </body>
 </html>
