@@ -3952,18 +3952,19 @@
     // ═══════════════════════════════════════════════
     // startApp — routes to admin or CL view
     // ═══════════════════════════════════════════════
-    function startApp() {
-        if (!session)
-            return;
-        if (session.role === "admin") {
-            document.getElementById("app").classList.remove("hidden");
-            renderAll();
-            renderActivityFeed();
-            renderUsersChapterDropdowns();
-        } else {
-            document.getElementById("cl-app").classList.remove("hidden");
-            renderCLApp();
-        }
+function startApp() {
+    if (!session) { console.error("startApp: no session"); return; }
+    console.log("startApp role:", session.role);
+    if (session.role === "admin") {
+        document.getElementById("app").classList.remove("hidden");
+        renderAll();
+        renderActivityFeed();
+        renderUsersChapterDropdowns();
+    } else {
+        document.getElementById("cl-app").classList.remove("hidden");
+        renderCLApp();
+    }
+}
     }
 
     // ═══════════════════════════════════════════════
