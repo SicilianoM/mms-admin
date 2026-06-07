@@ -3826,44 +3826,7 @@ function saveHistory(id) {
             </div>`).join('');
 
         
-        const p2 = state.performerProfiles.find(x => x.id === editingProfile);
-            const chapter = (state.chapters || []).find(c => String(c.id) === String(p.chapter));
-            if (editingProfile === p.id)
-                return `
-                      <div class="contact-card" style="flex-direction:column;align-items:stretch;gap:10px">
-                        <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:2px">Editing: ${p.name}</div>
-                        <div class="grid-3">
-                          <div class="form-field"><div class="form-label">Full Name</div><input id="ep-name" class="fi" value="${p.name || ''}"/></div>
-                          <div class="form-field"><div class="form-label">Instrument</div><input id="ep-instrument" class="fi" value="${p.instrument || ''}"/></div>
-                          <div class="form-field"><div class="form-label">Chapter</div><select id="ep-chapter" class="fi">${chapterOptions}</select></div>
-                        </div>
-                        <div class="grid-3">
-                          <div class="form-field"><div class="form-label">School / Affiliation</div><input id="ep-school" class="fi" value="${p.school || ''}"/></div>
-                          <div class="form-field"><div class="form-label">Email</div><input id="ep-email" type="email" class="fi" value="${p.email || ''}"/></div>
-                          <div class="form-field"><div class="form-label">Phone</div><input id="ep-phone" class="fi" value="${p.phone || ''}"/></div>
-                        </div>
-                        <div class="form-field"><div class="form-label">Notes</div><textarea id="ep-notes" class="fi">${p.notes || ''}</textarea></div>
-                        <div class="form-actions">
-                          <button class="btn-primary" onclick="saveEditProfile(${p.id})">Save</button>
-                          <button class="btn-secondary" onclick="cancelEditProfile()">Cancel</button>
-                        </div>
-                      </div>`;
-            return `<div class="contact-card">
-                  <div>
-                    <div class="contact-name">${p.name}</div>
-                    <div class="contact-role">${p.instrument || 'Instrument not specified'}</div>
-                    ${chapter ? `<div class="contact-detail">🗺 ${chapter.city}</div>` : ''}
-                    ${p.school ? `<div class="contact-detail">🎓 ${p.school}</div>` : ''}
-                    ${p.email ? `<div class="contact-detail">✉️ <a href="mailto:${p.email}" style="color:#7c5c3e">${p.email}</a></div>` : ''}
-                    ${p.phone ? `<div class="contact-detail">📞 ${p.phone}</div>` : ''}
-                    ${p.notes ? `<div class="contact-detail" style="color:#a09080;font-style:italic">📝 ${p.notes}</div>` : ''}
-                  </div>
-                  <div style="display:flex;gap:6px">
-                    <button class="btn-secondary btn-sm" onclick="startEditProfile(${p.id})">Edit</button>
-                    <button class="del-btn" onclick="rmPerformerProfile(${p.id})">✕</button>
-                  </div>
-                </div>`;
-        }).join('');
+       
         // Set chapter dropdown to saved value after DOM is built
         if (editingProfile) {
             const p = state.performerProfiles.find(x => x.id === editingProfile);
