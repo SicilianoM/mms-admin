@@ -1261,9 +1261,9 @@
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button class="btn-primary" onclick="createRecital()">Create Recital</button>
-                            <button class="btn-secondary" onclick="tog('new-recital-form')">Cancel</button>
-                        </div>
+                            <button class="btn-primary" onclick="savePerformer(${rec.id},${p.id})">Save</button>
+                            <button class="btn-secondary" onclick="cancelEdit()">Cancel</button>
+                          </div>
                     </div>
                     <div class="recital-selector-bar" id="recital-pills"></div>
                 </div>
@@ -2884,12 +2884,11 @@
         saveData();
         renderAvailability(rec);
     }
-    function confirmPerformer(rid, pid) {
-        upP(rid, pid, "status", "confirmed");
+   function savePerformer(rid, pid) {
         editingPerformer = null;
+        saveData();
         renderRecitalContent();
     }
-
     // ═══════════════════════════════════════════════
     // TICKETS
     // ═══════════════════════════════════════════════
