@@ -2353,7 +2353,8 @@
         document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         document.getElementById("tab-" + name).classList.remove("hidden");
         btn.classList.add("active");
-        const m = {
+       const m = {
+            tickets: renderTickets,
             planning: renderPlanning,
             emails: renderEmails,
             contacts: renderContacts,
