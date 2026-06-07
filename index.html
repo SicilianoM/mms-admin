@@ -1261,10 +1261,9 @@
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button class="btn-primary" onclick="savePerformer(${rec.id},${p.id})">Save</button>
-                            <button class="btn-secondary" onclick="cancelEdit()">Cancel</button>
-                          </div>
-                    </div>
+                           <button class="btn-primary" onclick="createRecital()">Create Recital</button>
+                            <button class="btn-secondary" onclick="tog('new-recital-form')">Cancel</button>
+                        </div>
                     <div class="recital-selector-bar" id="recital-pills"></div>
                 </div>
                 <div id="recital-content"></div>
@@ -2972,8 +2971,27 @@
     // ═══════════════════════════════════════════════
     // PLANNING / CHECKLISTS
     // ═══════════════════════════════════════════════
-   const PLAN_TASKS = [
-   function buildChecks() {
+ const PLAN_TASKS = [
+        { cat: "Venue & Logistics", tasks: ["Confirm venue booking and date", "Get venue address and parking info", "Check piano availability at venue", "Arrange chairs and stage layout", "Confirm venue capacity", "Plan arrival and setup time"] },
+        { cat: "Performers & Scheduling", tasks: ["Collect availability from all performers", "Confirm final performer list", "Confirm each performer's piece", "Confirm accompaniment arrangements", "Send performers the final date", "Set running order", "Schedule rehearsal if needed"] },
+        { cat: "Tickets & Fundraising", tasks: ["Set fundraising goal", "Start selling tickets", "Track all cash sales in dashboard"] },
+        { cat: "Day-Of Tasks", tasks: ["Arrive early to set up", "Confirm piano is tuned", "Set up ticket collection at door", "Brief performers on running order", "Welcome guests and open the event", "Collect all cash payments", "Take photos"] },
+        { cat: "Post-Event Tasks", tasks: ["Count total revenue", "Send all ticket revenue to national director (Matt)", "Email performers thank you", "Log totals in dashboard", "Debrief: what went well, what to improve", "Start planning next recital"] },
+    ];
+    const ADMIN_PLAN_TASKS = [
+        { cat: "Venue & Logistics", tasks: ["Confirm venue booking and date", "Get venue address and parking info", "Check piano availability at venue", "Arrange chairs and stage layout", "Confirm venue capacity", "Plan arrival and setup time"] },
+        { cat: "Performers & Scheduling", tasks: ["Collect availability via Google Form", "Confirm final performer list", "Confirm each performer's piece", "Confirm accompaniment arrangements", "Send performers the final date", "Set running order", "Schedule rehearsal if needed"] },
+        { cat: "Tickets & Fundraising", tasks: ["Set ticket price", "Set fundraising goal", "Start selling tickets", "Track all cash sales in dashboard", "Send donation to hospital after event", "Get donation receipt"] },
+        { cat: "Marketing & Social Media", tasks: ["Create event post for Instagram", "Post on Facebook", "Update mobilemusicsalon.org", "Send email to mailing list", "Share in local community groups", "Post reminder 1 week before", "Post reminder day before"] },
+        { cat: "Day-Of Tasks", tasks: ["Arrive early to set up", "Confirm piano is tuned", "Set up ticket collection at door", "Brief performers on running order", "Welcome guests and open the event", "Collect all cash payments", "Take photos for social media"] },
+        { cat: "Post-Event Tasks", tasks: ["Count total revenue", "Send donation to hospital", "Post thank-you on social media", "Email performers thank you", "Log totals in dashboard", "Debrief: what went well, what to improve", "Start planning next recital"] },
+    ];
+    function buildChecks(isAdmin) {
+        const tasks = isAdmin ? ADMIN_PLAN_TASKS : PLAN_TASKS;
+        const c = {};
+        tasks.forEach(cat => cat.tasks.forEach((t, i) => { c[cat.cat + "_" + i] = false; }));
+        return c;
+    }
     function initChecklists() {
         if (!state.checklists) {
             state.checklists = [{
@@ -4447,55 +4465,116 @@ function clRenderPerformerList(rec) {
                   <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${(rec.dates||[]).map(d => `<label style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #e8e0d4;border-radius:8px;background:#fffdf9;cursor:pointer;min-width:60px;text-align:center;font-size:12px;color:#5a3e28"><input type="checkbox" ${(p.availability||[]).includes(d)?'checked':''} onchange="clTogAvail(${rec.id},${p.id},'${d}',this.checked)" style="width:16px;height:16px;accent-color:#7c5c3e"/>${d}</label>`).join("")}</div>
                   ${!(rec.dates||[]).length ? '<div style="font-size:12px;color:#c4b8a8">Add dates first.</div>' : ""}
                 </div>
-                <di
-        const profiles = state.performerProfiles || [];
-        const profileDrop = profiles.length
+             <div class="form-actions">
+                  <button class="btn-primary" onclick="clSavePerformer(${rec.id},${p.id})">Save</button>
+                  <button class="btn-secondary" onclick="clCancelEdit()">Cancel</button>
+                </div>
+              </div>
+            </div>`;
+    }).join('');
+}
+function clStartEdit(pid) { clEditingPerformer = pid; renderCLRecitalContent(); }
+function clCancelEdit() { clEditingPerformer = null; renderCLRecitalContent(); }
+function clUpP(rid, pid, f, v) {
+    const rec = (state.recitals||[]).find(r => r.id === rid);
+    if (!rec) return;
+    rec.performers = rec.performers.map(p => p.id===pid ? {...p, [f]:v} : p);
+    saveData();
+}
+function clTogAvail(rid, pid, d, c) {
+    const rec = (state.recitals||[]).find(r => r.id === rid);
+    if (!rec) return;
+    rec.performers = rec.performers.map(p => {
+        if (p.id !== pid) return p;
+        const a = c ? [...(p.availability||[]), d] : (p.availability||[]).filter(x => x !== d);
+        return {...p, availability: a};
+    });
+    saveData();
+    clRenderAvailability(rec);
+}
+function clSavePerformer(rid, pid) {
+    saveData();
+    clEditingPerformer = null;
+    logActivity('updated performer in recital');
+    renderCLRecitalContent();
+}
+function renderCLRecitalContent() {
+    const rec = (state.recitals || []).find(r => r.id === clActiveRecitalId);
+    const el = document.getElementById("cl-recital-content");
+    if (!rec || !el) { if (el) el.innerHTML = ""; return; }
+    const profiles = state.performerProfiles || [];
+    const profileDrop = profiles.length
         ? `<select id="cl-rc-p-profile" class="fi"><option value="">Select performer…</option>${profiles.map(p => `<option value="${p.id}">${p.name}${p.instrument ? " (" + p.instrument + ")" : ""}</option>`).join('')}</select>`
         : `<div style="font-size:12px;color:#c4b8a8;font-style:italic;padding:8px 0">No performer profiles yet — ask admin to add them.</div>`;
-        el.innerHTML = `
-            <div class="card">
-              <div class="card-header">
-                <div>
-                  <div class="section-label">${rec.name}</div>
-                  ${rec.lockedDate ? `<div style="color:#22c55e;font-weight:600;margin-top:4px">📅 ${rec.lockedDate}</div>` : `<div style="font-size:13px;color:#c4b8a8;margin-top:4px">Date not yet confirmed</div>`}
-                </div>
-                <button class="btn-secondary btn-sm" onclick="clTogEditRecital()">Edit</button>
-              </div>
-              <div class="add-form hidden" id="cl-edit-recital-form">
-                <div class="grid-2">
-                  <div class="form-field"><div class="form-label">Recital Name</div><input id="cl-edit-name" class="fi" value="${rec.name}"/></div>
-                  <div class="form-field"><div class="form-label">Confirmed Date</div><input id="cl-edit-date" class="fi" placeholder="e.g. Jun 14" value="${rec.lockedDate || ''}"/></div>
-                </div>
-                <div class="form-actions">
-                  <button class="btn-primary" onclick="clSaveRecital()">Save</button>
-                  <button class="btn-secondary" onclick="clTogEditRecital()">Cancel</button>
-                </div>
-              </div>
+    const dateOptions = (rec.dates || []).map(d => `<option value="${d}">${d}</option>`).join("");
+    el.innerHTML = `
+        ${rec.lockedDate ? `
+        <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:4px">Recital Date Confirmed</div>
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff">📅 ${rec.lockedDate}</div>
+          </div>
+          <button onclick="clUnlockRecital()" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:'Lora',serif">Change date</button>
+        </div>` : `
+        <div style="background:#fff;border-radius:12px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:2px dashed #e8e0d4">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:4px">Finalize This Recital</div>
+              <div style="font-size:13px;color:#8b7355">Lock in the date once confirmed.</div>
             </div>
-            <div class="card">
-              <div class="card-header">
-                <div class="section-label">Performers</div>
-                <button class="btn-primary" onclick="clShowAddPerformer()">+ Add Performer</button>
-              </div>
-              <div class="add-form hidden" id="cl-add-performer-form">
-                <div class="grid-2">
-                  <div class="form-field"><div class="form-label">Performer</div>${profileDrop}</div>
-                  <div class="form-field"><div class="form-label">Piece</div><input id="cl-rc-p-piece" class="fi"/></div>
-                </div>
-                <div class="form-field"><div class="form-label">Notes</div><input id="cl-rc-p-notes" class="fi" placeholder="Optional"/></div>
-                <div class="form-actions">
-                  <button class="btn-primary" onclick="clAddPerformerToRecital()">Add</button>
-                  <button class="btn-secondary" onclick="clHideAddPerformer()">Cancel</button>
-                </div>
-              </div>
-              <div class="performer-list" id="cl-performer-list"></div>
-            </div>`;
-        renderCLPerformerList(rec);
-    }
-
-    function clTogEditRecital() {
-        tog('cl-edit-recital-form');
-    }
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              ${dateOptions ? `<select id="cl-lock-date-sel" class="fi" style="max-width:180px">${dateOptions}</select>
+              <button class="btn-primary" onclick="clLockInDate()">🔒 Lock In Date</button>` : `<div style="font-size:13px;color:#c4b8a8;font-style:italic">Add candidate dates first</div>`}
+            </div>
+          </div>
+        </div>`}
+        <div class="card">
+          <div class="card-header"><div><div class="section-label">Candidate Dates — ${rec.name}</div></div></div>
+          <div style="margin-bottom:14px">${(rec.dates||[]).map((d,i) => `<span class="date-pill">${d}<button onclick="clDeleteDate(${i})" title="Remove">×</button></span>`).join("")}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="cl-new-date" class="fi" placeholder="Add a date (e.g. Aug 23)" style="max-width:220px" onkeydown="if(event.key==='Enter')clAddDate()"/>
+            <button class="btn-primary btn-sm" onclick="clAddDate()">+ Add Date</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-label" style="margin-bottom:16px">Availability Overview</div>
+          <div style="overflow-x:auto"><table class="avail-table" id="cl-avail-table"></table></div>
+          <div id="cl-best-dates" style="margin-top:16px"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="section-label">Performers</div>
+            <button class="btn-primary" onclick="clShowAddPerformer()">+ Add Performer</button>
+          </div>
+          <div class="add-form hidden" id="cl-add-performer-form">
+            <div class="grid-2">
+              <div class="form-field"><div class="form-label">Performer</div>${profileDrop}</div>
+              <div class="form-field"><div class="form-label">Piece</div><input id="cl-rc-p-piece" class="fi"/></div>
+            </div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="cl-rc-p-notes" class="fi" placeholder="Optional"/></div>
+            <div class="form-actions">
+              <button class="btn-primary" onclick="clAddPerformerToRecital()">Add</button>
+              <button class="btn-secondary" onclick="clHideAddPerformer()">Cancel</button>
+            </div>
+          </div>
+          <div class="performer-list" id="cl-performer-list"></div>
+        </div>`;
+    clRenderAvailability(rec);
+    clRenderPerformerList(rec);
+}
+function clLockInDate() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const sel = document.getElementById("cl-lock-date-sel");
+    if (!sel) return;
+    rec.lockedDate = sel.value;
+    saveData();
+    logActivity(`locked in date "${sel.value}" for recital "${rec.name}"`);
+    renderCLRecitals();
+}
+function clTogEditRecital() {
+    tog('cl-edit-recital-form');
+}
 
     async function clSaveRecital() {
         const rec = (state.recitals || []).find(r => r.id === clActiveRecitalId);
