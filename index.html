@@ -4088,21 +4088,47 @@ function startApp() {
     // ═══════════════════════════════════════════════
     // ACTIVITY FEED (admin header)
     // ═══════════════════════════════════════════════
+   let activityDismissedAt = null;
     function renderActivityFeed() {
         const feed = document.getElementById("admin-activity-feed");
         const items = document.getElementById("activity-feed-items");
-        if (!feed || !items)
-            return;
-        if (!activityLog.length) {
+        if (!feed || !items) return;
+        if (!activityLog.length) { feed.classList.add("hidden"); return; }
+        const newSinceClose = activityDismissedAt
+            ? activityLog.filter(e => new Date(e.timestamp) > new Date(activityDismissedAt))
+            : activityLog;
+        // Show notification badge if dismissed but new activity exists
+        let notifBar = document.getElementById("activity-notif-bar");
+        if (!notifBar) {
+            notifBar = document.createElement("div");
+            notifBar.id = "activity-notif-bar";
+            notifBar.style.cssText = "display:none;padding:8px 32px;background:rgba(196,168,130,0.15);border-bottom:1px solid rgba(196,168,130,0.2);font-size:12px;color:#c4a882;cursor:pointer;text-align:center";
+            notifBar.onclick = () => { activityDismissedAt = null; renderActivityFeed(); };
+            feed.parentNode.insertBefore(notifBar, feed);
+        }
+        if (activityDismissedAt && newSinceClose.length) {
+            notifBar.style.display = "block";
+            notifBar.innerHTML = `🔔 ${newSinceClose.length} new chapter activit${newSinceClose.length>1?'ies':'y'} — click to view`;
             feed.classList.add("hidden");
             return;
         }
+        notifBar.style.display = "none";
         feed.classList.remove("hidden");
-        items.innerHTML = activityLog.slice(0, 10).map(e => `
-            <div class="activity-item">
-              <span><strong>${e.userName}</strong> ${e.action}</span>
-              <span class="activity-time">${timeAgo(e.timestamp)}</span>
-            </div>`).join("");
+        feed.innerHTML = `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 32px 0">
+              <div class="activity-feed-title" style="margin-bottom:0">Recent Chapter Activity</div>
+              <button onclick="dismissActivityFeed()" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:18px;line-height:1">×</button>
+            </div>
+            <div id="activity-feed-items" style="padding:0 32px 8px">${activityLog.slice(0,10).map(e => `
+              <div class="activity-item">
+                <span><strong>${e.userName}</strong> ${e.action}</span>
+                <span class="activity-time">${timeAgo(e.timestamp)}</span>
+              </div>`).join("")}
+            </div>`;
+    }
+    function dismissActivityFeed() {
+        activityDismissedAt = new Date().toISOString();
+        renderActivityFeed();
     }
 
     // ═══════════════════════════════════════════════
@@ -4240,19 +4266,21 @@ function startApp() {
     // ═══════════════════════════════════════════════
     // MESSAGES (admin sends, CL receives)
     // ═══════════════════════════════════════════════
-    function renderSentMessages() {
+   function renderSentMessages() {
         const list = document.getElementById("sent-messages-list");
-        if (!list)
-            return;
+        if (!list) return;
         if (!messages.length) {
             list.innerHTML = '<div style="color:#c4b8a8;font-size:13px;padding:8px 0">No messages sent yet.</div>';
             return;
         }
         list.innerHTML = messages.map(m => {
             const ch = (state.chapters || []).find(c => String(c.id) === String(m.toChapterId));
-            return `<div class="message-card">
-                  <div class="message-meta">To: ${ch ? ch.city : "Unknown"} · ${timeAgo(m.timestamp)} · ${m.read ? '<span style="color:#22c55e">✓ Read</span>' : '<span style="color:#c4a882">Unread</span>'}</div>
-                  <div class="message-text">${m.text}</div>
+            return `<div class="message-card" style="display:flex;justify-content:space-between;align-items:flex-start">
+                  <div style="flex:1">
+                    <div class="message-meta">To: ${ch ? ch.city : "Unknown"} · ${timeAgo(m.timestamp)} · ${m.read ? '<span style="color:#22c55e">✓ Read</span>' : '<span style="color:#c4a882">Unread</span>'}</div>
+                    <div class="message-text">${m.text}</div>
+                  </div>
+                  <button class="del-btn" onclick="deleteMessage(${m.id})">✕</button>
                 </div>`;
         }).join('');
     }
@@ -4276,6 +4304,11 @@ function startApp() {
         document.getElementById("msg-text").value = "";
         renderSentMessages();
     }
+        async function deleteMessage(id) {
+    messages = messages.filter(m => m.id !== id);
+    await saveKey("messages", messages);
+    renderSentMessages();
+}
 
     // ═══════════════════════════════════════════════
     // CHAPTER LEADER VIEW
@@ -4295,7 +4328,7 @@ function startApp() {
         document.getElementById("cl-tab-" + name).classList.remove("hidden");
         btn.classList.add("active");
         const m = {
-            tickets: () => { const sel=document.getElementById('t-recital'); if(sel) sel.innerHTML=(state.recitals||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join(''); },
+            tickets: () => { setTimeout(()=>{ const sel=document.getElementById('t-recital'); if(sel) sel.innerHTML=(state.recitals||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join(''); },50); },
             planning: renderPlanning,
             emails: renderEmails,
             contacts: renderContacts,
