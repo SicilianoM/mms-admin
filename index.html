@@ -1642,6 +1642,14 @@
                                 <input id="pp-instrument" class="fi" placeholder="e.g. Piano, Violin, Cello"/>
                             </div>
                             <div class="form-field">
+                                <div class="form-label">Role</div>
+                                <select id="pp-role" class="fi">
+                                    <option value="performer">Performer</option>
+                                    <option value="chapter_director">Chapter Director</option>
+                                    <option value="admin">Admin</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
                                 <div class="form-label">Chapter</div>
                                 <select id="pp-chapter" class="fi"></select>
                             </div>
@@ -3026,6 +3034,17 @@
         saveData();
         renderPlanning();
     }
+        function toggleArchiveChecklist(id) {
+    const c = state.checklists.find(r => r.id === id);
+    if (!c) return;
+    c.archived = !c.archived;
+    if (c.archived && activeChecklistId === id) {
+        const first = state.checklists.find(r => !r.archived);
+        if (first) activeChecklistId = first.id;
+    }
+    saveData();
+    renderPlanning();
+}
     function selectChecklist(id) {
         activeChecklistId = id;
         renderPlanning();
@@ -3040,8 +3059,9 @@
     }
     function renderPlanning() {
         initChecklists();
-        document.getElementById("checklist-pills").innerHTML = state.checklists.map(r => `
-            <button class="checklist-pill ${r.id === activeChecklistId ? 'active' : ''}" onclick="selectChecklist(${r.id})">${r.name}</button>
+       document.getElementById("checklist-pills").innerHTML = state.checklists.map(r => `
+            <button class="checklist-pill ${r.id === activeChecklistId ? 'active' : ''}" onclick="selectChecklist(${r.id})" style="${r.archived?'opacity:0.45':''}">${r.name}${r.archived?'<span style="font-size:10px;margin-left:4px;opacity:0.7">(archived)</span>':''}</button>
+            <button onclick="toggleArchiveChecklist(${r.id})" title="${r.archived?'Unarchive':'Archive'}" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:13px;padding:0 2px;margin-left:-4px">📦</button>
             <button onclick="deleteChecklist(${r.id})" style="background:none;border:none;color:#e57373;cursor:pointer;font-size:17px;padding:0 4px;margin-left:-4px;margin-right:6px">×</button>
           `).join("");
         const container = document.getElementById("checklist-container");
@@ -3225,19 +3245,29 @@
             return a.localeCompare(b);
         });
 
-        const renderPerformerBox = g => `<div class="history-card">
+       const renderPerformerBox = g => `<div class="history-card">
             <div style="display:flex;justify-content:space-between">
               <div style="flex:1">
                 <div class="history-name">${g.name}</div>
                 <div style="font-size:12px;color:#8b7355;margin-top:3px">🎭 ${g.entries.length} performance${g.entries.length > 1 ? 's' : ''}</div>
-                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
-                  ${g.entries.map(e => `<div style="font-size:12px;color:#8b7355;padding:6px 10px;background:#faf6f0;border-radius:6px">
-                    <strong>${e.recital}</strong>${e.date ? " · " + e.date : ""}<br>
-                    <em>${e.piece}</em>${e.notes ? "<br><span style='color:#a09080'>" + e.notes + "</span>" : ""}
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+                  ${g.entries.map(e => `<div style="font-size:12px;color:#8b7355;padding:8px 10px;background:#faf6f0;border-radius:6px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                      <div><strong>${e.recital}</strong>${e.date ? " · " + e.date : ""}<br><em>${e.piece}</em>${e.notes ? "<br><span style='color:#a09080'>" + e.notes + "</span>" : ""}</div>
+                      <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px">
+                        <button class="btn-secondary btn-xs" onclick="editHistory(${e.id})">Edit</button>
+                        <button class="del-btn" style="font-size:14px" onclick="rmHistory(${e.id})">✕</button>
+                      </div>
+                    </div>
+                    ${editingHistory===e.id ? `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+                      <input class="fi" id="eh-recital-${e.id}" value="${e.recital||''}" placeholder="Recital"/>
+                      <input class="fi" id="eh-piece-${e.id}" value="${e.piece||''}" placeholder="Piece"/>
+                      <input class="fi" id="eh-notes-${e.id}" value="${e.notes||''}" placeholder="Notes"/>
+                      <div style="display:flex;gap:6px"><button class="btn-primary btn-sm" onclick="saveHistory(${e.id})">Save</button><button class="btn-secondary btn-sm" onclick="cancelEditHistory()">Cancel</button></div>
+                    </div>` : ''}
                   </div>`).join("")}
                 </div>
               </div>
-              <button class="del-btn" onclick="rmHistory(${g.entries[0].id})" style="align-self:flex-start">✕</button>
             </div>
           </div>`;
 
@@ -3274,6 +3304,25 @@
         saveData();
         renderHistory();
     }
+        let editingHistory = null;
+function editHistory(id) {
+    editingHistory = id;
+    renderHistory();
+}
+function cancelEditHistory() {
+    editingHistory = null;
+    renderHistory();
+}
+function saveHistory(id) {
+    const h = state.history.find(x => x.id === id);
+    if (!h) return;
+    h.recital = document.getElementById('eh-recital-'+id).value;
+    h.piece = document.getElementById('eh-piece-'+id).value;
+    h.notes = document.getElementById('eh-notes-'+id).value;
+    editingHistory = null;
+    saveData();
+    renderHistory();
+}
     // ═══════════════════════════════════════════════
     // NOTES
     // ═══════════════════════════════════════════════
@@ -3705,10 +3754,79 @@
             empty.classList.remove("hidden");
             return;
         }
-        empty.classList.add("hidden");
+      empty.classList.add("hidden");
         const chapterOptions = `<option value="">None / Unassigned</option>` +
         (state.chapters || []).map(c => `<option value="${c.id}">${c.city}</option>`).join('');
-        list.innerHTML = state.performerProfiles.map(p => {
+
+        // Group by chapter, then by role
+        const grouped = {};
+        state.performerProfiles.forEach(p => {
+            const ch = (state.chapters||[]).find(c => String(c.id) === String(p.chapter));
+            const chLabel = ch ? ch.city : 'Unassigned';
+            if (!grouped[chLabel]) grouped[chLabel] = { director: [], performers: [], admins: [] };
+            const role = p.role || 'performer';
+            if (role === 'chapter_director') grouped[chLabel].director.push(p);
+            else if (role === 'admin') grouped[chLabel].admins.push(p);
+            else grouped[chLabel].performers.push(p);
+        });
+
+        const roleBadge = r => r === 'chapter_director' ? '<span style="background:#dbeafe;color:#1e40af;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;margin-left:6px">Chapter Director</span>' :
+            r === 'admin' ? '<span style="background:#fce7f3;color:#9d174d;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;margin-left:6px">Admin</span>' :
+            '<span style="background:#f3f4f6;color:#374151;font-size:10px;padding:2px 7px;border-radius:8px;font-weight:600;margin-left:6px">Performer</span>';
+
+        const renderCard = p => {
+            const chapter = (state.chapters || []).find(c => String(c.id) === String(p.chapter));
+            if (editingProfile === p.id)
+                return `
+                      <div class="contact-card" style="flex-direction:column;align-items:stretch;gap:10px">
+                        <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:2px">Editing: ${p.name}</div>
+                        <div class="grid-3">
+                          <div class="form-field"><div class="form-label">Full Name</div><input id="ep-name" class="fi" value="${p.name || ''}"/></div>
+                          <div class="form-field"><div class="form-label">Instrument</div><input id="ep-instrument" class="fi" value="${p.instrument || ''}"/></div>
+                          <div class="form-field"><div class="form-label">Role</div><select id="ep-role" class="fi"><option value="performer" ${(p.role||'performer')==='performer'?'selected':''}>Performer</option><option value="chapter_director" ${p.role==='chapter_director'?'selected':''}>Chapter Director</option><option value="admin" ${p.role==='admin'?'selected':''}>Admin</option></select></div>
+                        </div>
+                        <div class="grid-3">
+                          <div class="form-field"><div class="form-label">Chapter</div><select id="ep-chapter" class="fi">${chapterOptions}</select></div>
+                          <div class="form-field"><div class="form-label">School</div><input id="ep-school" class="fi" value="${p.school || ''}"/></div>
+                          <div class="form-field"><div class="form-label">Email</div><input id="ep-email" type="email" class="fi" value="${p.email || ''}"/></div>
+                        </div>
+                        <div class="grid-2">
+                          <div class="form-field"><div class="form-label">Phone</div><input id="ep-phone" class="fi" value="${p.phone || ''}"/></div>
+                          <div class="form-field"><div class="form-label">Notes</div><textarea id="ep-notes" class="fi">${p.notes || ''}</textarea></div>
+                        </div>
+                        <div class="form-actions">
+                          <button class="btn-primary" onclick="saveEditProfile(${p.id})">Save</button>
+                          <button class="btn-secondary" onclick="cancelEditProfile()">Cancel</button>
+                        </div>
+                      </div>`;
+            return `<div class="contact-card">
+                  <div>
+                    <div class="contact-name">${p.name}${roleBadge(p.role||'performer')}</div>
+                    <div class="contact-role">${p.instrument || 'Instrument not specified'}</div>
+                    ${chapter ? `<div class="contact-detail">🗺 ${chapter.city}</div>` : ''}
+                    ${p.school ? `<div class="contact-detail">🎓 ${p.school}</div>` : ''}
+                    ${p.email ? `<div class="contact-detail">✉️ <a href="mailto:${p.email}" style="color:#7c5c3e">${p.email}</a></div>` : ''}
+                    ${p.phone ? `<div class="contact-detail">📞 ${p.phone}</div>` : ''}
+                    ${p.notes ? `<div class="contact-detail" style="color:#a09080;font-style:italic">📝 ${p.notes}</div>` : ''}
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn-secondary btn-sm" onclick="startEditProfile(${p.id})">Edit</button>
+                    <button class="del-btn" onclick="rmPerformerProfile(${p.id})">✕</button>
+                  </div>
+                </div>`;
+        };
+
+        const keys = Object.keys(grouped).sort((a,b) => a==='Unassigned'?1:b==='Unassigned'?-1:a.localeCompare(b));
+        list.innerHTML = keys.map(ch => `
+            <div style="margin-bottom:20px">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8b7355;font-weight:600;padding:8px 0;border-bottom:2px solid #e8e0d4;margin-bottom:12px">🗺 ${ch}</div>
+              ${grouped[ch].director.length ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#1e40af;margin-bottom:6px">Chapter Director</div>${grouped[ch].director.map(renderCard).join('')}` : ''}
+              ${grouped[ch].performers.length ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#374151;margin-bottom:6px;margin-top:${grouped[ch].director.length?'12px':'0'}">Performers</div>${grouped[ch].performers.map(renderCard).join('')}` : ''}
+              ${grouped[ch].admins.length ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#9d174d;margin-bottom:6px;margin-top:12px">Admins</div>${grouped[ch].admins.map(renderCard).join('')}` : ''}
+            </div>`).join('');
+
+        list.innerHTML += ''; // trigger
+        const p2 = state.performerProfiles.find(x => x.id === editingProfile);
             const chapter = (state.chapters || []).find(c => String(c.id) === String(p.chapter));
             if (editingProfile === p.id)
                 return `
@@ -3760,10 +3878,11 @@
             return;
         if (!state.performerProfiles)
             state.performerProfiles = [];
-        state.performerProfiles.push({
+state.performerProfiles.push({
             id: Date.now(),
             name,
             instrument: document.getElementById("pp-instrument").value,
+            role: document.getElementById("pp-role").value || "performer",
             chapter: document.getElementById("pp-chapter").value,
             school: document.getElementById("pp-school").value,
             email: document.getElementById("pp-email").value,
@@ -3796,7 +3915,8 @@
         const name = document.getElementById("ep-name").value.trim();
         if (name)
             p.name = name;
-        p.instrument = document.getElementById("ep-instrument").value;
+      p.instrument = document.getElementById("ep-instrument").value;
+        p.role = document.getElementById("ep-role").value || "performer";
         p.chapter = document.getElementById("ep-chapter").value;
         p.school = document.getElementById("ep-school").value;
         p.email = document.getElementById("ep-email").value;
@@ -3827,8 +3947,26 @@
             return;
         }
         empty.classList.add("hidden");
-        list.innerHTML = state.chapters.map(c => {
+       list.innerHTML = state.chapters.map(c => {
             const bc = c.status === "Active" ? "badge-active" : c.status === "Planning" ? "badge-planning" : "badge-on-hold";
+            if (editingChapter === c.id) return `<div class="chapter-card">
+                <div style="font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:12px">Editing: ${c.city}</div>
+                <div class="grid-3">
+                  <div class="form-field"><div class="form-label">City, State</div><input id="ec-city" class="fi" value="${c.city||''}"/></div>
+                  <div class="form-field"><div class="form-label">Chapter Lead</div><input id="ec-lead" class="fi" value="${c.lead||''}"/></div>
+                  <div class="form-field"><div class="form-label">Status</div><select id="ec-status" class="fi"><option ${c.status==='Planning'?'selected':''}>Planning</option><option ${c.status==='Active'?'selected':''}>Active</option><option ${c.status==='On Hold'?'selected':''}>On Hold</option></select></div>
+                </div>
+                <div class="grid-3">
+                  <div class="form-field"><div class="form-label">Recitals Held</div><input id="ec-recitals" type="number" class="fi" value="${c.recitals||0}"/></div>
+                  <div class="form-field"><div class="form-label">Total Raised ($)</div><input id="ec-raised" type="number" class="fi" value="${c.raised||0}"/></div>
+                  <div class="form-field"><div class="form-label">Hospital Partner</div><input id="ec-hospital" class="fi" value="${c.hospital||''}"/></div>
+                </div>
+                <div class="form-field"><div class="form-label">Notes</div><input id="ec-notes" class="fi" value="${c.notes||''}"/></div>
+                <div class="form-actions" style="margin-top:12px">
+                  <button class="btn-primary" onclick="saveEditChapter(${c.id})">Save</button>
+                  <button class="btn-secondary" onclick="cancelEditChapter()">Cancel</button>
+                </div>
+              </div>`;
             return `<div class="chapter-card">
                   <div style="display:flex;justify-content:space-between">
                     <div style="flex:1">
@@ -3841,7 +3979,10 @@
                       </div>
                       ${c.notes ? `<div style="font-size:12px;color:#a09080;margin-top:6px;font-style:italic">📝 ${c.notes}</div>` : ""}
                     </div>
-                    <button class="del-btn" onclick="rmChapter(${c.id})">✕</button>
+                    <div style="display:flex;gap:6px">
+                      <button class="btn-secondary btn-sm" onclick="startEditChapter(${c.id})">Edit</button>
+                      <button class="del-btn" onclick="rmChapter(${c.id})">✕</button>
+                    </div>
                   </div>
                 </div>`;
         }).join("");
@@ -3874,6 +4015,24 @@
         renderChapters();
         renderStats();
     }
+        let editingChapter = null;
+function startEditChapter(id) { editingChapter = id; renderChapters(); }
+function cancelEditChapter() { editingChapter = null; renderChapters(); }
+function saveEditChapter(id) {
+    const c = state.chapters.find(x => x.id === id);
+    if (!c) return;
+    c.city = document.getElementById('ec-city').value;
+    c.lead = document.getElementById('ec-lead').value;
+    c.status = document.getElementById('ec-status').value;
+    c.recitals = Number(document.getElementById('ec-recitals').value) || 0;
+    c.raised = Number(document.getElementById('ec-raised').value) || 0;
+    c.hospital = document.getElementById('ec-hospital').value;
+    c.notes = document.getElementById('ec-notes').value;
+    editingChapter = null;
+    saveData();
+    renderChapters();
+    renderStats();
+}
     // ═══════════════════════════════════════════════
     // NEW: SESSION & EXTRA-DATA GLOBALS
     // ═══════════════════════════════════════════════
