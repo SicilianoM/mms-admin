@@ -1321,7 +1321,7 @@
                 <div class="card">
                     <div class="card-header">
                         <div class="section-label">Cash Sales Log</div>
-                        <button class="btn-primary" onclick="tog('add-ticket')">+ Log Sale</button>
+                        <button class="btn-primary" onclick="tog('add-ticket');populateTicketRecitalDropdown()">+ Log Sale</button>
                     </div>
                     <div class="add-form hidden" id="add-ticket">
                         <div class="grid-3">
@@ -2381,7 +2381,7 @@
     // ═══════════════════════════════════════════════
     // RENDER ALL
     // ═══════════════════════════════════════════════
-    function renderAll() {
+   function renderAll() {
         document.getElementById("loading-msg").classList.add("hidden");
         document.getElementById("tab-recitals").classList.remove("hidden");
         if (!state.recitals || !state.recitals.length)
@@ -2394,8 +2394,13 @@
         renderRecitalPills();
         renderRecitalContent();
         renderTickets();
+        populateTicketRecitalDropdown();
     }
 
+    function populateTicketRecitalDropdown() {
+        const sel = document.getElementById('t-recital');
+        if (sel) sel.innerHTML = (state.recitals || []).map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
     function renderStats() {
         const qty = state.tickets.reduce((s, t) => s + Number(t.quantity || 0), 0);
         const raised = state.tickets.reduce((s, t) => s + Number(t.amountPaid || 0), 0);
@@ -4334,7 +4339,7 @@ function startApp() {
         document.getElementById("cl-tab-" + name).classList.remove("hidden");
         btn.classList.add("active");
         const m = {
-            tickets: () => { setTimeout(()=>{ const sel=document.getElementById('t-recital'); if(sel) sel.innerHTML=(state.recitals||[]).map(r=>`<option value="${r.id}">${r.name}</option>`).join(''); },50); },
+            tickets: () => { populateTicketRecitalDropdown(); },
             planning: renderPlanning,
             emails: renderEmails,
             contacts: renderContacts,
