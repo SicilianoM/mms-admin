@@ -3825,7 +3825,7 @@ function saveHistory(id) {
               ${grouped[ch].admins.length ? `<div style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#9d174d;margin-bottom:6px;margin-top:12px">Admins</div>${grouped[ch].admins.map(renderCard).join('')}` : ''}
             </div>`).join('');
 
-        list.innerHTML += ''; // trigger
+        
         const p2 = state.performerProfiles.find(x => x.id === editingProfile);
             const chapter = (state.chapters || []).find(c => String(c.id) === String(p.chapter));
             if (editingProfile === p.id)
