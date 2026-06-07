@@ -2927,19 +2927,25 @@
     tbody.innerHTML = html;
     renderStats();
 }
-    function addTicket() {
-        const b = document.getElementById("t-buyer").value;
-        if (!b) return;
-        state.tickets.push({
-            id: Date.now(),
-            buyerName: b,
-            recitalId: document.getElementById("t-recital").value || null,
-            quantity: document.getElementById("t-qty").value,
-            amountPaid: document.getElementById("t-amount").value,
-            date: document.getElementById("t-date").value,
-            notes: document.getElementById("t-notes").value
-        });
-    }
+   function addTicket() {
+    const b = document.getElementById("t-buyer").value.trim();
+    if (!b) { alert("Please enter a buyer name."); return; }
+    const recitalId = document.getElementById("t-recital")?.value || null;
+    state.tickets.push({
+        id: Date.now(),
+        buyerName: b,
+        recitalId: recitalId,
+        quantity: document.getElementById("t-qty").value || 1,
+        amountPaid: document.getElementById("t-amount").value || 0,
+        date: document.getElementById("t-date").value,
+        notes: document.getElementById("t-notes").value
+    });
+    ["t-buyer", "t-amount", "t-notes", "t-date"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("t-qty").value = "1";
+    document.getElementById("add-ticket").classList.add("hidden");
+    saveData();
+    renderTickets();
+}
     function rmTicket(id) {
         state.tickets = state.tickets.filter(t => t.id !== id);
         saveData();
