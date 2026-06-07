@@ -2786,7 +2786,7 @@
                           <div class="form-field"><div class="form-label">Piece</div><input value="${p.piece || ''}" onchange="upP(${rec.id},${p.id},'piece',this.value)"/></div>
                           <div class="form-field"><div class="form-label">Piano Accompaniment</div>
                             <select onchange="upP(${rec.id},${p.id},'accompaniment',this.value)">
-                              ${["None", "Yes — Tamana", "TBD", "Other (see notes)"].map(o => `<option ${p.accompaniment === o ? 'selected' : ''}>${o}</option>`).join("")}
+                            ${["None", "Yes — Tamanna", "TBD", "Other (see notes)"].map(o => `<option ${p.accompaniment === o ? 'selected' : ''}>${o}</option>`).join("")}
                             </select>
                           </div>
                           <div class="form-field"><div class="form-label">Notes</div><input value="${p.notes || ''}" onchange="upP(${rec.id},${p.id},'notes',this.value)"/></div>
