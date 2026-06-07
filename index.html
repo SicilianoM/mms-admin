@@ -4126,9 +4126,15 @@ function startApp() {
               </div>`).join("")}
             </div>`;
     }
-    function dismissActivityFeed() {
+   function dismissActivityFeed() {
         activityDismissedAt = new Date().toISOString();
-        renderActivityFeed();
+        const feed = document.getElementById("admin-activity-feed");
+        if (feed) feed.classList.add("hidden");
+        const notifBar = document.getElementById("activity-notif-bar");
+        if (notifBar && activityLog.length) {
+            notifBar.style.display = "block";
+            notifBar.innerHTML = `🔔 ${activityLog.length} chapter activit${activityLog.length>1?'ies':'y'} — click to view`;
+        }
     }
 
     // ═══════════════════════════════════════════════
