@@ -2822,7 +2822,7 @@
                           <div class="form-field"><div class="form-label">Preference</div><input value="${p.preference || ''}" onchange="upP(${rec.id},${p.id},'preference',this.value)" placeholder="e.g. Prefers June"/></div>
                           <div>
                             <div class="form-label" style="margin-bottom:6px">Availability</div>
-                           <div class="avail-checks">${(rec.dates || []).map(d => `<label style="display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid #e8e0d4;border-radius:6px;background:#fffdf9"><input type="checkbox" ${(p.availability || []).includes(d) ? 'checked' : ''} onchange="togAvail(${rec.id},${p.id},'${d}',this.checked)"/><span>${d}</span></label>`).join("")}</div>
+                           <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${(rec.dates || []).map(d => `<label style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #e8e0d4;border-radius:8px;background:#fffdf9;cursor:pointer;min-width:60px;text-align:center;font-size:12px;color:#5a3e28"><input type="checkbox" ${(p.availability || []).includes(d) ? 'checked' : ''} onchange="togAvail(${rec.id},${p.id},'${d}',this.checked)" style="width:16px;height:16px;accent-color:#7c5c3e"/>${d}</label>`).join("")}</div>
                             ${!(rec.dates || []).length ? '<div style="font-size:12px;color:#c4b8a8">Add dates above first.</div>' : ""}
                           </div>
                           <div class="form-actions">
