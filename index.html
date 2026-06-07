@@ -2972,39 +2972,8 @@
     // ═══════════════════════════════════════════════
     // PLANNING / CHECKLISTS
     // ═══════════════════════════════════════════════
-    const PLAN_TASKS = [
-    {
-        cat: "Venue & Logistics",
-        tasks: ["Confirm venue booking and date", "Get venue address and parking info", "Check piano availability at venue", "Arrange chairs and stage layout", "Confirm venue capacity", "Plan arrival and setup time"]
-    },
-    {
-        cat: "Performers & Scheduling",
-        tasks: ["Collect availability via Google Form", "Confirm final performer list", "Confirm each performer's piece", "Confirm accompaniment arrangements", "Send performers the final date", "Set running order", "Schedule rehearsal if needed"]
-    },
-    {
-        cat: "Tickets & Fundraising",
-        tasks: ["Set ticket price", "Set fundraising goal", "Start selling tickets", "Track all cash sales in dashboard", "Send donation to hospital after event", "Get donation receipt"]
-    },
-    {
-        cat: "Marketing & Social Media",
-        tasks: ["Create event post for Instagram", "Post on Facebook", "Update mobilemusicsalon.org", "Send email to mailing list", "Share in local community groups", "Post reminder 1 week before", "Post reminder day before"]
-    },
-    {
-        cat: "Day-Of Tasks",
-        tasks: ["Arrive early to set up", "Confirm piano is tuned", "Set up ticket collection at door", "Brief performers on running order", "Welcome guests and open the event", "Collect all cash payments", "Take photos for social media"]
-    },
-    {
-        cat: "Post-Event Tasks",
-        tasks: ["Count total revenue", "Send donation to hospital", "Post thank-you on social media", "Email performers thank you", "Log totals in dashboard", "Debrief: what went well, what to improve", "Start planning next recital"]
-    },
-    ];
-    function buildChecks() {
-        const c = {};
-        PLAN_TASKS.forEach(cat => cat.tasks.forEach((t, i) => {
-            c[cat.cat + "_" + i] = false;
-        }));
-        return c;
-    }
+   const PLAN_TASKS = [
+   function buildChecks() {
     function initChecklists() {
         if (!state.checklists) {
             state.checklists = [{
@@ -3080,11 +3049,11 @@
             container.innerHTML = "";
             return;
         }
-        const total = PLAN_TASKS.reduce((s, c) => s + c.tasks.length, 0);
+       const total = ADMIN_PLAN_TASKS.reduce((s, c) => s + c.tasks.length, 0);
         const done = Object.values(rec.checks).filter(Boolean).length;
         const pct = Math.round((done / total) * 100);
         let html = `<div class="card"><div class="progress-label"><span style="font-weight:600">${rec.name}</span><span>${done}/${total} tasks</span></div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div><div style="font-size:12px;color:#8b7355;margin-top:6px">${pct}% complete</div></div>`;
-        PLAN_TASKS.forEach(cat => {
+        ADMIN_PLAN_TASKS.forEach(cat => {
             const catDone = cat.tasks.filter((_, i) => rec.checks[cat.cat + "_" + i]).length;
             html += `<div class="card"><div class="category-header"><span class="category-title">${cat.cat}</span><span class="category-progress">${catDone}/${cat.tasks.length}</span></div>`;
             cat.tasks.forEach((task, i) => {
@@ -3094,9 +3063,6 @@
             });
             html += `</div>`;
         });
-        container.innerHTML = html;
-    }
-
     // ═══════════════════════════════════════════════
     // CONTACTS
     // ═══════════════════════════════════════════════
@@ -4390,14 +4356,178 @@ function startApp() {
         renderCLRecitals();
     }
 
-    function renderCLRecitalContent() {
-        const rec = (state.recitals || []).find(r => r.id === clActiveRecitalId);
-        const el = document.getElementById("cl-recital-content");
-        if (!rec || !el) {
-            if (el)
-                el.innerHTML = "";
-            return;
-        }
+   function renderCLRecitalContent() {
+    const rec = (state.recitals || []).find(r => r.id === clActiveRecitalId);
+    const el = document.getElementById("cl-recital-content");
+    if (!rec || !el) { if (el) el.innerHTML = ""; return; }
+    const profiles = state.performerProfiles || [];
+    const profileDrop = profiles.length
+        ? `<select id="cl-rc-p-profile" class="fi"><option value="">Select performer…</option>${profiles.map(p => `<option value="${p.id}">${p.name}${p.instrument ? " (" + p.instrument + ")" : ""}</option>`).join('')}</select>`
+        : `<div style="font-size:12px;color:#c4b8a8;font-style:italic;padding:8px 0">No performer profiles yet.</div>`;
+    const dateOptions = (rec.dates || []).map(d => `<option value="${d}">${d}</option>`).join("");
+    el.innerHTML = `
+        ${rec.lockedDate ? `
+        <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:4px">Recital Date Confirmed</div>
+            <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff">📅 ${rec.lockedDate}</div>
+          </div>
+          <button onclick="clUnlockRecital()" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:'Lora',serif">Change date</button>
+        </div>` : `
+        <div style="background:#fff;border-radius:12px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.06);border:2px dashed #e8e0d4">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+            <div>
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8b7355;margin-bottom:4px">Finalize This Recital</div>
+              <div style="font-size:13px;color:#8b7355">Lock in the date once confirmed.</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              ${dateOptions ? `<select id="cl-lock-date-sel" class="fi" style="max-width:180px">${dateOptions}</select>
+              <button class="btn-primary" onclick="clLockInDate()">🔒 Lock In Date</button>` : `<div style="font-size:13px;color:#c4b8a8;font-style:italic">Add candidate dates first</div>`}
+            </div>
+          </div>
+        </div>`}
+
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="section-label">Candidate Dates — ${rec.name}</div>
+            </div>
+          </div>
+          <div id="cl-date-pills" style="margin-bottom:14px">${(rec.dates||[]).map((d,i) => `<span class="date-pill">${d}<button onclick="clDeleteDate(${i})" title="Remove">×</button></span>`).join("")}</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="cl-new-date" class="fi" placeholder="Add a date (e.g. Aug 23)" style="max-width:220px" onkeydown="if(event.key==='Enter')clAddDate()"/>
+            <button class="btn-primary btn-sm" onclick="clAddDate()">+ Add Date</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="section-label" style="margin-bottom:16px">Availability Overview</div>
+          <div style="overflow-x:auto"><table class="avail-table" id="cl-avail-table"></table></div>
+          <div id="cl-best-dates" style="margin-top:16px"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="section-label">Performers</div>
+            <button class="btn-primary" onclick="clShowAddPerformer()">+ Add Performer</button>
+          </div>
+          <div class="add-form hidden" id="cl-add-performer-form">
+            <div class="grid-2">
+              <div class="form-field"><div class="form-label">Performer</div>${profileDrop}</div>
+              <div class="form-field"><div class="form-label">Piece</div><input id="cl-rc-p-piece" class="fi"/></div>
+            </div>
+            <div class="form-field"><div class="form-label">Notes</div><input id="cl-rc-p-notes" class="fi" placeholder="Optional"/></div>
+            <div class="form-actions">
+              <button class="btn-primary" onclick="clAddPerformerToRecital()">Add</button>
+              <button class="btn-secondary" onclick="clHideAddPerformer()">Cancel</button>
+            </div>
+          </div>
+          <div class="performer-list" id="cl-performer-list"></div>
+        </div>`;
+    clRenderAvailability(rec);
+    clRenderPerformerList(rec);
+}
+        function clLockInDate() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const sel = document.getElementById("cl-lock-date-sel");
+    if (!sel) return;
+    rec.lockedDate = sel.value;
+    saveData();
+    logActivity(`locked in date "${sel.value}" for recital "${rec.name}"`);
+    renderCLRecitals();
+}
+function clUnlockRecital() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    rec.lockedDate = null;
+    saveData();
+    renderCLRecitals();
+}
+function clAddDate() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const inp = document.getElementById("cl-new-date");
+    const val = inp.value.trim();
+    if (!val) return;
+    if (!rec.dates) rec.dates = [];
+    if (rec.dates.includes(val)) { alert("Already added."); return; }
+    rec.dates.push(val);
+    inp.value = "";
+    saveData();
+    renderCLRecitalContent();
+}
+function clDeleteDate(idx) {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const d = rec.dates[idx];
+    rec.dates.splice(idx, 1);
+    rec.performers = rec.performers.map(p => ({...p, availability: (p.availability||[]).filter(x => x !== d)}));
+    saveData();
+    renderCLRecitalContent();
+}
+function clRenderAvailability(rec) {
+    const el = document.getElementById("cl-avail-table");
+    if (!el) return;
+    const dates = rec.dates || [];
+    const conf = rec.performers.filter(p => p.status === "confirmed");
+    let html = `<thead><tr><th>Performer</th>${dates.length ? dates.map(d => `<th>${d}</th>`).join("") : "<th style='color:#c4b8a8'>No dates added yet</th>"}</tr></thead><tbody>`;
+    rec.performers.forEach(p => {
+        html += `<tr><td style="color:${p.status==='pending'?'#aaa':'#3d2b1f'}">${p.name}${p.status==='pending'?'<span class="badge badge-pending" style="font-size:9px">pending</span>':''}</td>`;
+        if (!dates.length) html += `<td style="color:#ddd">—</td>`;
+        else dates.forEach(d => {
+            if (p.status==="pending") html += `<td style="color:#ddd">—</td>`;
+            else if ((p.availability||[]).includes(d)) html += `<td style="color:#22c55e;font-size:18px">✓</td>`;
+            else html += `<td style="color:#e8e0d4;font-size:16px">✕</td>`;
+        });
+        html += `</tr>`;
+    });
+    if (dates.length && conf.length) {
+        html += `<tr class="overlap-row"><td style="font-size:11px;font-weight:700;text-transform:uppercase">Overlap</td>`;
+        dates.forEach(d => {
+            const n = conf.filter(p => (p.availability||[]).includes(d)).length;
+            const all = conf.every(p => (p.availability||[]).includes(d));
+            html += `<td><span class="overlap-dot" style="background:${all?"#22c55e":n>=2?"#f59e0b":"#e8e0d4"};color:${n>=2?"#fff":"#aaa"}">${n}</span></td>`;
+        });
+        html += `</tr>`;
+    }
+    html += `</tbody>`;
+    el.innerHTML = html;
+    const box = document.getElementById("cl-best-dates");
+    if (!box) return;
+    if (!dates.length || !conf.length) { box.innerHTML = "Add dates and confirm performers to see best date."; box.className = "info-box gray"; return; }
+    const allDates = dates.filter(d => conf.every(p => (p.availability||[]).includes(d)));
+    const maxN = Math.max(...dates.map(d => conf.filter(p => (p.availability||[]).includes(d)).length));
+    const mostDates = dates.filter(d => conf.filter(p => (p.availability||[]).includes(d)).length === maxN);
+    if (allDates.length) { box.innerHTML = `<strong>✅ Best dates — all ${conf.length} confirmed available:</strong> ${allDates.join(", ")}`; box.className = "info-box green"; }
+    else { box.innerHTML = `<strong>⚠️ No date works for everyone.</strong> Best overlap (${maxN}/${conf.length}): ${mostDates.join(", ")}`; box.className = "info-box amber"; }
+}
+let clEditingPerformer = null;
+function clRenderPerformerList(rec) {
+    const el = document.getElementById("cl-performer-list");
+    if (!el) return;
+    if (!rec.performers.length) { el.innerHTML = '<div class="empty">No performers yet.</div>'; return; }
+    el.innerHTML = rec.performers.map(p => {
+        const bc = p.status==="confirmed" ? "badge-confirmed" : p.status==="unavailable" ? "badge-on-hold" : "badge-pending";
+        if (clEditingPerformer === p.id) return `
+            <div class="performer-card">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+                <span class="performer-name">${p.name}</span><span class="badge ${bc}">${p.status}</span>
+              </div>
+              <div class="edit-form">
+                <div class="form-field"><div class="form-label">Piece</div><input id="clep-piece-${p.id}" value="${p.piece||''}" class="fi" onchange="clUpP(${rec.id},${p.id},'piece',this.value)"/></div>
+                <div class="form-field"><div class="form-label">Status</div>
+                  <select class="fi" onchange="clUpP(${rec.id},${p.id},'status',this.value)">
+                    ${["confirmed","pending","unavailable"].map(s => `<option value="${s}" ${p.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join("")}
+                  </select>
+                </div>
+                <div class="form-field"><div class="form-label">Notes</div><input class="fi" value="${p.notes||''}" onchange="clUpP(${rec.id},${p.id},'notes',this.value)"/></div>
+                <div>
+                  <div class="form-label" style="margin-bottom:6px">Availability</div>
+                  <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">${(rec.dates||[]).map(d => `<label style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 12px;border:1px solid #e8e0d4;border-radius:8px;background:#fffdf9;cursor:pointer;min-width:60px;text-align:center;font-size:12px;color:#5a3e28"><input type="checkbox" ${(p.availability||[]).includes(d)?'checked':''} onchange="clTogAvail(${rec.id},${p.id},'${d}',this.checked)" style="width:16px;height:16px;accent-color:#7c5c3e"/>${d}</label>`).join("")}</div>
+                  ${!(rec.dates||[]).length ? '<div style="font-size:12px;color:#c4b8a8">Add dates first.</div>' : ""}
+                </div>
+                <di
         const profiles = state.performerProfiles || [];
         const profileDrop = profiles.length
         ? `<select id="cl-rc-p-profile" class="fi"><option value="">Select performer…</option>${profiles.map(p => `<option value="${p.id}">${p.name}${p.instrument ? " (" + p.instrument + ")" : ""}</option>`).join('')}</select>`
@@ -4648,10 +4778,13 @@ function startApp() {
         saveData();
         renderCLPlanning();
     }
-    function clToggleCheck(cid, key) {
+   function clToggleCheck(cid, key) {
         const c = state.checklists.find(r => r.id === cid);
         if (c) {
             c.checks[key] = !c.checks[key];
+            // Sync to admin checklist with same name
+            const adminCl = state.checklists.find(r => r.name === c.name && r.id !== cid);
+            if (adminCl) adminCl.checks[key] = c.checks[key];
             saveData();
             renderCLPlanning();
         }
@@ -4659,7 +4792,7 @@ function startApp() {
 
     // — History —
     function renderCLHistory() {
-        const mine = (state.history || []).filter(h => String(h.chapterId) === String(session.chapterId));
+       const mine = state.history || [];
         const list = document.getElementById("cl-history-list");
         const empty = document.getElementById("cl-no-history");
         if (!mine.length) {
