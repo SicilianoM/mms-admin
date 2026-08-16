@@ -1747,7 +1747,7 @@
                     <div class="card-header">
                         <div>
                             <div class="section-label">Resource Library</div>
-                            <div class="section-desc">Guides, forms, and templates chapter leaders can reference. Paste a link once and it's visible to every chapter.</div>
+                            <div class="section-desc">Guides, forms, and templates chapter leaders can reference. Upload a PDF once and it's visible to every chapter.</div>
                         </div>
                         <button class="btn-primary" onclick="tog('add-resource')">+ Add Resource</button>
                     </div>
@@ -1758,8 +1758,8 @@
                                 <input id="res-title" class="fi" placeholder="e.g. Chapter Leader Guide"/>
                             </div>
                             <div class="form-field">
-                                <div class="form-label">Link (Google Drive, etc.)</div>
-                                <input id="res-url" class="fi" placeholder="https://…"/>
+                                <div class="form-label">PDF File</div>
+                                <input id="res-file" type="file" accept="application/pdf" class="fi"/>
                             </div>
                         </div>
                         <div class="form-field">
@@ -1767,7 +1767,7 @@
                             <input id="res-desc" class="fi" placeholder="Optional"/>
                         </div>
                         <div class="form-actions">
-                            <button class="btn-primary" onclick="addResource()">Save</button>
+                            <button class="btn-primary" id="res-upload-btn" onclick="addResource()">Upload</button>
                             <button class="btn-secondary" onclick="tog('add-resource')">Cancel</button>
                         </div>
                     </div>
@@ -2305,10 +2305,8 @@
         activityDismissedAt: null,
         resources: [
             { id: 1, title: "Chapter Leader Guide", url: "", description: "Full guide to running a chapter" },
-            { id: 2, title: "Chapter Leader Agreement", url: "", description: "" },
-            { id: 3, title: "Performer Information Form", url: "", description: "" },
-            { id: 4, title: "Post-Recital Report Template", url: "", description: "" },
-            { id: 5, title: "Email & Social Media Templates", url: "", description: "Also available live in the Emails tab" },
+            { id: 2, title: "Performer Information Form", url: "", description: "" },
+            { id: 3, title: "Post-Recital Report Template", url: "", description: "" },
         ],
         donations: [],
         onboarding: {},
@@ -4051,10 +4049,8 @@ state.performerProfiles.push({
     const ONBOARDING_TASKS = [
         "Create your dashboard login (get username & password from Matt)",
         "Read the Chapter Leader Guide",
-        "Sign the Chapter Leader Agreement",
         "Identify 2–3 potential performers",
-        "Scout at least one candidate venue with hardwood floors",
-        "Confirm your hospital beneficiary",
+        "Find a venue for your first recital",
         "Set a target date for your first recital",
     ];
     function getOnboardingChecks(chapterId) {
@@ -4220,18 +4216,18 @@ function saveEditChapter(id) {
                 return `<div class="contact-card" style="flex-direction:column;align-items:stretch;gap:10px">
                     <div class="grid-2">
                       <div class="form-field"><div class="form-label">Title</div><input id="er-title" class="fi" value="${r.title || ''}"/></div>
-                      <div class="form-field"><div class="form-label">Link</div><input id="er-url" class="fi" value="${r.url || ''}"/></div>
+                      <div class="form-field"><div class="form-label">Replace PDF (optional)</div><input id="er-file" type="file" accept="application/pdf" class="fi"/></div>
                     </div>
                     <div class="form-field"><div class="form-label">Description</div><input id="er-desc" class="fi" value="${r.description || ''}"/></div>
                     <div class="form-actions">
-                      <button class="btn-primary btn-sm" onclick="saveEditResource(${r.id})">Save</button>
+                      <button class="btn-primary btn-sm" id="er-save-btn" onclick="saveEditResource(${r.id})">Save</button>
                       <button class="btn-secondary btn-sm" onclick="cancelEditResource()">Cancel</button>
                     </div>
                   </div>`;
             return `<div class="contact-card">
                   <div>
-                    <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">${r.title} ↗</a>` : r.title}</div>
-                    ${!r.url ? `<div class="contact-role" style="color:#e57373;letter-spacing:0;text-transform:none;font-weight:600">No link added yet</div>` : ''}
+                    <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">📄 ${r.title}</a>` : r.title}</div>
+                    ${!r.url ? `<div class="contact-role" style="color:#e57373;letter-spacing:0;text-transform:none;font-weight:600">No PDF uploaded yet</div>` : ''}
                     ${r.description ? `<div class="contact-detail">${r.description}</div>` : ''}
                   </div>
                   <div style="display:flex;gap:6px">
@@ -4241,22 +4237,49 @@ function saveEditChapter(id) {
                 </div>`;
         }).join("");
     }
-    function addResource() {
+    async function uploadResourcePdf(file) {
+        if (!db)
+            throw new Error("Not connected to storage.");
+        const path = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')}`;
+        const { error: upErr } = await db.storage.from('resources').upload(path, file, { contentType: 'application/pdf' });
+        if (upErr)
+            throw upErr;
+        const { data: urlData } = db.storage.from('resources').getPublicUrl(path);
+        return urlData.publicUrl;
+    }
+    async function addResource() {
         const title = document.getElementById("res-title").value.trim();
-        if (!title)
+        const fileInput = document.getElementById("res-file");
+        const file = fileInput.files[0];
+        if (!title) {
+            alert("Please enter a title.");
             return;
-        if (!state.resources)
-            state.resources = [];
-        state.resources.push({
-            id: Date.now(),
-            title,
-            url: document.getElementById("res-url").value.trim(),
-            description: document.getElementById("res-desc").value.trim()
-        });
-        ["res-title", "res-url", "res-desc"].forEach(id => document.getElementById(id).value = "");
-        document.getElementById("add-resource").classList.add("hidden");
-        saveData();
-        renderResources();
+        }
+        if (!file) {
+            alert("Please choose a PDF to upload.");
+            return;
+        }
+        const btn = document.getElementById("res-upload-btn");
+        if (btn) { btn.textContent = "Uploading…"; btn.disabled = true; }
+        try {
+            const url = await uploadResourcePdf(file);
+            if (!state.resources)
+                state.resources = [];
+            state.resources.push({
+                id: Date.now(),
+                title,
+                url,
+                description: document.getElementById("res-desc").value.trim()
+            });
+            ["res-title", "res-desc"].forEach(id => document.getElementById(id).value = "");
+            fileInput.value = "";
+            document.getElementById("add-resource").classList.add("hidden");
+            saveData();
+            renderResources();
+        } catch (e) {
+            alert("Upload failed: " + e.message + "\n\nMake sure a public 'resources' storage bucket exists in Supabase — ask Claude for setup steps if you haven't created one yet.");
+        }
+        if (btn) { btn.textContent = "Upload"; btn.disabled = false; }
     }
     function rmResource(id) {
         state.resources = state.resources.filter(r => r.id !== id);
@@ -4271,15 +4294,27 @@ function saveEditChapter(id) {
         editingResource = null;
         renderResources();
     }
-    function saveEditResource(id) {
+    async function saveEditResource(id) {
         const r = state.resources.find(x => x.id === id);
         if (!r)
             return;
         const title = document.getElementById('er-title').value.trim();
         if (title)
             r.title = title;
-        r.url = document.getElementById('er-url').value.trim();
         r.description = document.getElementById('er-desc').value.trim();
+        const fileInput = document.getElementById('er-file');
+        const file = fileInput && fileInput.files[0];
+        if (file) {
+            const btn = document.getElementById('er-save-btn');
+            if (btn) { btn.textContent = "Uploading…"; btn.disabled = true; }
+            try {
+                r.url = await uploadResourcePdf(file);
+            } catch (e) {
+                alert("Upload failed: " + e.message);
+                if (btn) { btn.textContent = "Save"; btn.disabled = false; }
+                return;
+            }
+        }
         editingResource = null;
         saveData();
         renderResources();
@@ -4296,8 +4331,8 @@ function saveEditChapter(id) {
         empty.classList.add("hidden");
         list.innerHTML = items.map(r => `<div class="contact-card">
               <div>
-                <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">${r.title} ↗</a>` : r.title}</div>
-                ${!r.url ? `<div class="contact-role" style="color:#c4b8a8;letter-spacing:0;text-transform:none">Link not added yet — ask Matt</div>` : ''}
+                <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">📄 ${r.title}</a>` : r.title}</div>
+                ${!r.url ? `<div class="contact-role" style="color:#c4b8a8;letter-spacing:0;text-transform:none">Not uploaded yet — ask Matt</div>` : ''}
                 ${r.description ? `<div class="contact-detail">${r.description}</div>` : ''}
               </div>
             </div>`).join('');
