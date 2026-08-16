@@ -2628,11 +2628,15 @@
         document.getElementById("recital-content").innerHTML = `
 
             ${rec.lockedDate ? `
-            <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(22,101,52,.2)">
+            <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(22,101,52,.2);flex-wrap:wrap;gap:12px">
               <div>
                 <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:4px">Recital Date Confirmed</div>
                 <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff">📅 ${rec.lockedDate}</div>
                 ${rec.textReminderDone ? '<div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px">✓ Performers texted</div>' : ''}
+                ${!rec.eventDateISO ? `<div style="margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                    <input type="date" id="rc-backfill-iso" style="padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font-family:'Lora',serif;font-size:12px"/>
+                    <button onclick="setEventDateISO()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'Lora',serif">Set calendar date for RSVP tracking</button>
+                  </div>` : ''}
               </div>
               <div style="display:flex;gap:8px;flex-wrap:wrap">
                 ${!rec.textReminderDone ? `<button onclick="markTexted()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:'Lora',serif">📱 Mark performers texted</button>` : ''}
@@ -2647,10 +2651,13 @@
                 </div>
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
                   ${dateOptions ? `<select id="lock-date-sel" class="fi" style="max-width:180px">${dateOptions}</select>
+                  <input type="date" id="lock-date-iso" class="fi" style="max-width:170px" title="Calendar date, for RSVP countdown"/>
                   <button class="btn-primary" onclick="lockInDate()">🔒 Lock In Date</button>` : `<div style="font-size:13px;color:#c4b8a8;font-style:italic">Add candidate dates first</div>`}
                 </div>
               </div>
             </div>`}
+
+            <div class="card" id="rc-rsvp-card"></div>
 
             <div class="card">
               <div class="card-header">
@@ -2701,6 +2708,12 @@
         renderDatePills(rec);
         renderAvailability(rec);
         renderPerformerList(rec);
+        renderRsvpCard(rec, {
+            prefix: 'rc',
+            containerId: 'rc-rsvp-card',
+            addFn: 'addRsvpToRecital',
+            rmFn: 'rmRsvpFromRecital'
+        });
     }
 
     // ── Finalize / Lock In Date ──
@@ -2709,10 +2722,17 @@
         if (!rec)
             return;
         const sel = document.getElementById("lock-date-sel");
+        const isoInp = document.getElementById("lock-date-iso");
         if (!sel)
             return;
+        if (!isoInp || !isoInp.value) {
+            alert("Please also pick the calendar date (with year) — this powers the RSVP countdown.");
+            return;
+        }
         rec.lockedDate = sel.value;
+        rec.eventDateISO = isoInp.value;
         rec.textReminderDone = false;
+        rec.rsvpAlertsSent = {};
         if (state.checklists) {
             const cl = state.checklists.find(c => c.name === rec.name || c.id === rec.checklistId);
             if (cl) {
@@ -2724,11 +2744,27 @@
         renderRecitalPills();
         renderRecitalContent();
     }
+    function setEventDateISO() {
+        const rec = activeRecital();
+        if (!rec)
+            return;
+        const inp = document.getElementById("rc-backfill-iso");
+        if (!inp || !inp.value) {
+            alert("Pick a calendar date first.");
+            return;
+        }
+        rec.eventDateISO = inp.value;
+        rec.rsvpAlertsSent = {};
+        saveData();
+        renderRecitalContent();
+    }
     function unlockRecital() {
         const rec = activeRecital();
         if (!rec)
             return;
         rec.lockedDate = null;
+        rec.eventDateISO = null;
+        rec.rsvpAlertsSent = {};
         rec.textReminderDone = false;
         saveData();
         renderRecitalPills();
@@ -2741,6 +2777,145 @@
         rec.textReminderDone = true;
         saveData();
         renderRecitalContent();
+    }
+
+    // ═══════════════════════════════════════════════
+    // RSVP TRACKER — shared by admin & chapter leader views
+    // ═══════════════════════════════════════════════
+    function rsvpTotal(rec) {
+        return (rec.rsvps || []).reduce((s, r) => s + Number(r.partySize || 1), 0);
+    }
+    function rsvpStatus(rec) {
+        const total = rsvpTotal(rec);
+        if (!rec.eventDateISO)
+            return { cls: "gray", text: "Lock in a calendar date above to start the RSVP countdown.", daysUntil: null, total };
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const eventDate = new Date(rec.eventDateISO + "T00:00:00");
+        const daysUntil = Math.round((eventDate - today) / 86400000);
+        const dateLabel = eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        if (daysUntil < 0)
+            return { cls: "gray", text: `This recital was ${dateLabel}. Final count: ${total} RSVP${total === 1 ? '' : 's'}.`, daysUntil, total };
+        if (total >= 20)
+            return { cls: "green", text: `✅ ${total}/20 RSVPs — you're clear on the minimum, ${daysUntil} day${daysUntil === 1 ? '' : 's'} out.`, daysUntil, total };
+        if (daysUntil <= 14)
+            return { cls: "amber", text: `🚨 Only ${total}/20 RSVPs with ${daysUntil} day${daysUntil === 1 ? '' : 's'} to go (${dateLabel}). 2-week checkpoint — decide whether to postpone.`, daysUntil, total };
+        if (daysUntil <= 21)
+            return { cls: "amber", text: `⚠️ Only ${total}/20 RSVPs with ${daysUntil} days to go (${dateLabel}). 3-week checkpoint — keep pushing outreach.`, daysUntil, total };
+        return { cls: "gray", text: `${total}/20 RSVPs so far. ${daysUntil} days until the recital (${dateLabel}).`, daysUntil, total };
+    }
+    function renderRsvpCard(rec, cfg) {
+        const el = document.getElementById(cfg.containerId);
+        if (!el)
+            return;
+        const status = rsvpStatus(rec);
+        const list = rec.rsvps || [];
+        el.innerHTML = `
+            <div class="card-header">
+              <div>
+                <div class="section-label">RSVP Tracker</div>
+                <div class="section-desc">Goal: 20 confirmed RSVPs before the recital.</div>
+              </div>
+              <button class="btn-primary btn-sm" onclick="tog('${cfg.prefix}-add-rsvp')">+ Log RSVP</button>
+            </div>
+            <div class="info-box ${status.cls}" style="margin-top:0">${status.text}</div>
+            <div class="goal-bar-wrap" style="margin-top:12px">
+              <div class="goal-bar-fill" style="width:${Math.min(100, Math.round((status.total / 20) * 100))}%;background:${status.total >= 20 ? 'linear-gradient(90deg,#22c55e,#16a34a)' : 'linear-gradient(90deg,#f59e0b,#d97706)'}"></div>
+            </div>
+            <div style="font-size:12px;color:#8b7355;margin-top:6px">${status.total}/20 RSVPs</div>
+            <div class="add-form hidden" id="${cfg.prefix}-add-rsvp" style="margin-top:14px">
+              <div class="grid-3">
+                <div class="form-field"><div class="form-label">Name</div><input id="${cfg.prefix}-rsvp-name" class="fi"/></div>
+                <div class="form-field"><div class="form-label"># of People</div><input id="${cfg.prefix}-rsvp-party" type="number" class="fi" value="1"/></div>
+                <div class="form-field"><div class="form-label">Date RSVP'd</div><input id="${cfg.prefix}-rsvp-date" type="date" class="fi"/></div>
+              </div>
+              <div class="form-field"><div class="form-label">Notes</div><input id="${cfg.prefix}-rsvp-notes" class="fi" placeholder="Optional"/></div>
+              <div class="form-actions">
+                <button class="btn-primary btn-sm" onclick="${cfg.addFn}()">Save</button>
+                <button class="btn-secondary btn-sm" onclick="tog('${cfg.prefix}-add-rsvp')">Cancel</button>
+              </div>
+            </div>
+            ${list.length ? `<div style="margin-top:14px;display:flex;flex-direction:column;gap:6px">
+              ${list.map(r => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#faf6f0;border-radius:6px;font-size:13px">
+                  <div><strong>${r.name}</strong> — ${r.partySize || 1} ${Number(r.partySize) === 1 ? 'person' : 'people'}${r.date ? ` <span style="color:#a09080">· ${r.date}</span>` : ''}${r.notes ? `<br><span style="color:#a09080;font-style:italic">${r.notes}</span>` : ''}</div>
+                  <button class="del-btn" style="font-size:14px" onclick="${cfg.rmFn}(${r.id})">✕</button>
+                </div>`).join('')}
+            </div>` : `<div style="font-size:12px;color:#c4b8a8;margin-top:14px">No RSVPs logged yet.</div>`}`;
+    }
+    function addRsvpToRecital() {
+        const rec = activeRecital();
+        if (!rec)
+            return;
+        const name = document.getElementById("rc-rsvp-name").value.trim();
+        if (!name) {
+            alert("Please enter a name.");
+            return;
+        }
+        if (!rec.rsvps)
+            rec.rsvps = [];
+        rec.rsvps.push({
+            id: Date.now(),
+            name,
+            partySize: Number(document.getElementById("rc-rsvp-party").value) || 1,
+            date: document.getElementById("rc-rsvp-date").value,
+            notes: document.getElementById("rc-rsvp-notes").value
+        });
+        ["rc-rsvp-name", "rc-rsvp-date", "rc-rsvp-notes"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("rc-rsvp-party").value = "1";
+        document.getElementById("rc-add-rsvp").classList.add("hidden");
+        saveData();
+        renderRsvpCard(rec, { prefix: 'rc', containerId: 'rc-rsvp-card', addFn: 'addRsvpToRecital', rmFn: 'rmRsvpFromRecital' });
+    }
+    function rmRsvpFromRecital(id) {
+        const rec = activeRecital();
+        if (!rec)
+            return;
+        rec.rsvps = (rec.rsvps || []).filter(r => r.id !== id);
+        saveData();
+        renderRsvpCard(rec, { prefix: 'rc', containerId: 'rc-rsvp-card', addFn: 'addRsvpToRecital', rmFn: 'rmRsvpFromRecital' });
+    }
+
+    // ── RSVP checkpoint alerts (3-week / 2-week) ──
+    async function logSystemAlert(action) {
+        activityLog.unshift({
+            id: Date.now() + Math.random(),
+            userId: "system",
+            userName: "RSVP Alert",
+            action,
+            timestamp: new Date().toISOString(),
+            system: true
+        });
+        if (activityLog.length > 100)
+            activityLog = activityLog.slice(0, 100);
+        await saveKey("activity_log", activityLog);
+    }
+    async function checkRsvpAlerts() {
+        if (!state.recitals)
+            return;
+        let changed = false;
+        for (const rec of state.recitals) {
+            if (rec.archived || !rec.eventDateISO)
+                continue;
+            const status = rsvpStatus(rec);
+            if (status.daysUntil === null || status.daysUntil < 0)
+                continue;
+            if (!rec.rsvpAlertsSent)
+                rec.rsvpAlertsSent = {};
+            if (status.daysUntil <= 21 && !rec.rsvpAlertsSent.threeWeek) {
+                rec.rsvpAlertsSent.threeWeek = true;
+                changed = true;
+                if (status.total < 20)
+                    await logSystemAlert(`⚠️ ${rec.name} has only ${status.total}/20 RSVPs with 3 weeks to go.`);
+            }
+            if (status.daysUntil <= 14 && !rec.rsvpAlertsSent.twoWeek) {
+                rec.rsvpAlertsSent.twoWeek = true;
+                changed = true;
+                if (status.total < 20)
+                    await logSystemAlert(`🚨 ${rec.name} still has only ${status.total}/20 RSVPs with 2 weeks to go — consider stepping in.`);
+            }
+        }
+        if (changed)
+            await saveData();
     }
 
     // ── Dates ──
@@ -4505,6 +4680,10 @@ function startApp() {
         document.getElementById("cl-app").classList.remove("hidden");
         renderCLApp();
     }
+    checkRsvpAlerts().then(() => {
+        if (session.role === "admin")
+            renderActivityFeed();
+    });
 }
 
     // ═══════════════════════════════════════════════
@@ -4548,8 +4727,8 @@ function startApp() {
               <button onclick="dismissActivityFeed()" style="background:none;border:none;color:#c4a882;cursor:pointer;font-size:18px;line-height:1">×</button>
             </div>
             <div id="activity-feed-items" style="padding:0 32px 8px">${activityLog.slice(0,10).map(e => `
-              <div class="activity-item">
-                <span><strong>${e.userName}</strong> ${e.action}</span>
+              <div class="activity-item" style="${e.system ? 'color:#fca5a5' : ''}">
+                <span>${e.system ? e.action : `<strong>${e.userName}</strong> ${e.action}`}</span>
                 <span class="activity-time">${timeAgo(e.timestamp)}</span>
               </div>`).join("")}
             </div>`;
@@ -4817,6 +4996,8 @@ function clUnlockRecital() {
     const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
     if (!rec) return;
     rec.lockedDate = null;
+    rec.eventDateISO = null;
+    rec.rsvpAlertsSent = {};
     saveData();
     renderCLRecitals();
 }
@@ -4947,10 +5128,14 @@ function renderCLRecitalContent() {
     const dateOptions = (rec.dates || []).map(d => `<option value="${d}">${d}</option>`).join("");
     el.innerHTML = `
         ${rec.lockedDate ? `
-        <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center">
+        <div style="background:linear-gradient(135deg,#166534,#15803d);border-radius:12px;padding:18px 24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
           <div>
             <div style="font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.7);text-transform:uppercase;margin-bottom:4px">Recital Date Confirmed</div>
             <div style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#fff">📅 ${rec.lockedDate}</div>
+            ${!rec.eventDateISO ? `<div style="margin-top:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+                <input type="date" id="cl-backfill-iso" style="padding:5px 8px;border-radius:6px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);color:#fff;font-family:'Lora',serif;font-size:12px"/>
+                <button onclick="clSetEventDateISO()" style="background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:'Lora',serif">Set calendar date for RSVP tracking</button>
+              </div>` : ''}
           </div>
           <button onclick="clUnlockRecital()" style="background:transparent;color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:'Lora',serif">Change date</button>
         </div>` : `
@@ -4962,10 +5147,12 @@ function renderCLRecitalContent() {
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
               ${dateOptions ? `<select id="cl-lock-date-sel" class="fi" style="max-width:180px">${dateOptions}</select>
+              <input type="date" id="cl-lock-date-iso" class="fi" style="max-width:170px" title="Calendar date, for RSVP countdown"/>
               <button class="btn-primary" onclick="clLockInDate()">🔒 Lock In Date</button>` : `<div style="font-size:13px;color:#c4b8a8;font-style:italic">Add candidate dates first</div>`}
             </div>
           </div>
         </div>`}
+        <div class="card" id="cl-rsvp-card"></div>
         <div class="card">
           <div class="card-header"><div><div class="section-label">Candidate Dates — ${rec.name}</div></div></div>
           <div style="margin-bottom:14px">${(rec.dates||[]).map((d,i) => `<span class="date-pill">${d}<button onclick="clDeleteDate(${i})" title="Remove">×</button></span>`).join("")}</div>
@@ -4999,16 +5186,66 @@ function renderCLRecitalContent() {
         </div>`;
     clRenderAvailability(rec);
     clRenderPerformerList(rec);
+    renderRsvpCard(rec, {
+        prefix: 'cl',
+        containerId: 'cl-rsvp-card',
+        addFn: 'clAddRsvp',
+        rmFn: 'clRmRsvp'
+    });
 }
 function clLockInDate() {
     const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
     if (!rec) return;
     const sel = document.getElementById("cl-lock-date-sel");
+    const isoInp = document.getElementById("cl-lock-date-iso");
     if (!sel) return;
+    if (!isoInp || !isoInp.value) {
+        alert("Please also pick the calendar date (with year) — this powers the RSVP countdown.");
+        return;
+    }
     rec.lockedDate = sel.value;
+    rec.eventDateISO = isoInp.value;
+    rec.rsvpAlertsSent = {};
     saveData();
     logActivity(`locked in date "${sel.value}" for recital "${rec.name}"`);
     renderCLRecitals();
+}
+function clSetEventDateISO() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const inp = document.getElementById("cl-backfill-iso");
+    if (!inp || !inp.value) { alert("Pick a calendar date first."); return; }
+    rec.eventDateISO = inp.value;
+    rec.rsvpAlertsSent = {};
+    saveData();
+    renderCLRecitalContent();
+}
+async function clAddRsvp() {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    const name = document.getElementById("cl-rsvp-name").value.trim();
+    if (!name) { alert("Please enter a name."); return; }
+    if (!rec.rsvps) rec.rsvps = [];
+    rec.rsvps.push({
+        id: Date.now(),
+        name,
+        partySize: Number(document.getElementById("cl-rsvp-party").value) || 1,
+        date: document.getElementById("cl-rsvp-date").value,
+        notes: document.getElementById("cl-rsvp-notes").value
+    });
+    ["cl-rsvp-name", "cl-rsvp-date", "cl-rsvp-notes"].forEach(id => document.getElementById(id).value = "");
+    document.getElementById("cl-rsvp-party").value = "1";
+    document.getElementById("cl-add-rsvp").classList.add("hidden");
+    await saveData();
+    await logActivity(`logged an RSVP for "${name}" — ${rec.name}`);
+    renderRsvpCard(rec, { prefix: 'cl', containerId: 'cl-rsvp-card', addFn: 'clAddRsvp', rmFn: 'clRmRsvp' });
+}
+async function clRmRsvp(id) {
+    const rec = (state.recitals||[]).find(r => r.id === clActiveRecitalId);
+    if (!rec) return;
+    rec.rsvps = (rec.rsvps||[]).filter(r => r.id !== id);
+    await saveData();
+    renderRsvpCard(rec, { prefix: 'cl', containerId: 'cl-rsvp-card', addFn: 'clAddRsvp', rmFn: 'clRmRsvp' });
 }
 function clTogEditRecital() {
     tog('cl-edit-recital-form');
