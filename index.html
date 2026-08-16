@@ -2657,7 +2657,7 @@
               </div>
             </div>`}
 
-            <div class="card" id="rc-rsvp-card"></div>
+            ${rec.lockedDate ? `<div class="card" id="rc-rsvp-card"></div>` : ''}
 
             <div class="card">
               <div class="card-header">
@@ -5152,7 +5152,7 @@ function renderCLRecitalContent() {
             </div>
           </div>
         </div>`}
-        <div class="card" id="cl-rsvp-card"></div>
+        ${rec.lockedDate ? `<div class="card" id="cl-rsvp-card"></div>` : ''}
         <div class="card">
           <div class="card-header"><div><div class="section-label">Candidate Dates — ${rec.name}</div></div></div>
           <div style="margin-bottom:14px">${(rec.dates||[]).map((d,i) => `<span class="date-pill">${d}<button onclick="clDeleteDate(${i})" title="Remove">×</button></span>`).join("")}</div>
