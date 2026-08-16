@@ -1231,6 +1231,8 @@
             <button class="tab-btn" onclick="go('emails',this)">✉️ Emails</button>
             <button class="tab-btn" onclick="go('performers',this)">🎼 Performers</button>
             <button class="tab-btn" onclick="go('chapters',this)">🗺 Chapters</button>
+            <button class="tab-btn" onclick="go('resources',this)">📚 Resources</button>
+            <button class="tab-btn" onclick="go('donations',this)">💰 Donations</button>
             <button class="tab-btn" id="users-tab-btn" onclick="go('users',this)">👥 Users</button>
         </div>
 
@@ -1739,6 +1741,88 @@
                     <div class="empty hidden" id="no-chapters">No chapters yet.</div>
                 </div>
             </div>
+            <!-- RESOURCES -->
+            <div id="tab-resources" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="section-label">Resource Library</div>
+                            <div class="section-desc">Guides, forms, and templates chapter leaders can reference. Paste a link once and it's visible to every chapter.</div>
+                        </div>
+                        <button class="btn-primary" onclick="tog('add-resource')">+ Add Resource</button>
+                    </div>
+                    <div class="add-form hidden" id="add-resource">
+                        <div class="grid-2">
+                            <div class="form-field">
+                                <div class="form-label">Title</div>
+                                <input id="res-title" class="fi" placeholder="e.g. Chapter Leader Guide"/>
+                            </div>
+                            <div class="form-field">
+                                <div class="form-label">Link (Google Drive, etc.)</div>
+                                <input id="res-url" class="fi" placeholder="https://…"/>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-label">Description</div>
+                            <input id="res-desc" class="fi" placeholder="Optional"/>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" onclick="addResource()">Save</button>
+                            <button class="btn-secondary" onclick="tog('add-resource')">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="resource-list"></div>
+                    <div class="empty hidden" id="no-resources">No resources yet.</div>
+                </div>
+            </div>
+
+            <!-- DONATIONS -->
+            <div id="tab-donations" class="hidden">
+                <div class="card">
+                    <div class="section-label" style="margin-bottom:12px">Donation Overview</div>
+                    <div id="donation-summary"></div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="section-label">Hospital Donations</div>
+                            <div class="section-desc">Track what each chapter sent to their hospital beneficiary and whether a receipt came back.</div>
+                        </div>
+                        <button class="btn-primary" onclick="tog('add-donation')">+ Log Donation</button>
+                    </div>
+                    <div class="add-form hidden" id="add-donation">
+                        <div class="grid-3">
+                            <div class="form-field">
+                                <div class="form-label">Chapter</div>
+                                <select id="dn-chapter" class="fi"></select>
+                            </div>
+                            <div class="form-field">
+                                <div class="form-label">Amount ($)</div>
+                                <input id="dn-amount" type="number" class="fi"/>
+                            </div>
+                            <div class="form-field">
+                                <div class="form-label">Date Sent</div>
+                                <input id="dn-date" type="date" class="fi"/>
+                            </div>
+                        </div>
+                        <div class="form-field" style="flex-direction:row;align-items:center;gap:8px;margin-bottom:10px">
+                            <input type="checkbox" id="dn-receipt" style="width:16px;height:16px;accent-color:#7c5c3e"/>
+                            <span class="form-label" style="margin:0">Receipt already received</span>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-label">Note</div>
+                            <input id="dn-note" class="fi" placeholder="Optional"/>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" onclick="addDonation()">Save</button>
+                            <button class="btn-secondary" onclick="tog('add-donation')">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="donation-list"></div>
+                    <div class="empty hidden" id="no-donations">No donations logged yet.</div>
+                </div>
+            </div>
+
             <!-- USERS & MESSAGES -->
             <div id="tab-users" class="hidden">
                 <div class="card">
@@ -1786,7 +1870,7 @@
                     <div class="card-header">
                         <div>
                             <div class="section-label">Messages to Chapters</div>
-                            <div class="section-desc">Chapter leaders see these in their Messages tab.</div>
+                            <div class="section-desc">Chapter leaders see these in their Messages tab. Choose a chapter, or broadcast to everyone at once.</div>
                         </div>
                     </div>
                     <div class="add-form" style="margin-bottom:16px">
@@ -1794,7 +1878,7 @@
                             <div class="form-field">
                                 <div class="form-label">Send To</div>
                                 <select id="msg-to-chapter" class="fi">
-                                    <option value="">Select chapter…</option>
+                                    <option value="">Select recipient…</option>
                                 </select>
                             </div>
                             <div class="form-field">
@@ -1826,14 +1910,21 @@
             </div>
         </div>
         <div class="tabs" id="cl-tabs">
+            <button class="tab-btn" onclick="clGo('onboarding',this)">🚀 Getting Started</button>
             <button class="tab-btn active" onclick="clGo('recitals',this)">🎻 Recitals</button>
             <button class="tab-btn" onclick="clGo('tickets',this)">🎟 Tickets</button>
             <button class="tab-btn" onclick="clGo('planning',this)">✅ Planning</button>
             <button class="tab-btn" onclick="clGo('history',this)">🎵 Performer History</button>
             <button class="tab-btn" onclick="clGo('notes',this)">📝 Notes</button>
+            <button class="tab-btn" onclick="clGo('resources',this)">📚 Resources</button>
+            <button class="tab-btn" onclick="clGo('donations',this)">💰 Donation</button>
             <button class="tab-btn" id="cl-messages-tab-btn" onclick="clGo('messages',this)">✉️ Messages</button>
         </div>
         <div class="content">
+            <!-- CL Onboarding -->
+            <div id="cl-tab-onboarding" class="hidden">
+                <div id="cl-onboarding-container"></div>
+            </div>
             <!-- CL Recitals -->
             <div id="cl-tab-recitals">
                 <div class="card">
@@ -1996,6 +2087,53 @@
                     <div class="empty hidden" id="cl-no-notes">No notes yet.</div>
                 </div>
             </div>
+            <!-- CL Resources -->
+            <div id="cl-tab-resources" class="hidden">
+                <div class="card">
+                    <div class="section-label" style="margin-bottom:8px">Resource Library</div>
+                    <p style="font-size:13px;color:#8b7355;margin-bottom:16px">Guides, forms, and templates from Matt. Tap a title to open the link.</p>
+                    <div id="cl-resource-list"></div>
+                    <div class="empty hidden" id="cl-no-resources">No resources added yet.</div>
+                </div>
+            </div>
+            <!-- CL Donations -->
+            <div id="cl-tab-donations" class="hidden">
+                <div class="card">
+                    <div class="card-header">
+                        <div>
+                            <div class="section-label">Hospital Donations</div>
+                            <div class="section-desc">Log when you send your chapter's proceeds and whether you've gotten a receipt back.</div>
+                        </div>
+                        <button class="btn-primary" onclick="tog('cl-add-donation')">+ Log Donation</button>
+                    </div>
+                    <div class="add-form hidden" id="cl-add-donation">
+                        <div class="grid-2">
+                            <div class="form-field">
+                                <div class="form-label">Amount ($)</div>
+                                <input id="cl-dn-amount" type="number" class="fi"/>
+                            </div>
+                            <div class="form-field">
+                                <div class="form-label">Date Sent</div>
+                                <input id="cl-dn-date" type="date" class="fi"/>
+                            </div>
+                        </div>
+                        <div class="form-field" style="flex-direction:row;align-items:center;gap:8px;margin-bottom:10px">
+                            <input type="checkbox" id="cl-dn-receipt" style="width:16px;height:16px;accent-color:#7c5c3e"/>
+                            <span class="form-label" style="margin:0">Receipt already received</span>
+                        </div>
+                        <div class="form-field">
+                            <div class="form-label">Note</div>
+                            <input id="cl-dn-note" class="fi" placeholder="Optional"/>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn-primary" onclick="clAddDonation()">Save</button>
+                            <button class="btn-secondary" onclick="tog('cl-add-donation')">Cancel</button>
+                        </div>
+                    </div>
+                    <div id="cl-donation-list"></div>
+                    <div class="empty hidden" id="cl-no-donations">No donations logged yet.</div>
+                </div>
+            </div>
             <!-- CL Messages -->
             <div id="cl-tab-messages" class="hidden">
                 <div class="card">
@@ -2015,7 +2153,7 @@
     const SUPABASE_URL = "https://auqosveraaukoktzlnug.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1cW9zdmVyYWF1a29rdHpsbnVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5MTU2MjIsImV4cCI6MjA5MDQ5MTYyMn0.2LeFUxlhUmT_6tFvNG5MAuDbMsITAsCP8WM_7_HEMrw";
 
-    const ALL_TABS = ["recitals", "tickets", "planning", "contacts", "venues", "history", "notes", "reminders", "emails", "performers", "chapters", "users"];
+    const ALL_TABS = ["recitals", "tickets", "planning", "contacts", "venues", "history", "notes", "reminders", "emails", "performers", "chapters", "resources", "donations", "users"];
 
     const DEFAULT_DATA = {
         recitals: [
@@ -2164,6 +2302,16 @@
         notes: [],
         performerProfiles: [],
         checklists: null,
+        activityDismissedAt: null,
+        resources: [
+            { id: 1, title: "Chapter Leader Guide", url: "", description: "Full guide to running a chapter" },
+            { id: 2, title: "Chapter Leader Agreement", url: "", description: "" },
+            { id: 3, title: "Performer Information Form", url: "", description: "" },
+            { id: 4, title: "Post-Recital Report Template", url: "", description: "" },
+            { id: 5, title: "Email & Social Media Templates", url: "", description: "Also available live in the Emails tab" },
+        ],
+        donations: [],
+        onboarding: {},
     };
 
     // ═══════════════════════════════════════════════
@@ -2183,7 +2331,7 @@
         editingUser = null;
     let clActiveRecitalId = null,
         clActiveChecklistId = null;
-    const CL_TABS = ["recitals", "tickets", "planning", "history", "notes", "messages"];
+    const CL_TABS = ["onboarding", "recitals", "tickets", "planning", "history", "notes", "resources", "donations", "messages"];
     // ═══════════════════════════════════════════════
     // SUPABASE
     // ═══════════════════════════════════════════════
@@ -2364,6 +2512,8 @@
             chapters: renderChapters,
             performers: renderPerformerProfiles,
             reminders: renderReminders,
+            resources: renderResources,
+            donations: renderDonations,
             users: renderUsersTab
         };
         if (m[name])
@@ -3196,6 +3346,12 @@
     // ═══════════════════════════════════════════════
     // PERFORMER HISTORY — grouped by chapter
     // ═══════════════════════════════════════════════
+    function chapterIdForHistoryEntry(h) {
+        if (h.chapterId)
+            return String(h.chapterId);
+        const profile = (state.performerProfiles || []).find(p => p.name === h.name);
+        return profile && profile.chapter ? String(profile.chapter) : null;
+    }
     function renderHistory() {
         if (!state.history)
             state.history = [];
@@ -3219,13 +3375,15 @@
             grouped[h.name].entries.push(h);
         });
 
-        // Map each performer to their chapter via performerProfiles
+        // Map each performer to their chapter, preferring an explicit chapterId
+        // on the history entry (e.g. logged by a chapter leader) and falling
+        // back to the performer's profile chapter for legacy/admin entries.
         const chapterGroups = {};
         Object.values(grouped).forEach(g => {
-            const profile = (state.performerProfiles || []).find(p => p.name === g.name);
             let chapterLabel = "Unassigned";
-            if (profile && profile.chapter) {
-                const ch = (state.chapters || []).find(c => String(c.id) === String(profile.chapter));
+            const chId = g.entries.map(chapterIdForHistoryEntry).find(Boolean);
+            if (chId) {
+                const ch = (state.chapters || []).find(c => String(c.id) === chId);
                 if (ch)
                     chapterLabel = ch.city;
             }
@@ -3888,6 +4046,42 @@ state.performerProfiles.push({
         renderPerformerProfiles();
     }
     // ═══════════════════════════════════════════════
+    // CHAPTER ONBOARDING CHECKLIST
+    // ═══════════════════════════════════════════════
+    const ONBOARDING_TASKS = [
+        "Create your dashboard login (get username & password from Matt)",
+        "Read the Chapter Leader Guide",
+        "Sign the Chapter Leader Agreement",
+        "Identify 2–3 potential performers",
+        "Scout at least one candidate venue with hardwood floors",
+        "Confirm your hospital beneficiary",
+        "Set a target date for your first recital",
+    ];
+    function getOnboardingChecks(chapterId) {
+        if (!state.onboarding)
+            state.onboarding = {};
+        if (!state.onboarding[chapterId])
+            state.onboarding[chapterId] = {};
+        return state.onboarding[chapterId];
+    }
+    function onboardingProgress(chapterId) {
+        const checks = getOnboardingChecks(chapterId);
+        const done = ONBOARDING_TASKS.filter((_, i) => checks[i]).length;
+        return { done, total: ONBOARDING_TASKS.length };
+    }
+    let expandedOnboardingChapter = null;
+    function toggleOnboardingView(chapterId) {
+        expandedOnboardingChapter = expandedOnboardingChapter === chapterId ? null : chapterId;
+        renderChapters();
+    }
+    function adminToggleOnboarding(chapterId, i) {
+        const checks = getOnboardingChecks(chapterId);
+        checks[i] = !checks[i];
+        saveData();
+        renderChapters();
+    }
+
+    // ═══════════════════════════════════════════════
     // CHAPTERS
     // ═══════════════════════════════════════════════
     function renderChapters() {
@@ -3928,6 +4122,9 @@ state.performerProfiles.push({
                   <button class="btn-secondary" onclick="cancelEditChapter()">Cancel</button>
                 </div>
               </div>`;
+            const onb = onboardingProgress(c.id);
+            const onbPct = onb.total ? Math.round((onb.done / onb.total) * 100) : 0;
+            const onbChecks = getOnboardingChecks(c.id);
             return `<div class="chapter-card">
                   <div style="display:flex;justify-content:space-between">
                     <div style="flex:1">
@@ -3939,6 +4136,15 @@ state.performerProfiles.push({
                         <div class="chapter-stat"><strong>$${c.raised || 0}</strong>Total raised</div>
                       </div>
                       ${c.notes ? `<div style="font-size:12px;color:#a09080;margin-top:6px;font-style:italic">📝 ${c.notes}</div>` : ""}
+                      <div style="margin-top:12px;max-width:280px">
+                        <div style="display:flex;justify-content:space-between;align-items:center">
+                          <span style="font-size:11px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Onboarding</span>
+                          <span style="font-size:11px;color:#8b7355">${onb.done}/${onb.total}</span>
+                        </div>
+                        <div class="progress-bar-wrap" style="height:5px;margin-top:4px"><div class="progress-bar-fill" style="width:${onbPct}%"></div></div>
+                        <button class="btn-secondary btn-xs" style="margin-top:6px" onclick="toggleOnboardingView(${c.id})">${expandedOnboardingChapter === c.id ? 'Hide' : 'View'} checklist</button>
+                        ${expandedOnboardingChapter === c.id ? `<div style="margin-top:8px">${ONBOARDING_TASKS.map((task, i) => `<div class="checklist-item ${onbChecks[i] ? 'done' : ''}" style="padding:6px 10px"><input type="checkbox" ${onbChecks[i] ? 'checked' : ''} onchange="adminToggleOnboarding(${c.id},${i})"/><span class="task-text" style="font-size:12px">${task}</span></div>`).join('')}</div>` : ''}
+                      </div>
                     </div>
                     <div style="display:flex;gap:6px">
                       <button class="btn-secondary btn-sm" onclick="startEditChapter(${c.id})">Edit</button>
@@ -3994,6 +4200,275 @@ function saveEditChapter(id) {
     renderChapters();
     renderStats();
 }
+    // ═══════════════════════════════════════════════
+    // RESOURCES
+    // ═══════════════════════════════════════════════
+    let editingResource = null;
+    function renderResources() {
+        if (!state.resources)
+            state.resources = [];
+        const list = document.getElementById("resource-list"),
+            empty = document.getElementById("no-resources");
+        if (!state.resources.length) {
+            list.innerHTML = "";
+            empty.classList.remove("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
+        list.innerHTML = state.resources.map(r => {
+            if (editingResource === r.id)
+                return `<div class="contact-card" style="flex-direction:column;align-items:stretch;gap:10px">
+                    <div class="grid-2">
+                      <div class="form-field"><div class="form-label">Title</div><input id="er-title" class="fi" value="${r.title || ''}"/></div>
+                      <div class="form-field"><div class="form-label">Link</div><input id="er-url" class="fi" value="${r.url || ''}"/></div>
+                    </div>
+                    <div class="form-field"><div class="form-label">Description</div><input id="er-desc" class="fi" value="${r.description || ''}"/></div>
+                    <div class="form-actions">
+                      <button class="btn-primary btn-sm" onclick="saveEditResource(${r.id})">Save</button>
+                      <button class="btn-secondary btn-sm" onclick="cancelEditResource()">Cancel</button>
+                    </div>
+                  </div>`;
+            return `<div class="contact-card">
+                  <div>
+                    <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">${r.title} ↗</a>` : r.title}</div>
+                    ${!r.url ? `<div class="contact-role" style="color:#e57373;letter-spacing:0;text-transform:none;font-weight:600">No link added yet</div>` : ''}
+                    ${r.description ? `<div class="contact-detail">${r.description}</div>` : ''}
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn-secondary btn-sm" onclick="startEditResource(${r.id})">Edit</button>
+                    <button class="del-btn" onclick="rmResource(${r.id})">✕</button>
+                  </div>
+                </div>`;
+        }).join("");
+    }
+    function addResource() {
+        const title = document.getElementById("res-title").value.trim();
+        if (!title)
+            return;
+        if (!state.resources)
+            state.resources = [];
+        state.resources.push({
+            id: Date.now(),
+            title,
+            url: document.getElementById("res-url").value.trim(),
+            description: document.getElementById("res-desc").value.trim()
+        });
+        ["res-title", "res-url", "res-desc"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("add-resource").classList.add("hidden");
+        saveData();
+        renderResources();
+    }
+    function rmResource(id) {
+        state.resources = state.resources.filter(r => r.id !== id);
+        saveData();
+        renderResources();
+    }
+    function startEditResource(id) {
+        editingResource = id;
+        renderResources();
+    }
+    function cancelEditResource() {
+        editingResource = null;
+        renderResources();
+    }
+    function saveEditResource(id) {
+        const r = state.resources.find(x => x.id === id);
+        if (!r)
+            return;
+        const title = document.getElementById('er-title').value.trim();
+        if (title)
+            r.title = title;
+        r.url = document.getElementById('er-url').value.trim();
+        r.description = document.getElementById('er-desc').value.trim();
+        editingResource = null;
+        saveData();
+        renderResources();
+    }
+    function renderCLResources() {
+        const items = state.resources || [];
+        const list = document.getElementById("cl-resource-list"),
+            empty = document.getElementById("cl-no-resources");
+        if (!items.length) {
+            list.innerHTML = "";
+            empty.classList.remove("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
+        list.innerHTML = items.map(r => `<div class="contact-card">
+              <div>
+                <div class="contact-name">${r.url ? `<a href="${r.url}" target="_blank" rel="noopener" style="color:#3d2b1f;text-decoration:none">${r.title} ↗</a>` : r.title}</div>
+                ${!r.url ? `<div class="contact-role" style="color:#c4b8a8;letter-spacing:0;text-transform:none">Link not added yet — ask Matt</div>` : ''}
+                ${r.description ? `<div class="contact-detail">${r.description}</div>` : ''}
+              </div>
+            </div>`).join('');
+    }
+
+    // ═══════════════════════════════════════════════
+    // DONATIONS
+    // ═══════════════════════════════════════════════
+    function renderDonations() {
+        if (!state.donations)
+            state.donations = [];
+        const chSel = document.getElementById("dn-chapter");
+        if (chSel)
+            chSel.innerHTML = (state.chapters || []).map(c => `<option value="${c.id}">${c.city}</option>`).join('');
+        const totalDonated = state.donations.reduce((s, d) => s + Number(d.amount || 0), 0);
+        const withReceipt = state.donations.filter(d => d.receiptReceived).length;
+        const summaryEl = document.getElementById("donation-summary");
+        if (summaryEl)
+            summaryEl.innerHTML = `<div style="display:flex;gap:24px;flex-wrap:wrap">
+                <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#3d2b1f">$${totalDonated}</div><div style="font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Total Donated</div></div>
+                <div style="text-align:center"><div style="font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:#3d2b1f">${withReceipt}/${state.donations.length}</div><div style="font-size:12px;color:#8b7355;text-transform:uppercase;letter-spacing:1px">Receipts Confirmed</div></div>
+              </div>`;
+        const list = document.getElementById("donation-list"),
+            empty = document.getElementById("no-donations");
+        if (!state.donations.length) {
+            list.innerHTML = "";
+            empty.classList.remove("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
+        const byChapter = {};
+        state.donations.forEach(d => {
+            const ch = (state.chapters || []).find(c => String(c.id) === String(d.chapterId));
+            const label = ch ? ch.city : "Unknown chapter";
+            if (!byChapter[label])
+                byChapter[label] = [];
+            byChapter[label].push(d);
+        });
+        list.innerHTML = Object.keys(byChapter).sort().map(ch => `
+            <div style="margin-bottom:16px">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:2px;color:#8b7355;font-weight:600;padding:8px 0;border-bottom:2px solid #e8e0d4;margin-bottom:10px">🗺 ${ch}</div>
+              ${byChapter[ch].map(d => `<div class="contact-card">
+                  <div>
+                    <div class="contact-name">$${d.amount} <span class="badge ${d.receiptReceived ? 'badge-confirmed' : 'badge-pending'}">${d.receiptReceived ? 'Receipt confirmed' : 'Awaiting receipt'}</span></div>
+                    <div class="contact-detail">📅 Sent ${d.dateSent || '—'}</div>
+                    ${d.note ? `<div class="contact-detail" style="font-style:italic">📝 ${d.note}</div>` : ''}
+                  </div>
+                  <div style="display:flex;gap:6px">
+                    <button class="btn-secondary btn-sm" onclick="toggleDonationReceipt(${d.id})">${d.receiptReceived ? 'Mark unreceived' : 'Mark received'}</button>
+                    <button class="del-btn" onclick="rmDonation(${d.id})">✕</button>
+                  </div>
+                </div>`).join('')}
+            </div>`).join('');
+    }
+    function addDonation() {
+        const chapterId = document.getElementById("dn-chapter").value;
+        const amount = document.getElementById("dn-amount").value;
+        if (!chapterId || !amount) {
+            alert("Select a chapter and enter an amount.");
+            return;
+        }
+        if (!state.donations)
+            state.donations = [];
+        state.donations.unshift({
+            id: Date.now(),
+            chapterId,
+            amount: Number(amount),
+            dateSent: document.getElementById("dn-date").value,
+            receiptReceived: document.getElementById("dn-receipt").checked,
+            note: document.getElementById("dn-note").value
+        });
+        ["dn-amount", "dn-date", "dn-note"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("dn-receipt").checked = false;
+        document.getElementById("add-donation").classList.add("hidden");
+        saveData();
+        renderDonations();
+    }
+    function rmDonation(id) {
+        state.donations = state.donations.filter(d => d.id !== id);
+        saveData();
+        renderDonations();
+    }
+    function toggleDonationReceipt(id) {
+        const d = state.donations.find(x => x.id === id);
+        if (!d)
+            return;
+        d.receiptReceived = !d.receiptReceived;
+        saveData();
+        renderDonations();
+    }
+    function renderCLDonations() {
+        const mine = (state.donations || []).filter(d => String(d.chapterId) === String(session.chapterId));
+        const list = document.getElementById("cl-donation-list"),
+            empty = document.getElementById("cl-no-donations");
+        if (!mine.length) {
+            list.innerHTML = "";
+            empty.classList.remove("hidden");
+            return;
+        }
+        empty.classList.add("hidden");
+        list.innerHTML = mine.map(d => `<div class="contact-card">
+              <div>
+                <div class="contact-name">$${d.amount} <span class="badge ${d.receiptReceived ? 'badge-confirmed' : 'badge-pending'}">${d.receiptReceived ? 'Receipt confirmed' : 'Awaiting receipt'}</span></div>
+                <div class="contact-detail">📅 Sent ${d.dateSent || '—'}</div>
+                ${d.note ? `<div class="contact-detail" style="font-style:italic">📝 ${d.note}</div>` : ''}
+              </div>
+              <button class="del-btn" onclick="clRmDonation(${d.id})">✕</button>
+            </div>`).join('');
+    }
+    async function clAddDonation() {
+        const amount = document.getElementById("cl-dn-amount").value;
+        if (!amount) {
+            alert("Enter an amount.");
+            return;
+        }
+        if (!state.donations)
+            state.donations = [];
+        state.donations.unshift({
+            id: Date.now(),
+            chapterId: session.chapterId,
+            amount: Number(amount),
+            dateSent: document.getElementById("cl-dn-date").value,
+            receiptReceived: document.getElementById("cl-dn-receipt").checked,
+            note: document.getElementById("cl-dn-note").value
+        });
+        ["cl-dn-amount", "cl-dn-date", "cl-dn-note"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("cl-dn-receipt").checked = false;
+        document.getElementById("cl-add-donation").classList.add("hidden");
+        await saveData();
+        await logActivity(`logged a $${amount} donation to the hospital`);
+        renderCLDonations();
+    }
+    async function clRmDonation(id) {
+        state.donations = state.donations.filter(d => d.id !== id);
+        await saveData();
+        renderCLDonations();
+    }
+
+    // ═══════════════════════════════════════════════
+    // CHAPTER ONBOARDING — CHAPTER LEADER VIEW
+    // ═══════════════════════════════════════════════
+    function renderCLOnboarding() {
+        const container = document.getElementById('cl-onboarding-container');
+        if (!container)
+            return;
+        const chapterId = session.chapterId;
+        if (!chapterId) {
+            container.innerHTML = '<div class="card"><div class="empty">Onboarding is tracked per chapter — reach out to Matt if this looks wrong.</div></div>';
+            return;
+        }
+        const checks = getOnboardingChecks(chapterId);
+        const done = ONBOARDING_TASKS.filter((_, i) => checks[i]).length;
+        const pct = Math.round((done / ONBOARDING_TASKS.length) * 100);
+        container.innerHTML = `
+            <div class="card">
+              <div class="progress-label"><span style="font-weight:600">Getting Started</span><span>${done}/${ONBOARDING_TASKS.length} tasks</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
+              <div style="font-size:12px;color:#8b7355;margin-top:6px">${pct}% complete</div>
+            </div>
+            <div class="card">
+              ${ONBOARDING_TASKS.map((task, i) => `<div class="checklist-item ${checks[i] ? 'done' : ''}"><input type="checkbox" ${checks[i] ? 'checked' : ''} onchange="clToggleOnboarding(${i})"/><span class="task-text">${task}</span></div>`).join('')}
+            </div>`;
+    }
+    async function clToggleOnboarding(i) {
+        const checks = getOnboardingChecks(session.chapterId);
+        checks[i] = !checks[i];
+        await saveData();
+        await logActivity('updated their onboarding checklist');
+        renderCLOnboarding();
+    }
+
     // ═══════════════════════════════════════════════
     // NEW: SESSION & EXTRA-DATA GLOBALS
     // ═══════════════════════════════════════════════
@@ -4086,14 +4561,14 @@ function startApp() {
     // ═══════════════════════════════════════════════
     // ACTIVITY FEED (admin header)
     // ═══════════════════════════════════════════════
-   let activityDismissedAt = null;
     function renderActivityFeed() {
         const feed = document.getElementById("admin-activity-feed");
         const items = document.getElementById("activity-feed-items");
         if (!feed || !items) return;
         if (!activityLog.length) { feed.classList.add("hidden"); return; }
-        const newSinceClose = activityDismissedAt
-            ? activityLog.filter(e => new Date(e.timestamp) > new Date(activityDismissedAt))
+        const dismissedAt = state.activityDismissedAt;
+        const newSinceClose = dismissedAt
+            ? activityLog.filter(e => new Date(e.timestamp) > new Date(dismissedAt))
             : activityLog;
         // Show notification badge if dismissed but new activity exists
         let notifBar = document.getElementById("activity-notif-bar");
@@ -4101,10 +4576,16 @@ function startApp() {
             notifBar = document.createElement("div");
             notifBar.id = "activity-notif-bar";
             notifBar.style.cssText = "display:none;padding:8px 32px;background:rgba(196,168,130,0.15);border-bottom:1px solid rgba(196,168,130,0.2);font-size:12px;color:#c4a882;cursor:pointer;text-align:center";
-            notifBar.onclick = () => { activityDismissedAt = null; renderActivityFeed(); };
+            notifBar.onclick = () => { state.activityDismissedAt = null; saveData(); renderActivityFeed(); };
             feed.parentNode.insertBefore(notifBar, feed);
         }
-        if (activityDismissedAt && newSinceClose.length) {
+        if (dismissedAt && !newSinceClose.length) {
+            // Dismissed and nothing new since — stay hidden, no notif bar either.
+            notifBar.style.display = "none";
+            feed.classList.add("hidden");
+            return;
+        }
+        if (dismissedAt && newSinceClose.length) {
             notifBar.style.display = "block";
             notifBar.innerHTML = `🔔 ${newSinceClose.length} new chapter activit${newSinceClose.length>1?'ies':'y'} — click to view`;
             feed.classList.add("hidden");
@@ -4125,14 +4606,12 @@ function startApp() {
             </div>`;
     }
    function dismissActivityFeed() {
-        activityDismissedAt = new Date().toISOString();
+        state.activityDismissedAt = new Date().toISOString();
+        saveData();
         const feed = document.getElementById("admin-activity-feed");
         if (feed) feed.classList.add("hidden");
         const notifBar = document.getElementById("activity-notif-bar");
-        if (notifBar && activityLog.length) {
-            notifBar.style.display = "block";
-            notifBar.innerHTML = `🔔 ${activityLog.length} chapter activit${activityLog.length>1?'ies':'y'} — click to view`;
-        }
+        if (notifBar) notifBar.style.display = "none";
     }
 
     // ═══════════════════════════════════════════════
@@ -4155,7 +4634,7 @@ function startApp() {
         if (uCh)
             uCh.innerHTML = opts;
         if (msgCh)
-            msgCh.innerHTML = opts;
+            msgCh.innerHTML = '<option value="">Select recipient…</option><option value="ALL">📢 Broadcast to All Chapters</option>' + (state.chapters || []).map(c => `<option value="${c.id}">${c.city}</option>`).join('');
     }
 
     function toggleChapterSelect() {
@@ -4281,7 +4760,7 @@ function startApp() {
             const ch = (state.chapters || []).find(c => String(c.id) === String(m.toChapterId));
             return `<div class="message-card" style="display:flex;justify-content:space-between;align-items:flex-start">
                   <div style="flex:1">
-                    <div class="message-meta">To: ${ch ? ch.city : "Unknown"} · ${timeAgo(m.timestamp)} · ${m.read ? '<span style="color:#22c55e">✓ Read</span>' : '<span style="color:#c4a882">Unread</span>'}</div>
+                    <div class="message-meta">To: ${ch ? ch.city : "Unknown"}${m.broadcast ? ' <span style="background:#fef3c7;color:#92400e;font-size:9px;padding:1px 6px;border-radius:8px;font-weight:600;margin-left:2px">BROADCAST</span>' : ''} · ${timeAgo(m.timestamp)} · ${m.read ? '<span style="color:#22c55e">✓ Read</span>' : '<span style="color:#c4a882">Unread</span>'}</div>
                     <div class="message-text">${m.text}</div>
                   </div>
                   <button class="del-btn" onclick="deleteMessage(${m.id})">✕</button>
@@ -4293,16 +4772,26 @@ function startApp() {
         const chapterId = document.getElementById("msg-to-chapter").value;
         const text = document.getElementById("msg-text").value.trim();
         if (!chapterId || !text) {
-            alert("Select a chapter and enter a message.");
+            alert("Select a recipient and enter a message.");
             return;
         }
-        messages.unshift({
-            id: Date.now(),
-            toChapterId: chapterId,
-            from: session.userName || "Admin",
-            text,
-            timestamp: new Date().toISOString(),
-            read: false
+        const isBroadcast = chapterId === "ALL";
+        const targets = isBroadcast ? (state.chapters || []).map(c => c.id) : [chapterId];
+        if (!targets.length) {
+            alert("No chapters to send to yet.");
+            return;
+        }
+        const ts = new Date().toISOString();
+        targets.forEach((tid, idx) => {
+            messages.unshift({
+                id: Date.now() + idx,
+                toChapterId: tid,
+                from: session.userName || "Admin",
+                text,
+                timestamp: ts,
+                read: false,
+                broadcast: isBroadcast
+            });
         });
         await saveKey("messages", messages);
         document.getElementById("msg-text").value = "";
@@ -4332,17 +4821,14 @@ function startApp() {
         document.getElementById("cl-tab-" + name).classList.remove("hidden");
         btn.classList.add("active");
         const m = {
-            tickets: () => { populateTicketRecitalDropdown(); },
-            planning: renderPlanning,
-            emails: renderEmails,
-            contacts: renderContacts,
-            venues: renderVenues,
-            history: renderHistory,
-            notes: renderNotes,
-            chapters: renderChapters,
-            performers: renderPerformerProfiles,
-            reminders: renderReminders,
-            users: renderUsersTab
+            onboarding: renderCLOnboarding,
+            tickets: () => { renderCLTickets(); },
+            planning: renderCLPlanning,
+            history: renderCLHistory,
+            notes: renderCLNotes,
+            resources: renderCLResources,
+            donations: renderCLDonations,
+            messages: renderCLMessages
         };
         if (m[name])
             m[name]();
@@ -4794,8 +5280,9 @@ function clTogEditRecital() {
     }
 
     // — History —
+    let clEditingHistory = null;
     function renderCLHistory() {
-       const mine = state.history || [];
+        const mine = (state.history || []).filter(h => chapterIdForHistoryEntry(h) === String(session.chapterId));
         const list = document.getElementById("cl-history-list");
         const empty = document.getElementById("cl-no-history");
         if (!mine.length) {
@@ -4820,10 +5307,50 @@ function clTogEditRecital() {
             list.innerHTML = Object.values(grouped).map(g => `<div class="history-card">
                 <div class="history-name">${g.name}</div>
                 <div style="font-size:12px;color:#8b7355;margin-top:3px">🎭 ${g.entries.length} performance${g.entries.length > 1 ? 's' : ''}</div>
-                <div style="margin-top:10px;display:flex;flex-direction:column;gap:4px">
-                  ${g.entries.map(e => `<div style="font-size:12px;color:#8b7355;padding:6px 10px;background:#faf6f0;border-radius:6px"><strong>${e.recital}</strong>${e.date ? " · " + e.date : ""}<br><em>${e.piece}</em>${e.notes ? "<br><span style='color:#a09080'>" + e.notes + "</span>" : ""}</div>`).join('')}
+                <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+                  ${g.entries.map(e => `<div style="font-size:12px;color:#8b7355;padding:8px 10px;background:#faf6f0;border-radius:6px">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                      <div><strong>${e.recital}</strong>${e.date ? " · " + e.date : ""}<br><em>${e.piece}</em>${e.notes ? "<br><span style='color:#a09080'>" + e.notes + "</span>" : ""}</div>
+                      <div style="display:flex;gap:4px;flex-shrink:0;margin-left:8px">
+                        <button class="btn-secondary btn-xs" onclick="clEditHistory(${e.id})">Edit</button>
+                        <button class="del-btn" style="font-size:14px" onclick="clRmHistory(${e.id})">✕</button>
+                      </div>
+                    </div>
+                    ${clEditingHistory===e.id ? `<div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+                      <input class="fi" id="cleh-recital-${e.id}" value="${e.recital||''}" placeholder="Recital"/>
+                      <input class="fi" id="cleh-piece-${e.id}" value="${e.piece||''}" placeholder="Piece"/>
+                      <input class="fi" id="cleh-notes-${e.id}" value="${e.notes||''}" placeholder="Notes"/>
+                      <div style="display:flex;gap:6px"><button class="btn-primary btn-sm" onclick="clSaveHistory(${e.id})">Save</button><button class="btn-secondary btn-sm" onclick="clCancelEditHistory()">Cancel</button></div>
+                    </div>` : ''}
+                  </div>`).join("")}
                 </div>
               </div>`).join('');
+    }
+    function clEditHistory(id) {
+        clEditingHistory = id;
+        renderCLHistory();
+    }
+    function clCancelEditHistory() {
+        clEditingHistory = null;
+        renderCLHistory();
+    }
+    async function clSaveHistory(id) {
+        const h = state.history.find(x => x.id === id);
+        if (!h)
+            return;
+        h.recital = document.getElementById('cleh-recital-' + id).value;
+        h.piece = document.getElementById('cleh-piece-' + id).value;
+        h.notes = document.getElementById('cleh-notes-' + id).value;
+        clEditingHistory = null;
+        await saveData();
+        await logActivity(`updated performance history for "${h.name}"`);
+        renderCLHistory();
+    }
+    async function clRmHistory(id) {
+        state.history = state.history.filter(h => h.id !== id);
+        await saveData();
+        await logActivity('removed a performance history entry');
+        renderCLHistory();
     }
 
     async function clAddHistory() {
@@ -4844,6 +5371,7 @@ function clTogEditRecital() {
         ["cl-h-name", "cl-h-recital", "cl-h-date", "cl-h-piece", "cl-h-notes"].forEach(id => document.getElementById(id).value = "");
         document.getElementById("cl-add-history").classList.add("hidden");
         await saveData();
+        await logActivity(`logged a performance for "${name}"`);
         renderCLHistory();
     }
 
